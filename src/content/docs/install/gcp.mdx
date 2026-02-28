@@ -1,0 +1,64 @@
+---
+title: "GCP Compute Engine 部署"
+description: "在 Google Cloud Compute Engine 上使用 Docker 部署 OpenClaw Gateway 的完整指南，實現持久化狀態和可靠的重啟行為。"
+order: 13
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/gcp"
+---
+
+本指南說明如何在 GCP Compute Engine 上使用 Docker 部署 OpenClaw Gateway，實現約每月 $5-12 的全天候運行，具備持久化狀態和可靠的重啟行為。
+
+## 部署步驟
+
+整個指南包含 13 個依序步驟：
+
+1. **安裝 gcloud CLI** — 透過官方 Google Cloud SDK 或使用網頁控制台
+2. **建立 GCP 專案** — 並啟用 Compute Engine API 及計費功能
+3. **佈建 VM** — 建議使用 e2-small；e2-micro 有 OOM 失敗風險
+4. **SSH 存取** — 連線到執行個體
+5. **安裝 Docker** — 並驗證安裝
+6. **複製 OpenClaw 儲存庫** — 從 GitHub
+7. **建立持久化目錄** — 確保狀態在重啟後存活
+8. **設定環境變數** — 在 `.env` 檔案中使用安全的秘密值
+9. **設定 Docker Compose** — 配置卷掛載
+10. **將二進位檔嵌入 Docker 映像檔** — 對持久化至關重要
+11. **建置並啟動** — 容器
+12. **驗證 Gateway** — 透過日誌確認運行狀態
+13. **從筆電存取** — 使用 SSH 連接埠轉發通道
+
+## 機器類型建議
+
+| 類型 | 規格 | 費用 | 備註 |
+|------|------|------|------|
+| e2-medium | 2 vCPU、4GB RAM | 約 $25/月 | 最可靠的建置 |
+| e2-small | 2 vCPU、2GB RAM | 約 $12/月 | 最低建議配置 |
+| e2-micro | 2 vCPU（共享）、1GB RAM | 免費方案 | 經常因 OOM 失敗 |
+
+## 關鍵持久化架構
+
+> **警告：** 在運行中的容器內安裝二進位檔是一個陷阱。任何在執行時安裝的內容都會在重新啟動時遺失。
+
+所有外部二進位檔必須在建置時使用自訂 Dockerfile 嵌入 Docker 映像檔。
+
+狀態透過主機卷掛載持久化，包括：
+
+- Gateway 設定和權杖
+- OAuth 憑證和 API 金鑰
+- 技能設定
+- 代理工作區成品
+- WhatsApp 會話
+- Gmail 鑰匙圈（受密碼保護）
+
+## 疑難排解
+
+**Docker 建置時 OOM 失敗：** 表示 VM 記憶體不足；至少升級到 e2-small。
+
+**SSH 連線被拒：** 通常在 SSH 金鑰傳播後 1-2 分鐘內解決。
+
+> **提示：** 對於正式環境自動化，建議使用具有最小 IAM 權限的服務帳戶，而非擁有者等級的存取權限。
+
+## 相關資源
+
+- [Docker 安裝](/docs/install/docker)
+- [Gateway 設定](/docs/gateway/configuration)
+- [Gateway 疑難排解](/docs/gateway/troubleshooting)

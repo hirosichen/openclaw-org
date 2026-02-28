@@ -1,0 +1,65 @@
+---
+title: "Northflank 部署"
+description: "使用一鍵範本在 Northflank 上部署 OpenClaw 的指南，無需終端機存取即可完成設定。"
+order: 18
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/northflank"
+---
+
+OpenClaw 可以使用一鍵範本在 Northflank 上部署，無需終端機存取。該平台託管 Gateway 並透過 `/setup` 精靈提供瀏覽器導向的設定。
+
+## 開始使用
+
+部署流程包含九個步驟：
+
+1. 透過提供的連結存取部署範本
+2. 如需要，建立 Northflank 帳戶
+3. 啟動部署
+4. 設定 `SETUP_PASSWORD` 環境變數
+5. 啟動 stack 建置
+6. 監控完成狀態並存取資源
+7. 開啟 OpenClaw 服務
+8. 造訪公開 URL 的 `/setup` 端點完成設定
+9. 在 `/openclaw` 存取控制 UI
+
+## 包含的功能
+
+部署提供：
+
+- 附帶控制 UI 的託管 Gateway
+- 網頁設定精靈，無需終端機指令
+- 透過 Northflank 卷進行持久化儲存，跨重新部署維持設定
+
+## 設定流程
+
+1. 導覽至設定 URL
+2. 輸入您的密碼
+3. 選擇 AI 模型和認證供應商
+4. 選擇性地新增訊息平台憑證
+5. 完成初始化
+
+> **提示：** 精靈支援 Telegram 配對碼核准，讓您可以直接在設定過程中連接 Telegram Bot。
+
+## 聊天平台整合
+
+### Telegram
+
+1. 在 Telegram 中與 `@BotFather` 對話
+2. 使用 `/newbot` 指令
+3. 取得 Bot 權杖並在設定精靈中輸入
+
+### Discord
+
+1. 前往 Discord 開發者入口網站
+2. 建立應用程式
+3. 新增 Bot
+4. 啟用 Message Content Intent（必要）
+5. 設定 OAuth2 權限，包含 bot scope 和 application commands
+6. 取得權杖並在設定精靈中輸入
+
+## 相關資源
+
+- [頻道設定](/docs/channels/channels)
+- [Telegram 頻道](/docs/channels/telegram)
+- [Discord 頻道](/docs/channels/discord)
+- [Gateway 設定](/docs/gateway/configuration)

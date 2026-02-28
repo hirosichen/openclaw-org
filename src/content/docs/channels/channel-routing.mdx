@@ -1,0 +1,52 @@
+---
+title: "頻道路由"
+description: "OpenClaw 的確定性訊息路由機制，自動將回覆導向來源通訊頻道。"
+order: 3
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/channel-routing"
+---
+
+OpenClaw 實作確定性訊息路由，自動將回覆導向來源通訊頻道，無需模型介入。
+
+## 核心概念
+
+**支援的頻道：** WhatsApp、Telegram、Discord、Slack、Signal、iMessage 和 WebChat。
+
+系統使用三個組織層級：
+
+- **AccountId** — 每個頻道的帳號實例
+- **AgentId** — 獨立的工作空間，擁有獨立的工作階段儲存
+- **SessionKey** — 用於上下文和並行管理的儲存桶
+
+## Session Key 架構
+
+私訊使用代理的主要工作階段，而群組和頻道則維持隔離：
+
+> **提示：** 私訊會合併到代理的**主要**工作階段。
+
+基於對話串的對話會附加識別碼：`agent:main:discord:channel:123456:thread:987654`
+
+## 路由優先順序系統
+
+系統按以下順序評估綁定：
+
+1. 精確 peer 配對
+2. 父層 peer 繼承
+3. Discord guild + 角色
+4. Guild 配對
+5. Slack team 配對
+6. Account 配對
+7. 頻道範圍配對
+8. 預設代理回退
+
+> **提示：** 當綁定包含多個配對欄位時，**所有提供的欄位都必須匹配**。
+
+## 進階功能
+
+### 廣播群組
+
+廣播群組可在滿足啟用條件時，為同一聯絡人同時產生多代理回應。設定使用 peer 識別碼對應到代理陣列。
+
+### 回覆上下文
+
+回覆上下文在所有頻道中一致地包含傳送者資訊、原始訊息內文和引用文字。

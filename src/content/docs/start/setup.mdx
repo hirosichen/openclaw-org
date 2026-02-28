@@ -1,0 +1,63 @@
+---
+title: "環境設定"
+description: "OpenClaw 的安裝前置需求、設定策略和工作流程指南，涵蓋穩定版和開發版部署。"
+order: 6
+section: "start"
+officialDoc: "https://docs.openclaw.ai/start/setup"
+---
+
+本頁涵蓋 OpenClaw 的安裝前置需求、設定策略和工作流程，適用於穩定版（macOS 應用程式）和前沿版（自訂 Gateway）部署。
+
+## 設定策略
+
+> **重要：** 客製化設定存放在儲存庫之外，分為兩個位置：工作區目錄和 JSON 設定檔。保持客製化與原始碼分離，可簡化未來的更新流程。
+
+## 三種工作流程選項
+
+### 1. 穩定版方式
+
+安裝 macOS 應用程式，使用其內建的 Gateway。這是最簡單的入門方式。
+
+### 2. 開發版方式
+
+獨立執行 Gateway：
+
+```bash
+pnpm gateway:watch
+```
+
+搭配應用程式設為 Local 模式。
+
+### 3. 原始碼安裝
+
+從原始碼選擇性編譯 macOS 應用程式。
+
+## 憑證與狀態儲存
+
+以下是認證權杖、會話資料和憑證在不同頻道中的儲存位置：
+
+| 頻道 | 儲存位置 |
+|------|----------|
+| WhatsApp | `$OPENCLAW_STATE_DIR` 下的會話檔案 |
+| Telegram | Gateway 設定中的 Bot 權杖 |
+| Discord | Gateway 設定中的 Bot 權杖 |
+| Slack | Gateway 設定中的應用程式權杖 |
+
+## 系統特定注意事項
+
+### Linux 使用者
+
+對於 Linux 使用者，需要特別注意 systemd 使用者服務和 lingering 設定，以防止登出時 Gateway 關閉：
+
+```bash
+loginctl enable-linger $USER
+```
+
+> **提示：** 這可確保您的 Gateway 在登出後繼續在背景執行。
+
+## 相關資源
+
+- [引導精靈（CLI）](/docs/start/wizard)
+- [Gateway 設定](/docs/gateway/configuration)
+- [安裝指南](/docs/install/install)
+- [頻道設定](/docs/channels/channels)

@@ -1,0 +1,92 @@
+---
+title: "Render 部署"
+description: "使用基礎設施即程式碼透過 render.yaml Blueprint 檔案在 Render 上部署 OpenClaw 的指南。"
+order: 17
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/render"
+---
+
+本指南說明如何使用基礎設施即程式碼，透過 `render.yaml` Blueprint 檔案在 Render 上部署 OpenClaw。
+
+## 前置需求
+
+- 有效的 Render 帳戶（有免費方案可用）
+- 支援的模型供應商的 API 金鑰
+
+## 一鍵部署
+
+使用者可以點選提供的 Render 連結進行部署，系統會自動：
+
+1. 從 `render.yaml` Blueprint 建立新服務
+2. 提示設定 `SETUP_PASSWORD`
+3. 建置並部署 Docker 映像檔
+
+產生的服務 URL 格式為 `https://<service-name>.onrender.com`。
+
+## Blueprint 設定
+
+YAML 檔案定義完整的基礎設施，包括：
+
+- Docker 執行環境
+- 在 `/health` 的健康檢查監控
+- 環境變數（`PORT: 8080`、狀態目錄、工作區目錄）
+- 持久化磁碟儲存（預設 1GB）
+- 自動產生的安全 Gateway 權杖
+
+Blueprint 的主要功能包含 `sync: false` 用於秘密提示，以及 `generateValue: true` 用於自動安全權杖產生。
+
+## 方案比較
+
+| 方案 | 特性 | 建議用途 |
+|------|------|----------|
+| **Free** | 自動關閉、無磁碟 | 測試與評估 |
+| **Starter** | 持久化磁碟 | 建議的預設方案 |
+| **Standard+** | 正式環境等級、多頻道 | 正式部署 |
+
+## 部署後設定
+
+部署完成後，使用者應：
+
+1. 造訪 `/setup` 的設定精靈
+2. 輸入憑證並選擇模型供應商
+3. 選擇性地設定訊息整合
+4. 在 `/openclaw` 存取控制儀表板
+
+## 儀表板管理
+
+Render Dashboard 提供：
+
+- 即時日誌檢視（建置、部署、執行時）
+- Shell 存取用於除錯
+- 環境變數修改
+- 自訂網域設定，附帶自動 TLS
+
+## 進階功能
+
+### 擴展
+
+透過方案升級進行垂直擴展；Standard 方案可進行水平擴展。
+
+### 備份
+
+可在 `/setup/export` 取得設定和工作區匯出，用於可攜式備份和還原。
+
+### 自動部署
+
+Fork 的儲存庫需要手動 Blueprint 同步。
+
+## 疑難排解
+
+| 問題 | 解決方案 |
+|------|----------|
+| 缺少 `SETUP_PASSWORD` | 在 Render 環境變數中設定密碼 |
+| 連接埠不符 | 確認設定和 Dockerfile 之間的連接埠一致 |
+| 免費方案冷啟動延遲 | 升級到 Starter 方案以獲得持續運行 |
+| 免費方案資料遺失 | 免費方案無持久化磁碟，升級方案或使用備份匯出 |
+| 健康檢查失敗 | 確保在 30 秒內回傳 200 回應 |
+
+## 相關資源
+
+- [遷移指南](/docs/install/migrating)
+- [Gateway 設定](/docs/gateway/configuration)
+- [Gateway 健康檢查](/docs/gateway/health)

@@ -1,0 +1,65 @@
+---
+title: "Zalo"
+description: "透過 Zalo Bot API 整合 OpenClaw，支援越南市場的一對一對話和群組訊息。"
+order: 20
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/zalo"
+---
+
+OpenClaw 的 Zalo 整合讓 Gateway 能在 Zalo（越南主流通訊應用程式）上運作機器人，支援一對一對話。此外掛為實驗性功能，支援私訊和群組處理，並提供策略控制。
+
+## 安裝
+
+Zalo 為獨立外掛，需另行安裝：
+
+```bash
+openclaw plugins install @openclaw/zalo
+```
+
+此外掛不包含在核心安裝中。
+
+## 設定
+
+### 最小設定步驟
+
+1. **產生機器人 token** — 在 [Zalo Bot Platform](https://bot.zaloplatforms.com) 產生機器人 token
+2. **設定 token** — 透過環境變數 `ZALO_BOT_TOKEN` 或設定檔配置
+3. **重新啟動 Gateway** — 重新啟動以套用設定
+
+### 私訊存取策略
+
+預設的私訊存取策略為 `pairing`，未知發送者會收到配對碼，有效期為一小時。
+
+## 主要功能
+
+- **文字訊息** — 支援文字訊息，上限 2,000 字元，超過時自動分段
+- **圖片處理** — 支援圖片上傳和下載
+- **串流模式** — 預設封鎖串流模式，因為 2,000 字元限制使串流效果不佳
+
+## 存取控制
+
+### 私訊策略
+
+私訊可使用以下策略：
+
+- `pairing` — 預設，透過配對碼驗證
+- `allowlist` — 僅允許清單中的使用者
+- `open` — 開放存取
+
+### 群組策略
+
+群組支援三種模式：
+
+- `open` — 開放存取
+- `allowlist` — 僅允許清單中的群組（預設，基於安全考量）
+- `disabled` — 停用群組功能
+
+> **提示：** 發送者 ID 用於決定存取權限。系統不支援使用者名稱查詢功能。
+
+## 訊息遞送與操作
+
+訊息會確定性地路由回 Zalo，模型無法選擇其他頻道。可使用 CLI 指令直接傳送訊息，適合排程工作使用：
+
+```bash
+openclaw message send --channel zalo --target <id>
+```

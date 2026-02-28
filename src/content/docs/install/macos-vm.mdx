@@ -1,0 +1,83 @@
+---
+title: "macOS 虛擬機器"
+description: "在 macOS 虛擬機器上執行 OpenClaw 的指南，適用於需要 iMessage 支援或嚴格隔離環境的使用者。"
+order: 14
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/macos-vm"
+---
+
+本指南涵蓋在 macOS 虛擬機器上執行 OpenClaw，搭配沙箱功能，適用於需要 macOS 特定功能（如 iMessage 支援）或與日常運算環境嚴格隔離的使用者。
+
+## 主要部署選項
+
+本指南提供三種主要方式：
+
+1. **小型 Linux VPS** — 成本效益高的全天候 Gateway，開銷最小
+2. **專屬硬體** — Mac mini 或 Linux 主機，提供住宅 IP 和瀏覽器自動化，不受資料中心封鎖
+3. **混合設定** — 使用低成本 VPS 作為 Gateway，加上本機 Mac 作為 Node 處理特殊任務
+
+## 基於 Lume 的本機 VM（大多數使用者建議選項）
+
+對於 Apple Silicon Mac 使用者，建議使用 Lume 建立沙箱化 macOS 環境。此方式提供：
+
+- 隔離的 macOS 環境，保持主機系統乾淨
+- 透過 BlueBubbles 整合 iMessage（在 Linux/Windows 上無法使用）
+- 快速 VM 複製，可立即重置
+- 無需額外硬體或雲端費用
+
+### 需求
+
+- Apple Silicon Mac（M1/M2/M3/M4）
+- macOS Sequoia 或更新版本
+- 每個 VM 約 60 GB 磁碟空間
+- 約 20 分鐘設定時間
+
+## 安裝與設定流程
+
+依序完成以下八個步驟：
+
+1. **安裝 Lume** — 透過 shell 腳本安裝
+
+2. **建立 macOS VM：**
+
+```bash
+lume create openclaw --os macos --ipsw latest
+```
+
+3. **完成設定助理** — 並啟用「遠端登入」（SSH）
+
+4. **取得 VM IP 位址**
+
+5. **SSH 進入虛擬機器**
+
+6. **安裝 OpenClaw 並執行引導流程**
+
+7. **設定頻道** — WhatsApp、Telegram 等
+
+8. **在背景無介面執行 VM**
+
+## iMessage 整合
+
+BlueBubbles 是新增 iMessage 功能的主要機制。使用者在 VM 中以 Apple ID 進行認證，啟用 Web API，並設定指向 OpenClaw Gateway 的 webhook。
+
+## 營運考量
+
+對於持續運行，建議：
+
+- 保持主機 Mac 開啟且防止休眠
+- 建立「黃金映像」快照以便輕鬆重置
+- 考慮使用專屬硬體以實現真正的全天候可用性
+
+## 疑難排解
+
+| 問題 | 解決方案 |
+|------|----------|
+| SSH 無法連線 | 確認「遠端登入」已在 VM 中啟用 |
+| 找不到 VM IP | 使用 `lume list` 查看已分配的 IP |
+| PATH 設定問題 | 確認 OpenClaw 已正確加入 shell 的 PATH |
+
+## 相關資源
+
+- [頻道設定](/docs/channels/channels)
+- [iMessage 頻道](/docs/channels/imessage)
+- [Gateway 設定](/docs/gateway/configuration)

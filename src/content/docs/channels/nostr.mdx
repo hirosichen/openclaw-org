@@ -1,0 +1,106 @@
+---
+title: "Nostr"
+description: "透過 NIP-04 加密私訊整合 OpenClaw 與去中心化 Nostr 協定。"
+order: 18
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/nostr"
+---
+
+Nostr 外掛程式讓 OpenClaw 能透過去中心化的 Nostr 協定，使用 NIP-04 標準加密來接收和回應加密私訊。
+
+## 安裝
+
+透過 onboarding 精靈安裝：
+
+```bash
+openclaw onboard
+```
+
+或使用 npm 手動安裝：
+
+```bash
+openclaw plugins install @openclaw/nostr
+```
+
+對於開發工作流程，也可改為連結本機的 checkout。
+
+安裝後需重新啟動 Gateway。
+
+## 核心設定
+
+基本設定需要 Nostr keypair（透過 `nak key generate` 產生）和指定私鑰為環境變數的設定：
+
+```json5
+{
+  channels: {
+    nostr: {
+      enabled: true,
+      privateKey: "${NOSTR_PRIVATE_KEY}",
+    },
+  },
+}
+```
+
+## 主要設定參數
+
+| 參數 | 說明 |
+|------|------|
+| `privateKey` | 必填，`nsec` 或十六進位格式 |
+| `relays` | 預設為 Damus 和 nos.lol relay URL |
+| `dmPolicy` | 控制訊息存取（pairing、allowlist、open 或 disabled） |
+| `allowFrom` | 指定允許的傳送者公鑰 |
+
+## 個人資料管理
+
+使用者可以發布個人資料中繼資料為 NIP-01 kind:0 事件，包括顯示名稱、簡介、頭像 URL 和聯絡資訊。
+
+> **提示：** 個人資料 URL 必須使用 HTTPS。
+
+## 存取控制
+
+### 配對模式
+
+配對策略會給予未知傳送者存取碼，傳送者需核准後才能互動。
+
+### 允許清單模式
+
+允許清單模式將訊息限制為已核准的公鑰。
+
+### 開放模式
+
+開放模式允許不受限制的傳入訊息。
+
+## Relay 設定
+
+最佳實務建議使用 2-3 個 relay 以確保冗餘，同時避免過多 relay 連線造成延遲問題。本機 relay 可用於測試環境。
+
+```json5
+{
+  channels: {
+    nostr: {
+      relays: [
+        "wss://relay.damus.io",
+        "wss://nos.lol"
+      ],
+    },
+  },
+}
+```
+
+## 協定支援
+
+**目前支援：**
+
+- NIP-01（基本事件）
+- NIP-04（加密訊息）
+
+**計畫新增：**
+
+- NIP-17 gift-wrapped 訊息
+- NIP-44 版本化加密
+
+## 目前限制
+
+- MVP 版本僅處理私訊
+- 不支援媒體附件
+- 使用 NIP-04 加密而非較新的 gift-wrap 標準

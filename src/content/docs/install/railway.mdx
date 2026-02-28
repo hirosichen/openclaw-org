@@ -1,0 +1,61 @@
+---
+title: "Railway 部署"
+description: "使用一鍵範本在 Railway 上部署 OpenClaw 的指南，透過瀏覽器完成設定。"
+order: 16
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/railway"
+---
+
+本指南說明如何使用一鍵範本在 Railway 上部署 OpenClaw，透過瀏覽器即可完成設定。
+
+## 部署步驟
+
+1. 點選部署按鈕
+2. 在 `/data` 設定卷（Volume）
+3. 設定環境變數（特別是 `SETUP_PASSWORD`）
+4. 在連接埠 8080 啟用 HTTP proxy
+5. 透過 `/setup` 端點的網頁精靈完成設定
+
+## 必要設定
+
+Railway 所需的設定包括：
+
+| 設定 | 值 |
+|------|------|
+| **HTTP Proxy** | 在連接埠 8080 啟用 |
+| **Volume** | 掛載於 `/data` 以持久化儲存 |
+| `SETUP_PASSWORD` | 您選擇的密碼 |
+| `PORT` | `8080` |
+| `OPENCLAW_GATEWAY_TOKEN` | （選用）自訂 Gateway 權杖 |
+| `OPENCLAW_STATE_DIR` | （選用）自訂狀態目錄 |
+| `OPENCLAW_WORKSPACE_DIR` | （選用）自訂工作區目錄 |
+
+## 設定流程
+
+部署完成後：
+
+1. 造訪您的 Railway 網域的 `/setup` 精靈
+2. 使用密碼進行認證
+3. 選擇 LLM 供應商和認證方式
+4. 選擇性地新增聊天平台權杖（Telegram、Discord、Slack）
+5. 啟動設定
+
+## 聊天整合
+
+本指南提供從各平台取得 Bot 權杖的詳細說明：
+
+- **Telegram** — 透過 `@BotFather` 取得 Bot 權杖
+- **Discord** — 透過開發者入口網站產生權杖
+- **Slack** — 設定 Slack 應用程式並取得權杖
+
+## 備份功能
+
+您可以透過 `/setup/export` 端點下載備份，以便在不遺失設定或工作區資料的情況下遷移到替代主機。
+
+> **提示：** 定期匯出備份，以確保您隨時可以遷移到其他平台。
+
+## 相關資源
+
+- [遷移指南](/docs/install/migrating)
+- [Gateway 設定](/docs/gateway/configuration)
+- [頻道設定](/docs/channels/channels)

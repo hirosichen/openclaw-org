@@ -1,0 +1,222 @@
+---
+title: "Google Chat"
+description: "透過 Google Chat API 整合 OpenClaw 與 Google Chat，支援私訊和 Space 通訊。"
+order: 15
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/googlechat"
+---
+
+Google Chat 外掛程式讓 OpenClaw 能透過 Google Chat API webhook（僅 HTTP）接收和回應私訊和 Space 中的訊息。
+
+## 快速設定指南
+
+### 初始設定步驟
+
+1. **建立並啟用 Google Chat API：**
+   - 前往 Google Chat API Credentials 主控台
+   - 如有需要，啟用 API
+
+2. **設定 Service Account：**
+   - 選擇 Create Credentials > Service Account
+   - 指定名稱（例如：`openclaw-chat`）
+   - 略過權限和主體設定
+
+3. **產生 JSON 金鑰：**
+   - 存取新建立的 service account
+   - 前往 Keys 分頁
+   - Add Key > Create new key
+   - 選擇 JSON 格式
+
+4. **在本機儲存憑證：**
+   - 將 JSON 檔案儲存至 Gateway 主機（例如：`~/.openclaw/googlechat-service-account.json`）
+
+5. **在 Cloud Console 中設定 Chat 應用程式：**
+   - 在 Application info 區段中填寫應用程式名稱、頭像 URL、說明
+   - 啟用 Interactive features
+   - 勾選「Join spaces and group conversations」
+   - 在 Connection settings 下選擇 HTTP endpoint URL
+   - 設定帶有 `/googlechat` 路徑的通用 HTTP 端點
+   - 將可見性設定為特定使用者/群組
+   - 新增您的電子郵件地址
+
+6. **啟用應用程式狀態：**
+   - 儲存後重新整理頁面
+   - 找到 App status 區段
+   - 將狀態變更為「Live - available to users」
+   - 儲存變更
+
+7. **設定 OpenClaw：**
+   - 設定環境變數：`GOOGLE_CHAT_SERVICE_ACCOUNT_FILE=/path/to/service-account.json`
+   - 或使用設定選項：`channels.googlechat.serviceAccountFile: "/path/to/service-account.json"`
+
+8. **設定 webhook audience 並啟動 Gateway**
+
+## 新增至 Google Chat
+
+1. 開啟 Google Chat
+2. 點擊「Direct Messages」旁的加號圖示
+3. 搜尋您設定的應用程式名稱
+4. 選擇並新增機器人
+5. 傳送訊息以啟用
+
+> **提示：** 私人應用程式不會出現在 Marketplace 中；需要按名稱搜尋。
+
+## 公開 URL 設定（僅 Webhook）
+
+Google Chat webhook 需要公開的 HTTPS 端點。安全最佳實務：僅公開 `/googlechat` 路徑。
+
+### 選項 A：Tailscale Funnel（建議）
+
+**檢查 Gateway 綁定：**
+
+```bash
+ss -tlnp | grep 18789
+```
+
+**私密公開儀表板：**
+
+```bash
+# 對於 localhost 綁定：
+tailscale serve --bg --https 8443 http://127.0.0.1:18789
+
+# 對於 Tailscale IP 綁定：
+tailscale serve --bg --https 8443 http://100.106.161.80:18789
+```
+
+**公開 webhook：**
+
+```bash
+# 對於 localhost：
+tailscale funnel --bg --set-path /googlechat http://127.0.0.1:18789/googlechat
+
+# 對於 Tailscale IP：
+tailscale funnel --bg --set-path /googlechat http://100.106.161.80:18789/googlechat
+```
+
+**授權並驗證：**
+
+- 如果出現提示，請造訪授權 URL
+- 檢查設定：`tailscale serve status` 和 `tailscale funnel status`
+
+**公開 webhook URL：** `https://<node-name>.<tailnet>.ts.net/googlechat`
+
+**私密儀表板：** `https://<node-name>.<tailnet>.ts.net:8443/`
+
+### 選項 B：反向代理（Caddy）
+
+```caddy
+your-domain.com {
+    reverse_proxy /googlechat* localhost:18789
+}
+```
+
+### 選項 C：Cloudflare Tunnel
+
+設定 ingress 規則：
+
+- **路徑：** `/googlechat` → `http://localhost:18789/googlechat`
+- **預設規則：** HTTP 404
+
+## 運作方式
+
+1. **Webhook 處理：** Google Chat 傳送帶有 Bearer token 授權的 POST 請求
+2. **Token 驗證：** 系統根據設定的 audience 驗證 token
+3. **訊息路由：** 訊息依 space 類型導向
+   - 私訊：`agent:<agentId>:googlechat:dm:<spaceId>`
+   - Spaces：`agent:<agentId>:googlechat:group:<spaceId>`
+4. **存取控制：** 私訊預設需要配對核准；未知傳送者會收到配對碼
+5. **群組 spaces：** 預設需要 @-mention
+
+## 目標識別碼
+
+- **私訊：** `users/<userId>`（建議）
+- **Spaces：** `spaces/<spaceId>`
+- **電子郵件地址：** 僅在 `dangerouslyAllowNameMatching: true` 時用於允許清單比對
+
+## 設定範例
+
+```json5
+{
+  channels: {
+    googlechat: {
+      enabled: true,
+      serviceAccountFile: "/path/to/service-account.json",
+      audienceType: "app-url",
+      audience: "https://gateway.example.com/googlechat",
+      webhookPath: "/googlechat",
+      botUser: "users/1234567890",
+      dm: {
+        policy: "pairing",
+        allowFrom: ["users/1234567890"],
+      },
+      groupPolicy: "allowlist",
+      groups: {
+        "spaces/AAAA": {
+          allow: true,
+          requireMention: true,
+          users: ["users/1234567890"],
+          systemPrompt: "Short answers only.",
+        },
+      },
+      actions: { reactions: true },
+      typingIndicator: "message",
+      mediaMaxMb: 20,
+    },
+  },
+}
+```
+
+**設定說明：**
+
+- 憑證可透過 `serviceAccount`（JSON 字串）內嵌傳遞
+- `serviceAccountRef` 支援環境變數和檔案型的密碼參考
+- 預設 webhook 路徑為 `/googlechat`
+- 當 `actions.reactions` 為 true 時，透過 `reactions` 工具啟用反應功能
+- `typingIndicator` 選項：`none`、`message`（預設）、`reaction`
+- 附件透過 Chat API 下載，大小受 `mediaMaxMb` 限制
+
+## 疑難排解
+
+### 405 Method Not Allowed 錯誤
+
+**常見原因：**
+
+1. **缺少頻道設定：**
+
+```bash
+openclaw config get channels.googlechat
+```
+
+若找不到路徑則新增設定
+
+2. **外掛程式已停用：**
+
+```bash
+openclaw plugins list | grep googlechat
+```
+
+透過以下方式啟用：`plugins.entries.googlechat.enabled: true`
+
+3. **Gateway 未重新啟動：**
+
+```bash
+openclaw gateway restart
+```
+
+**驗證指令：**
+
+```bash
+openclaw channels status
+```
+
+### 其他疑難排解
+
+- 執行 `openclaw channels status --probe` 以檢查驗證或 audience 錯誤
+- 驗證 Chat 應用程式的 webhook URL 和事件訂閱
+- 如果提及限制封鎖了回覆，請設定 `botUser`
+- 在測試時使用 `openclaw logs --follow` 來除錯收到的請求
+
+## 相關文件
+
+- [Gateway 設定詳情](/docs/channels/channels)
+- [安全指南](/docs/channels/pairing)

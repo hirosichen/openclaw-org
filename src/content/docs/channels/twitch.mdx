@@ -1,0 +1,103 @@
+---
+title: "Twitch"
+description: "透過 IRC 整合 OpenClaw 與 Twitch 聊天室，讓機器人帳號能在頻道中收發訊息。"
+order: 19
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/twitch"
+---
+
+OpenClaw 的 Twitch 外掛透過 IRC 連接 Twitch 聊天室，讓機器人能在頻道中接收和傳送訊息。
+
+## 安裝
+
+Twitch 為獨立外掛，需另行安裝：
+
+```bash
+openclaw plugins install @openclaw/twitch
+```
+
+## 快速設定
+
+1. **建立機器人帳號** — 在 Twitch 上建立專用的機器人帳號
+2. **產生 OAuth 憑證** — 透過 Twitch Token Generator 產生，選擇 Bot Token 並勾選 `chat:read` 和 `chat:write` 範圍
+3. **取得 Twitch 使用者 ID** — 記下你的使用者 ID
+4. **設定 token** — 透過環境變數或設定檔配置 token
+5. **啟動 Gateway** — 啟動後機器人即可連線
+
+> **重要：** 請務必設定存取控制（`allowFrom` 或 `allowedRoles`），以防止未授權使用者觸發機器人。
+
+## 核心概念
+
+- 每個帳號作為獨立的 Twitch 頻道，由 Gateway 管理
+- 回覆會確定性地路由回 Twitch
+- 每個帳號維護唯一的工作階段金鑰（`agent:<agentId>:twitch:<accountName>`）
+- `username` 欄位指定機器人帳號；`channel` 指定聊天室
+
+## 設定選項
+
+主要帳號設定包括：
+
+- `username` — 機器人帳號名稱
+- `accessToken` — OAuth 存取 token
+- `clientId` — 應用程式用戶端 ID
+- `channel` — 要加入的聊天室
+- `enabled` — 是否啟用此帳號
+- `clientSecret` / `refreshToken` — 選填，用於自動重新整理 token
+- `allowFrom` — 使用者 ID 允許清單
+- `allowedRoles` — 角色型存取控制
+- `requireMention` — 是否需要提及才回覆（預設為 `true`）
+
+## 多帳號支援
+
+使用 `channels.twitch.accounts` 設定多個機器人帳號，每個帳號使用獨立的 token，讓一個機器人能同時在不同頻道中運作。
+
+## 存取控制方法
+
+### 使用者 ID 允許清單
+
+透過 `allowFrom` 設定使用者 ID 允許清單（建議使用——因為使用者 ID 為永久識別碼）。
+
+### 角色型存取
+
+透過 `allowedRoles` 根據角色限制存取，可用角色包括：`moderator`、`owner`、`vip`、`subscriber`、`all`。
+
+### 停用提及要求
+
+將 `requireMention` 設為 `false` 即可停用提及要求。
+
+## Token 管理
+
+從 Token Generator 產生的 token 會在數小時後過期，需手動重新產生。如需自動重新整理，請設定自有的 Twitch 應用程式，並配置 `clientSecret` 和 `refreshToken`。
+
+## 工具操作
+
+代理可呼叫 `twitch` 操作來傳送訊息：
+
+```json
+{
+  "action": "twitch",
+  "params": {
+    "message": "text",
+    "to": "#channel"
+  }
+}
+```
+
+## 訊息限制
+
+訊息上限為 500 個字元，超過時會在單字邊界自動分段；傳送前會移除 Markdown 格式。
+
+## 疑難排解
+
+使用以下診斷指令檢查問題：
+
+```bash
+openclaw doctor
+openclaw channels status --probe
+```
+
+常見問題包括：
+
+- 存取控制設定錯誤
+- 機器人未加入正確的頻道
+- 驗證 token 問題

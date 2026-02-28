@@ -1,0 +1,76 @@
+---
+title: "exe.dev 部署"
+description: "在 exe.dev 虛擬機器上部署 OpenClaw Gateway 的設定指南，可透過 HTTPS 存取。"
+order: 15
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/exe-dev"
+---
+
+本指南涵蓋在 exe.dev 虛擬機器上部署 OpenClaw Gateway，部署後可透過 `https://<vm-name>.exe.xyz` 存取。
+
+## 需求
+
+- exe.dev 帳戶
+- SSH 存取 exe.dev 虛擬機器（選用）
+
+## 快速入門路徑
+
+初學者方法包括：
+
+1. 造訪 exe.new/openclaw
+2. 輸入認證憑證
+3. 選擇 VM 旁的「Agent」
+4. 等待自動設定完成
+
+## 自動安裝
+
+您可以使用 Shelley（exe.dev 的代理）自動安裝 OpenClaw，它會使用預定義的提示處理設定、nginx 配置、WebSocket 支援和裝置配對。
+
+## 手動安裝步驟
+
+### 1. 建立 VM
+
+```bash
+ssh exe.dev new
+```
+
+### 2. 安裝前置需求
+
+```bash
+apt-get install -y git curl jq ca-certificates openssl
+```
+
+### 3. 安裝 OpenClaw
+
+透過 curl 執行官方安裝腳本：
+
+```bash
+curl -fsSL https://get.openclaw.ai | bash
+```
+
+### 4. 設定 Nginx
+
+將連接埠 18789 轉發到連接埠 8000，並啟用 WebSocket 支援。Nginx 設定包含 proxy 設定、WebSocket 升級標頭，以及針對長時間連線最佳化的逾時設定。
+
+### 5. 存取與授權
+
+導覽至 VM 的 URL，並使用 CLI 指令核准裝置：
+
+```bash
+openclaw auth approve
+```
+
+## 維護
+
+使用 npm 執行更新，包含健康檢查和 Gateway 重啟：
+
+```bash
+npm update -g openclaw
+openclaw gateway restart
+openclaw status
+```
+
+## 相關資源
+
+- [安裝指南](/docs/install/install)
+- [Gateway 設定](/docs/gateway/configuration)

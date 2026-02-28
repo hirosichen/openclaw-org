@@ -1,0 +1,104 @@
+---
+title: "IRC"
+description: "透過 IRC 擴充外掛程式整合 OpenClaw 與 IRC 頻道和私訊。"
+order: 17
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/irc"
+---
+
+IRC 外掛程式讓 OpenClaw 能連線至 IRC 頻道和私訊，透過主設定檔中的擴充外掛程式進行設定。
+
+## 快速開始
+
+在 `~/.openclaw/openclaw.json` 中啟用 IRC，設定主機、連接埠、TLS、暱稱和目標頻道等基本參數：
+
+```json5
+{
+  channels: {
+    irc: {
+      enabled: true,
+      host: "irc.libera.chat",
+      port: 6697,
+      tls: true,
+      nick: "openclaw-bot",
+      channels: ["#mychannel"],
+    },
+  },
+}
+```
+
+> **提示：** 除非您刻意接受明文傳輸，否則請使用 TLS（`channels.irc.tls=true`）。
+
+## 安全框架
+
+系統實作兩個預設安全策略：
+
+- **私訊存取** — 使用 `"pairing"` 模式（預設），需要核准新的傳送者
+- **群組頻道** — 預設為 `"allowlist"` 模式，僅允許已設定的頻道
+
+## 存取控制
+
+兩個獨立的門禁機制保護 IRC：
+
+### 頻道層級存取
+
+透過 `groupPolicy` 和 `groups` 設定控制哪些 IRC 頻道可以與機器人互動。
+
+### 傳送者層級存取
+
+透過 `allowFrom` 設定控制哪些使用者可以傳送私訊。
+
+> **提示：** 常見錯誤：`allowFrom` 控制的是私訊存取，而非頻道參與權。
+
+## 提及限制
+
+預設情況下，OpenClaw 在群組情境中需要被提及才會回應。可依頻道或全域透過 `requireMention: false` 停用此功能。
+
+```json5
+{
+  channels: {
+    irc: {
+      requireMention: false,
+      // 或依頻道設定：
+      groups: {
+        "#mychannel": {
+          requireMention: false,
+        },
+      },
+    },
+  },
+}
+```
+
+## 工具限制
+
+對於啟用開放存取的公開頻道，建議使用 `tools.deny` 或 `toolsBySender` 來限制危險操作，例如執行階段執行和檔案系統存取。
+
+```json5
+{
+  channels: {
+    irc: {
+      groups: {
+        "#public-channel": {
+          tools: {
+            deny: ["runtime_exec", "fs_write"],
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+## NickServ 驗證
+
+支援需要暱稱識別的伺服器的 NickServ 驗證，並可選擇自動註冊。
+
+## 環境變數
+
+外掛程式支援透過環境變數進行標準 IRC 設定：
+
+- `IRC_HOST` — IRC 伺服器主機
+- `IRC_PORT` — IRC 伺服器連接埠
+- `IRC_NICK` — 機器人暱稱
+- `IRC_TLS` — 是否啟用 TLS

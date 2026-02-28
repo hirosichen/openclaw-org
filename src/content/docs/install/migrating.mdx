@@ -1,0 +1,105 @@
+---
+title: "遷移指南"
+description: "將 OpenClaw Gateway 遷移到新機器的完整指南，保留現有設定和會話，無需重複引導流程。"
+order: 9
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/migrating"
+---
+
+本指南說明如何在機器之間轉移 OpenClaw Gateway，同時保留現有設定和會話，無需重複引導流程。
+
+## 核心遷移概念
+
+遷移過程的關鍵在於轉移兩個必要元件：
+
+1. **狀態目錄**（`$OPENCLAW_STATE_DIR`，通常為 `~/.openclaw/`）— 包含設定、認證、會話和頻道資訊
+2. **工作區**（預設為 `~/.openclaw/workspace/`）— 存放代理檔案、記憶和提示
+
+然而，有幾個常見錯誤可能導致遷移失敗，特別是涉及設定檔、權限和不完整的複製。
+
+## 遷移前準備
+
+### 定位您的狀態目錄
+
+預設位置為 `~/.openclaw/`，但如果使用以下方式，可能會有自訂路徑：
+- 透過 `--profile <name>` 使用命名設定檔（變為 `~/.openclaw-<profile>/`）
+- 環境變數 `OPENCLAW_STATE_DIR=/some/path`
+
+要驗證，請在**舊機器**上執行 `openclaw status`，並檢查輸出中的目錄參考。
+
+### 確認您的工作區
+
+常見位置包括 `~/.openclaw/workspace/` 或包含 `MEMORY.md`、`USER.md` 及相關檔案的自訂目錄。
+
+### 保留的內容
+
+複製兩個目錄可保留 Gateway 設定、認證憑證、會話歷史、頻道狀態和工作區檔案。僅複製工作區（例如透過 Git）可保留檔案，但會遺失會話、憑證和頻道登入資訊。
+
+## 遷移程序
+
+### 步驟 0：在原始機器上備份
+
+停止 Gateway 以防止複製期間檔案變更：
+
+```bash
+openclaw gateway stop
+```
+
+建立兩個元件的封存檔：
+
+```bash
+cd ~
+tar -czf openclaw-state.tgz .openclaw
+tar -czf openclaw-workspace.tgz .openclaw/workspace
+```
+
+### 步驟 1：在目標機器上安裝 OpenClaw
+
+按照[安裝說明](/docs/install/install)進行操作；允許自動引導是可以的，因為您接下來會覆寫它。
+
+### 步驟 2：傳輸狀態和工作區
+
+使用 `scp`、`rsync -a` 或外部儲存裝置等方式複製兩個目錄。確認隱藏目錄已傳輸且所有權與 Gateway 使用者相符。
+
+### 步驟 3：執行 Doctor 並重新啟動
+
+執行：
+
+```bash
+openclaw doctor
+```
+
+這會處理遷移和服務修復。
+
+然後：
+
+```bash
+openclaw gateway restart
+openclaw status
+```
+
+## 常見錯誤與解決方案
+
+**設定檔/狀態目錄不符：** 如果新舊 Gateway 使用不同的設定檔，請使用匹配的參數重新執行，並再次執行 `openclaw doctor`。
+
+**不完整的複製：** 僅複製 `openclaw.json` 會失敗，因為憑證和代理狀態存放在 `$OPENCLAW_STATE_DIR` 下的其他位置。
+
+**所有權問題：** 如果傳輸期間權限發生變更，Gateway 將無法存取憑證。透過確保正確的檔案所有權來修正。
+
+**遠端 Gateway 場景：** 搬移您的本機不會遷移遠端 Gateway 的狀態 — 請遷移實際的 Gateway 主機。
+
+**安全考量：** 狀態目錄包含秘密資訊（API 金鑰、權杖）。以正式環境等級的安全措施處理備份。
+
+## 遷移後驗證
+
+確認遷移成功，驗證以下項目：
+
+- Gateway 正在執行（`openclaw status`）
+- 頻道保持已認證狀態
+- 儀表板顯示現有會話
+- 工作區檔案可以存取
+
+## 相關資源
+
+- [Gateway 疑難排解](/docs/gateway/troubleshooting)
+- [常見問題](/docs/help/faq)

@@ -1,0 +1,53 @@
+---
+title: "Hetzner VPS 部署"
+description: "在 Hetzner VPS 上使用 Docker 部署 OpenClaw Gateway 的正式環境指南，涵蓋持久化狀態管理和安全存取。"
+order: 12
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/hetzner"
+---
+
+本指南說明如何在 Hetzner VPS 上使用 Docker 部署 OpenClaw Gateway。重點涵蓋持久化狀態管理、將二進位檔嵌入映像檔，以及安全的重啟行為，實現約每月 $5 的全天候運行設定。
+
+## 核心部署元件
+
+### 基本設定步驟
+
+部署流程包括：佈建 Hetzner Ubuntu/Debian VPS、安裝 Docker、複製 OpenClaw 儲存庫，以及設定持久化目錄。
+
+> **重要：** 所有長期狀態必須存放在主機上，而非短暫的容器內。
+
+### 二進位檔管理
+
+關鍵需求是在建置時將外部二進位檔（gog、goplaces、wacli）嵌入 Docker 映像檔中。
+
+> **警告：** 在運行中的容器內安裝二進位檔是一個陷阱。任何在執行時安裝的內容都會在重新啟動時遺失。
+
+### 持久化策略
+
+狀態被組織在多個位置：
+
+- **Gateway 設定** — 掛載到主機目錄
+- **認證設定檔** — 掛載到主機目錄
+- **工作區成品** — 掛載到主機目錄
+- **WhatsApp 會話** — 掛載到主機目錄
+- **外部二進位檔和 Node 執行環境** — 存在於 Docker 映像檔內
+
+## 安全與存取
+
+建議保持 Gateway 在 VPS 上僅監聽 loopback，並透過 SSH 通道從您的筆電存取：
+
+```bash
+ssh -L 18789:127.0.0.1:18789 user@your-hetzner-vps
+```
+
+> **提示：** 對於可能存在對抗性的多使用者環境，請維持公司共享代理和個人設定檔之間的嚴格分離，並使用專屬的 VPS/執行帳戶。
+
+## 基礎設施即程式碼選項
+
+對於偏好自動化部署的團隊，社群維護的 Terraform 設定可供使用，提供模組化設定、安全強化和自動備份/還原工作流程。
+
+## 相關資源
+
+- [Docker 安裝](/docs/install/docker)
+- [Gateway 設定](/docs/gateway/configuration)
+- [Gateway 安全性](/docs/gateway/security)

@@ -1,0 +1,106 @@
+---
+title: "BlueBubbles (macOS REST)"
+description: "透過 BlueBubbles macOS 伺服器的 HTTP REST API 整合 iMessage，提供豐富的 API 和簡易設定。"
+order: 21
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/bluebubbles"
+---
+
+BlueBubbles 是內建外掛，透過 BlueBubbles macOS 伺服器的 HTTP REST API 實現 iMessage 整合。由於其更豐富的 API 和更簡易的設定流程，建議用於 iMessage 整合。
+
+## 主要功能
+
+- 支援 macOS Sequoia (15) 和 Tahoe (26)，部分功能有限制
+- 透過 REST API 端點通訊（`GET /api/v1/ping`、`POST /message/text`）
+- 透過 Webhook 接收傳入訊息
+- 支援附件、貼圖、輸入指示器、已讀回執和回應
+- 進階功能：訊息編輯、取消傳送、回覆串接、效果、群組管理
+
+## 快速設定
+
+安裝需要三個主要步驟：
+
+1. **安裝 BlueBubbles 伺服器應用程式** — 在 macOS 上安裝 BlueBubbles 伺服器
+2. **啟用 Web API** — 設定密碼並啟用 Web API
+3. **設定 OpenClaw** — 配置伺服器 URL 和驗證資訊
+
+可透過互動式設定或手動設定：
+
+```bash
+openclaw onboard
+```
+
+或手動在設定檔中配置 JSON 設定。
+
+## 安全要求
+
+- 必須設定 Webhook 密碼驗證
+- 未驗證的請求會被拒絕
+
+> **重要：** 請務必設定 Webhook 密碼。OpenClaw 會拒絕未包含與設定匹配的密碼/GUID 的 BlueBubbles Webhook 請求。
+
+## Messages.app 保持運作方案
+
+在虛擬機環境中，Messages 應用程式可能會變得無回應。文件提供了一個 AppleScript 搭配 LaunchAgent 的方案，每 5 分鐘「喚醒」應用程式以維持活動狀態。
+
+## 存取控制
+
+### 私訊策略
+
+- 預設使用 `pairing`（一小時有效期的配對碼）
+
+### 群組策略
+
+- 支援 `open`、`allowlist` 或 `disabled` 策略
+
+### 提及閘控
+
+- 代理僅在被特別提及時才回覆
+
+### 指令授權
+
+- 控制功能僅限已授權的發送者使用
+
+## 進階操作設定
+
+可啟用的特定功能包括：
+
+- **回應/Tapback** — 訊息回應
+- **訊息編輯** — 編輯已傳送的訊息
+- **取消傳送** — 取消傳送訊息
+- **回覆串接** — 串接式回覆
+- **效果** — 訊息效果
+- **群組重新命名** — 重新命名群組
+- **圖示自訂** — 自訂群組圖示
+- **參與者管理** — 管理群組成員
+- **附件傳送** — 傳送附件
+
+> **提示：** 語音備忘錄需要 MP3 或 CAF 音訊格式。
+
+## 訊息 ID 系統
+
+OpenClaw 可能使用短 ID 以提高 token 效率，但提供完整識別碼（`MessageSidFull`、`ReplyToIdFull`）用於持久自動化。短 ID 可能在重新啟動或快取清除後失效。
+
+## 媒體與文字處理
+
+- **傳入附件** — 下載到媒體快取，預設上限 8 MB
+- **傳出文字** — 預設分段上限 4,000 字元
+- **分段模式** — 支援長度型和換行（段落）型分段
+
+## 設定參考
+
+完整設定選項控制：頻道啟用、伺服器連線、Webhook 路徑、私訊/群組策略、允許清單、已讀回執、串流模式、媒體限制、歷史記錄保留和每帳號覆寫。
+
+## 已知限制
+
+- macOS 26 (Tahoe) 的訊息編輯功能已損壞
+- Tahoe 上的群組圖示更新可能回報成功但未實際同步
+- 回應功能需要 BlueBubbles 私有 API 存取權限
+- 編輯/取消傳送功能需要 macOS 13 或更新版本
+
+## 疑難排解
+
+- 檢查 Webhook 日誌以排除連線問題
+- 管理配對碼的有效期限
+- 驗證伺服器 API 版本以確認進階功能支援
+- 使用 `openclaw status` 指令進行健康檢查診斷
