@@ -1,0 +1,55 @@
+---
+title: "iMessage"
+description: "透過 imsg CLI 工具整合 OpenClaw 與 Apple iMessage，支援本地和遠端 Mac 部署。"
+order: 5
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/imessage"
+---
+
+iMessage 整合是一個舊版外部 CLI 工具，透過標準輸入/輸出的 JSON-RPC 進行通訊。對於新部署，建議改用 BlueBubbles。`imsg` 整合為舊版工具，可能在未來版本中被移除。
+
+## 本地 Mac 安裝
+
+1. 透過 Homebrew 安裝 `imsg` CLI 工具
+2. 在 OpenClaw 中設定二進位檔路徑和 Messages 資料庫位置
+3. 管理配對請求（1 小時後過期）
+
+## 遠端 Mac 設定
+
+1. 將 CLI 路徑指向 SSH 包裝腳本
+2. 設定 `remoteHost` 以透過 SCP 取得附件
+3. 需要在 `~/.ssh/known_hosts` 中驗證主機金鑰
+
+## macOS 權限需求
+
+執行 OpenClaw 的處理程序上下文需要以下權限：
+
+- **完整磁碟存取** — 用於存取 Messages 資料庫
+- **自動化權限** — 用於透過 Messages.app 傳送訊息
+- Messages 必須在 Mac 上已登入
+
+## 存取控制
+
+### 私訊
+
+由 `dmPolicy` 控制，支援以下選項：
+
+- `pairing`（預設）— 需要核准
+- `allowlist` — 僅限預先核准的聯絡人
+- `open` — 允許所有傳送者
+
+### 群組
+
+透過 `groupPolicy` 單獨管理，使用正規表示式模式進行提及偵測，因為 iMessage 缺乏原生的提及中繼資料。
+
+## 部署模式
+
+- **專用機器人 macOS 使用者** — 使用獨立的 Apple ID
+- **透過 SSH/Tailscale 的遠端 Mac** — 支援附件處理
+- **多帳號設定** — 每個帳號覆寫特定設定，如資料庫路徑和附件處理
+
+## 技術限制
+
+- 文字分段限制：4,000 字元（預設）
+- 媒體檔案大小：16 MB（預設）
+- 配對請求：1 小時過期時間

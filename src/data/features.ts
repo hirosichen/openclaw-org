@@ -6,33 +6,33 @@ export interface Feature {
 
 export const features: Feature[] = [
   {
-    icon: '🏠',
-    title: '完全本機運行',
-    description: '所有資料留在你的裝置上，不需要雲端服務。隱私、安全、完全掌控。',
-  },
-  {
-    icon: '💬',
-    title: '多頻道整合',
-    description: '支援 LINE、WhatsApp、Telegram、Discord、Signal 等主流聊天 App。',
-  },
-  {
-    icon: '🤖',
-    title: '多 AI 模型支援',
-    description: '支援 OpenAI、Anthropic、Google Gemini 等多種大型語言模型。',
+    icon: '🌐',
+    title: '多頻道閘道器',
+    description: '透過單一 Gateway 程序同時連接 WhatsApp、Telegram、Discord 和 iMessage。',
   },
   {
     icon: '🔌',
-    title: '外掛系統',
-    description: '透過外掛擴充功能，打造專屬於你的 AI 助理工作流程。',
+    title: '外掛頻道',
+    description: '使用擴展套件新增 Mattermost 等更多頻道支援。',
   },
   {
-    icon: '🧠',
-    title: '記憶與上下文',
-    description: '智慧記憶管理，讓 AI 助理記住你的偏好與對話歷史。',
+    icon: '🤖',
+    title: '多代理路由',
+    description: '為每個代理、工作區或傳送者建立隔離的會話。',
   },
   {
-    icon: '🛡️',
-    title: '安全設計',
-    description: '內建安全機制，控制 AI 的行為邊界與資料存取權限。',
+    icon: '📸',
+    title: '媒體支援',
+    description: '傳送和接收圖片、音訊和文件。',
+  },
+  {
+    icon: '🖥️',
+    title: 'Web 控制介面',
+    description: '瀏覽器儀表板，用於聊天、設定、會話和節點管理。',
+  },
+  {
+    icon: '📱',
+    title: '行動節點',
+    description: '配對 iOS 和 Android 節點，支援 Canvas。',
   },
 ];

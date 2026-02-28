@@ -1,0 +1,54 @@
+---
+title: "WebChat（Gateway WebSocket UI）"
+description: "Gateway 的原生聊天 UI，直接透過 WebSocket 連線，使用與其他頻道相同的 session 與路由規則。"
+order: 5
+section: "web"
+officialDoc: "https://docs.openclaw.ai/web/webchat"
+---
+
+## 概覽
+
+WebChat 是 gateway 的原生聊天 UI（無內嵌瀏覽器，也無本機靜態伺服器）。macOS/iOS SwiftUI 聊天 UI 直接透過 Gateway WebSocket 通訊。
+
+## 核心功能
+
+- 原生聊天介面，無需內嵌瀏覽器或本機靜態伺服器
+- 與所有頻道共用 session 和路由規則
+- 回覆保證路由回 WebChat
+
+## 設定
+
+設定需要：
+
+1. 啟動 gateway
+2. 開啟 WebChat UI
+3. 設定 gateway 認證（預設為必要，即使在本機也是如此）
+
+## 操作行為
+
+系統使用三個主要 WebSocket 操作：
+
+- **`chat.history`**：歷史記錄功能有內建限制——gateway 可能會截斷冗長文字、省略重型元資料，並以「過大」通知替換超大訊息。
+- **`chat.send`**：傳送訊息至 agent。
+- **`chat.inject`**：直接將助手備註附加至逐字稿並廣播至 UI（不觸發 agent 執行）。
+
+中止的操作會在 UI 和逐字稿中保留部分輸出，並附加中止元資料標記。
+
+## Control UI 工具面板
+
+透過 `tools.catalog` 取得執行期工具目錄，將項目標記為核心或外掛，無法取得時回退至靜態列表。
+
+## 遠端存取
+
+透過 SSH/Tailscale 通道可進行遠端操作；無需獨立伺服器。
+
+## 設定參考
+
+使用全域設定中的以下項目：
+
+- `gateway.port`
+- `gateway.bind`
+- 認證設定（`gateway.auth.mode`、`gateway.auth.token`、`gateway.auth.password`）
+- Session 儲存選項
+
+當 gateway 無法連線時，介面會轉為唯讀模式。

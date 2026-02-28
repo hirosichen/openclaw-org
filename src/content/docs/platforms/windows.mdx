@@ -1,69 +1,147 @@
 ---
-title: Windows 平台指南
-description: 在 Windows 上安裝和使用 OpenClaw 的完整指南
-order: 3
-section: platforms
-officialDoc: https://github.com/nickthecook/openclaw
+title: "Windows (WSL2)"
+description: "透過 WSL2 在 Windows 上安裝與設定 OpenClaw 的指南，建議使用 Ubuntu 以獲得最佳 CLI 與 Gateway 相容性。"
+order: 4
+section: "platforms"
+officialDoc: "https://docs.openclaw.ai/platforms/windows"
 ---
 
-## Windows 安裝
+建議在 Windows 上**透過 WSL2** 使用 OpenClaw（推薦 Ubuntu）。CLI + Gateway 在 Linux 內部執行，保持執行環境一致性，使工具鏈更加相容（Node/Bun/pnpm、Linux 二進位檔、技能）。原生 Windows 可能較為棘手。WSL2 提供完整的 Linux 體驗——只需一個指令即可安裝：`wsl --install`。
 
-### 使用 Scoop（推薦）
+原生 Windows 配套應用程式正在規劃中。
 
-```powershell
-scoop install openclaw
+## 安裝（WSL2）
+
+- [入門指南](/docs/start/getting-started)（在 WSL 內使用）
+- [安裝與更新](/docs/install/updating)
+- 官方 WSL2 指南（Microsoft）：[https://learn.microsoft.com/windows/wsl/install](https://learn.microsoft.com/windows/wsl/install)
+
+## Gateway
+
+- [Gateway 操作手冊](/docs/gateway)
+- [設定](/docs/gateway/configuration)
+
+## Gateway 服務安裝（CLI）
+
+在 WSL2 內：
+
+```
+openclaw onboard --install-daemon
 ```
 
-### 使用 winget
+或：
 
-```powershell
-winget install OpenClaw
+```
+openclaw gateway install
 ```
 
-### 手動安裝
+或：
 
-從 [GitHub Releases](https://github.com/nickthecook/openclaw/releases) 下載最新的 Windows 安裝程式。
-
-## 系統需求
-
-- Windows 10 版本 1903 或更新
-- x86_64 處理器
-- 至少 4 GB RAM
-
-## Windows 特有設定
-
-### 作為 Windows Service 執行
-
-```powershell
-# 安裝服務
-openclaw service install
-
-# 啟動服務
-openclaw service start
+```
+openclaw configure
 ```
 
-### 開機自動啟動
+出現提示時選擇 **Gateway service**。
 
-```powershell
-# 新增到啟動程式
-openclaw service install --startup
+修復/遷移：
+
+```
+openclaw doctor
 ```
 
-### WSL 支援
+## 進階：透過 LAN 公開 WSL 服務（portproxy）
 
-如果你使用 WSL (Windows Subsystem for Linux)，可以使用 Linux 安裝方式：
+WSL 擁有自己的虛擬網路。如果其他機器需要連接到 **WSL 內部** 執行的服務（SSH、本機 TTS 伺服器或 Gateway），您必須將 Windows 連接埠轉發到目前的 WSL IP。WSL IP 在重新啟動後會改變，因此您可能需要重新整理轉發規則。
+
+範例（以**系統管理員**身分開啟 PowerShell）：
+
+```powershell
+$Distro = "Ubuntu-24.04"
+$ListenPort = 2222
+$TargetPort = 22
+
+$WslIp = (wsl -d $Distro -- hostname -I).Trim().Split(" ")[0]
+if (-not $WslIp) { throw "WSL IP not found." }
+
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=$ListenPort `
+  connectaddress=$WslIp connectport=$TargetPort
+```
+
+允許連接埠通過 Windows 防火牆（僅需一次）：
+
+```powershell
+New-NetFirewallRule -DisplayName "WSL SSH $ListenPort" -Direction Inbound `
+  -Protocol TCP -LocalPort $ListenPort -Action Allow
+```
+
+WSL 重新啟動後重新整理 portproxy：
+
+```powershell
+netsh interface portproxy delete v4tov4 listenport=$ListenPort listenaddress=0.0.0.0 | Out-Null
+netsh interface portproxy add v4tov4 listenport=$ListenPort listenaddress=0.0.0.0 `
+  connectaddress=$WslIp connectport=$TargetPort | Out-Null
+```
+
+注意事項：
+
+- 從其他機器 SSH 連線時，目標為 **Windows 主機 IP**（例如：`ssh user@windows-host -p 2222`）。
+- 遠端節點必須指向**可連線**的 Gateway URL（非 `127.0.0.1`）；使用 `openclaw status --all` 確認。
+- 使用 `listenaddress=0.0.0.0` 以允許 LAN 存取；`127.0.0.1` 僅限本機。
+- 如果需要自動化，可註冊排程工作在登入時執行重新整理步驟。
+
+## 逐步 WSL2 安裝
+
+### 1) 安裝 WSL2 + Ubuntu
+
+開啟 PowerShell（系統管理員）：
+
+```powershell
+wsl --install
+# 或明確選擇發行版：
+wsl --list --online
+wsl --install -d Ubuntu-24.04
+```
+
+如果 Windows 要求，請重新開機。
+
+### 2) 啟用 systemd（Gateway 安裝所需）
+
+在您的 WSL 終端機中：
 
 ```bash
-# 在 WSL 中
-curl -fsSL https://get.openclaw.org | bash
+sudo tee /etc/wsl.conf >/dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
 ```
 
-### Windows 防火牆
-
-首次啟動時，Windows 防火牆可能會詢問是否允許 OpenClaw 的網路存取。請選擇允許。
-
-手動設定：
+然後從 PowerShell：
 
 ```powershell
-New-NetFirewallRule -DisplayName "OpenClaw" -Direction Inbound -Port 3000 -Protocol TCP -Action Allow
+wsl --shutdown
 ```
+
+重新開啟 Ubuntu，然後驗證：
+
+```bash
+systemctl --user status
+```
+
+### 3) 安裝 OpenClaw（在 WSL 內）
+
+在 WSL 內依照 Linux 入門流程：
+
+```bash
+git clone https://github.com/openclaw/openclaw.git
+cd openclaw
+pnpm install
+pnpm ui:build # 首次執行時自動安裝 UI 依賴
+pnpm build
+openclaw onboard
+```
+
+完整指南：[入門指南](/docs/start/getting-started)
+
+## Windows 配套應用程式
+
+目前尚無 Windows 配套應用程式。歡迎社群貢獻。

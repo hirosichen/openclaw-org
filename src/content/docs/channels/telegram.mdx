@@ -1,63 +1,58 @@
 ---
-title: Telegram 整合
-description: 設定 Telegram Bot 連接 OpenClaw
+title: "Telegram"
+description: "使用 Telegram Bot API 設定 OpenClaw 的 Telegram 機器人整合，支援私訊和群組通訊。"
 order: 3
-section: channels
-officialDoc: https://github.com/nickthecook/openclaw
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/telegram"
 ---
 
-## Telegram Bot 整合
+OpenClaw 的 Telegram 整合透過 Telegram Bot API 實現機器人通訊，預設使用 long polling 模式，支援私訊和群組聊天。
 
-Telegram 提供功能豐富的 Bot API，是 OpenClaw 最完整的頻道整合之一。
+## 快速設定
 
-## 設定步驟
+1. **建立 bot token** — 在 Telegram 中向 `@BotFather` 發送訊息，執行 `/newbot` 指令並儲存產生的 token
+2. **設定 token** — 在設定檔或環境變數中配置（系統不使用 `openclaw channels login telegram`）
+3. **啟動 Gateway** — 然後透過配對流程核准第一則私訊
+4. **將機器人加入群組** — 如有需要，調整群組策略設定
 
-### 1. 建立 Telegram Bot
+設定值優先於環境變數，`TELEGRAM_BOT_TOKEN` 僅適用於預設帳號。
 
-1. 在 Telegram 中搜尋 `@BotFather`
-2. 發送 `/newbot` 指令
-3. 依照指示設定 Bot 名稱
-4. 記下 **Bot Token**
+## 存取控制
 
-### 2. 設定 OpenClaw
+### 私訊策略
 
-```bash
-openclaw channel enable telegram
-openclaw channel config telegram --bot-token YOUR_BOT_TOKEN
-```
+`dmPolicy` 支援四種模式：
 
-### 3. 設定 Webhook
+- `pairing`（預設）— 使用者需發送初始訊息，然後由你透過限時代碼核准
+- `allowlist` — 必須明確指定數值型使用者 ID
+- `open` — 允許任何傳送者
+- `disabled` — 封鎖所有私訊
 
-```bash
-# OpenClaw 會自動設定 Webhook
-openclaw channel setup telegram
-```
+系統可使用 `openclaw doctor --fix` 將舊版使用者名稱項目解析為數值型 ID。
 
-### 4. 測試
+### 群組存取
 
-```bash
-openclaw channel test telegram
-```
+透過兩個機制運作：允許哪些群組，以及群組內哪些傳送者有授權。預設情況下，群組被封鎖，除非在設定中明確允許。
 
-在 Telegram 中搜尋你的 Bot 並發送訊息即可開始使用。
+群組傳送者授權**不會**繼承私訊配對的核准。群組存取需要透過 `groupAllowFrom` 或每個群組的允許清單進行明確設定。
 
-## Telegram 特有功能
+## Telegram 端設定
 
-- **Inline Mode** — 在任何對話中呼叫 Bot
-- **Inline Keyboard** — 互動式按鈕
-- **群組支援** — 在群組中使用 Bot
-- **檔案傳送** — 支援各種檔案格式
-- **Markdown** — 支援格式化訊息
+在群組中有效運作前，請考慮以下 Telegram 端設定：
 
-## 設定範例
+- **隱私模式** — 如果機器人需要在非管理員狀態下查看所有群組訊息，透過 BotFather 的 `/setprivacy` 停用
+- **管理員身份** — 將機器人設為群組管理員可授予查看所有訊息的權限
+- **群組權限** — 透過 Telegram 的群組設定介面控制機器人功能
 
-```yaml
-channels:
-  telegram:
-    enabled: true
-    bot_token: YOUR_BOT_TOKEN
-    features:
-      inline_mode: true
-      group_support: true
-      markdown: true
-```
+## 主要功能
+
+- **訊息串流** — 使用即時編輯的部分回覆預覽
+- **對話串** — 論壇主題和訊息對話串，具有獨立的工作階段金鑰
+- **表情回應** — 可選的使用者表情回應通知系統
+- **指令** — 原生和自訂指令選單，支援外掛
+- **媒體處理** — 音訊/影片區分、貼圖快取和處理
+- **內嵌按鈕** — 可設定鍵盤範圍（私訊、群組、全部或允許清單）
+
+## 疑難排解
+
+常見問題包括隱私模式阻擋訊息可見性、傳送者授權不足，以及網路連線問題。部分主機會優先解析 `api.telegram.org` 為 IPv6，損壞的 IPv6 出口可能導致間歇性 Telegram API 失敗。如有需要，建議設定 IPv4 優先的 DNS 解析。

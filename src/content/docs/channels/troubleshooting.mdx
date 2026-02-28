@@ -1,0 +1,82 @@
+---
+title: "頻道疑難排解"
+description: "OpenClaw 通訊頻道問題的系統化診斷指南，涵蓋所有支援的平台。"
+order: 11
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/troubleshooting"
+---
+
+本頁提供 OpenClaw 通訊頻道問題的系統化診斷指引。
+
+## 初始診斷步驟
+
+作為第一步疑難排解步驟，依序執行以下指令：
+
+```bash
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+openclaw channels status --probe
+```
+
+正常運作的系統應顯示 Runtime 為執行中、RPC 探測成功，以及頻道標記為已連線/就緒。
+
+## 各頻道疑難排解
+
+### WhatsApp
+
+常見問題包括：
+
+- **私訊被封鎖** — 未核准的傳送者無法傳送私訊，檢查配對狀態
+- **群組訊息過濾** — 基於提及要求的群組訊息篩選，驗證 `groupPolicy` 設定
+- **斷線迴圈** — 需要憑證驗證，使用 `openclaw doctor`
+
+### Telegram
+
+常見問題包括：
+
+- **配對核准失敗** — 確認配對流程已完成
+- **隱私模式設定** — 影響群組中的訊息可見性，透過 BotFather 調整
+- **網路路由問題** — API 端點的 DNS/路由檢查，注意 IPv6 問題
+
+### Discord
+
+常見問題包括：
+
+- **伺服器/頻道允許清單** — 確認伺服器和頻道已加入允許清單
+- **Message Content Intent** — 驗證 Intent 設定是否已在 Developer Portal 中啟用
+- **私訊配對** — 檢查配對核准狀態
+
+### Slack
+
+常見問題包括：
+
+- **Socket Mode 連線** — Token 驗證，確認 `SLACK_APP_TOKEN` 和 `SLACK_BOT_TOKEN`
+- **頻道過濾** — 取決於 `groupPolicy` 設定
+- **私訊策略** — 驗證私訊設定和配對核准
+
+### iMessage / BlueBubbles
+
+常見問題包括：
+
+- **Webhook 可達性** — 驗證 webhook 端點可以被存取
+- **macOS 隱私權限 (TCC)** — 確認完整磁碟存取和自動化權限已授予
+
+### Signal
+
+常見問題包括：
+
+- **signal-cli 常駐程序連線** — 確認 signal-cli 正在執行且可連線
+- **接收模式設定** — 影響機器人回應性的設定
+
+### Matrix
+
+常見問題包括：
+
+- **聊天室允許清單** — 聊天室被群組策略封鎖，確認允許清單設定
+- **加密模組** — 驗證加密模組支援和裝置驗證狀態
+
+## 診斷模式
+
+每個頻道的疑難排解遵循一致的結構：識別症狀、使用特定 CLI 指令進行目標診斷檢查，然後套用適當的修正。這種方法論有助於使用者有效地隔離問題。

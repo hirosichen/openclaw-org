@@ -1,0 +1,44 @@
+---
+title: "引導設定總覽"
+description: "OpenClaw 支援多種引導設定路徑，依據 Gateway 執行位置與偏好的設定方式選擇"
+order: 4
+section: "start"
+officialDoc: "https://docs.openclaw.ai/start/onboarding-overview"
+---
+
+OpenClaw 支援多種引導設定路徑，依據 Gateway 執行位置與你偏好的供應商設定方式來選擇。
+
+## 選擇你的引導設定路徑
+
+- **CLI 精靈**：適用於 macOS、Linux 及 Windows（透過 WSL2）。
+- **macOS 應用程式**：適用於在 Apple silicon 或 Intel Mac 上進行引導式首次設定。
+
+## CLI 引導精靈
+
+在終端機中執行精靈：
+
+```bash
+openclaw onboard
+```
+
+當你需要完全控制 Gateway、工作區、頻道與技能時，請使用 CLI 精靈。文件：
+
+- [Onboarding Wizard (CLI)](/docs/start/wizard)
+- [`openclaw onboard` 指令](/docs/cli/onboard)
+
+## macOS 應用程式引導
+
+當你想要在 macOS 上取得完全引導式設定體驗時，請使用 OpenClaw 應用程式。文件：
+
+- [Onboarding (macOS App)](/docs/start/onboarding)
+
+## 自訂供應商
+
+如果你需要的端點未被列出 — 包括公開標準 OpenAI 或 Anthropic API 的託管供應商 — 在 CLI 精靈中選擇 **Custom Provider**。系統會要求你：
+
+- 選擇 OpenAI 相容、Anthropic 相容或 **Unknown**（自動偵測）。
+- 輸入基礎 URL 與 API 金鑰（如果供應商需要）。
+- 提供模型 ID 與選用的別名。
+- 選擇一個 Endpoint ID，讓多個自訂端點可以共存。
+
+詳細步驟請參閱上方的 CLI 引導文件。

@@ -1,86 +1,97 @@
 ---
-title: 閘道器安全
-description: 保護 OpenClaw 閘道器的安全設定
+title: "安全性"
+description: "OpenClaw Gateway 安全模型、威脅緩解與部署強化指南"
 order: 3
-section: gateway
-officialDoc: https://github.com/nickthecook/openclaw
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/security"
 ---
 
-## 安全設定
+## 核心安全模型
 
-保護你的 OpenClaw 閘道器免受未授權存取。
+OpenClaw 採用**個人助理信任模型**運作，而非多租戶系統。OpenClaw **不是**多個對抗性使用者共享一個 agent/gateway 的敵對多租戶安全邊界。
 
-## 身份驗證
+關鍵假設：
 
-### API Token
+- 每個 Gateway 一個受信任的操作者邊界
+- 共享主機/設定存取表示共享信任域
+- 如需對抗性使用者隔離，需要跨不同 OS 使用者或主機的獨立 Gateway 和憑證
 
-```yaml
-gateway:
-  auth:
-    enabled: true
-    token: your-secure-token-here
-```
+## 快速安全稽核
 
-使用 Token 存取 API：
+`openclaw security audit` 指令可標記常見弱點：
+
+- Gateway 驗證暴露
+- 瀏覽器控制暴露
+- 提升的允許清單
+- 檔案系統權限問題
 
 ```bash
-curl -H "Authorization: Bearer your-secure-token-here" \
-  http://localhost:3000/api/status
+openclaw security audit
+openclaw security audit --deep
+openclaw security audit --fix
+openclaw security audit --json
 ```
 
-### Webhook 驗證
+## 主要安全控制
 
-每個頻道都有自己的驗證機制，OpenClaw 會自動驗證來自頻道的請求：
+### 驗證與存取
 
-- **LINE** — 使用 Channel Secret 驗證簽章
-- **Telegram** — 使用 Secret Token 驗證
-- **Slack** — 使用 Signing Secret 驗證
+- `gateway.auth`（token/password/device auth）驗證呼叫者
+- `sessionKey` 用於路由上下文，而非授權邊界
+- DM 策略支援 `pairing`、`allowlist`、`open` 或 `disabled` 模式
 
-## 速率限制
+### 工具與執行強化
 
-```yaml
-gateway:
-  rate_limit:
-    enabled: true
-    window: 60        # 秒
-    max_requests: 100 # 每個窗口的最大請求數
-```
+- 沙箱隔離工具執行（選用但建議啟用）
+- `tools.exec` 需要 shell 指令的核准
+- `tools.elevated` 是需要嚴格允許清單控制的逃逸通道
+- 對不受信任的發送者，應預設拒絕 `gateway` 和 `cron` 等危險工具
 
-## IP 白名單
+### 網路與暴露
 
-```yaml
-gateway:
-  ip_whitelist:
-    enabled: true
-    addresses:
-      - 127.0.0.1
-      - 10.0.0.0/8
-```
+- 預設繫結模式：僅 loopback（本機可存取）
+- 非 loopback 繫結需要強驗證
+- Tailscale Serve/Funnel 會顯著擴大攻擊面
 
-## CORS 設定
+## 部署強化基準
 
-```yaml
-gateway:
-  cors:
-    enabled: true
-    origins:
-      - https://yourdomain.com
-    methods:
-      - GET
-      - POST
-    headers:
-      - Content-Type
-      - Authorization
-```
+最小安全設定包括：
 
-## SSL/TLS
+- 僅本機 Gateway 繫結
+- 基於 token 的驗證
+- 每個頻道/peer 的 DM 工作階段隔離
+- 停用自動化/runtime/檔案系統工具群組
+- 工作空間範圍的檔案系統存取
+- 明確拒絕 exec 或設為需要核准模式
 
-建議在正式環境中使用 SSL/TLS。可以透過反向代理（Nginx/Caddy）處理，或使用 OpenClaw 內建功能：
+## 威脅態勢與緩解
 
-```yaml
-gateway:
-  ssl:
-    enabled: true
-    cert: /path/to/cert.pem
-    key: /path/to/key.pem
-```
+**主要威脅：**
+
+- 來自不受信任訊息內容的 prompt injection
+- 工具濫用導致未授權的檔案系統/網路/shell 操作
+- 憑證透過日誌或轉錄暴露
+
+**有效防禦：**
+
+- 限制性 DM 策略（預設為 pairing）
+- 群組頻道中的 mention 閘控
+- 工具執行沙箱化
+- 日誌中的敏感資料遮蔽
+- 模型選擇（較新的模型比舊版本更能抵抗 prompt injection）
+
+## 範圍外發現
+
+研究人員請注意，某些模式在此模型中**不被**視為弱點：
+
+- 無 auth/policy 繞過的純 prompt injection 鏈
+- 假設在共享基礎架構上進行敵對多租戶操作的主張
+- 將工作階段路由鍵視為 auth token 的每使用者授權發現
+
+## 事件回應框架
+
+**遏制：** 停止 Gateway、限制網路暴露、停用有風險的 DM/群組存取。
+
+**修復：** 輪換 Gateway token、provider 憑證，並更新遠端用戶端密鑰。
+
+**調查：** 檢閱 Gateway 日誌、工作階段轉錄、近期設定變更，並重新執行安全稽核。

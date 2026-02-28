@@ -1,0 +1,34 @@
+---
+title: "OpenRouter"
+description: "透過 OpenRouter 統一 API 在 OpenClaw 中路由請求至多個模型的設定指南。"
+order: 5
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/openrouter"
+---
+
+OpenRouter 提供**統一的 API**，透過單一端點和 API 金鑰將請求路由到多個模型。它與 OpenAI 相容，因此大多數 OpenAI SDK 只需切換 base URL 即可使用。
+
+## CLI 設定
+
+```bash
+openclaw onboard --auth-choice apiKey --token-provider openrouter --token "$OPENROUTER_API_KEY"
+```
+
+## 設定片段
+
+```json5
+{
+  env: { OPENROUTER_API_KEY: "sk-or-..." },
+  agents: {
+    defaults: {
+      model: { primary: "openrouter/anthropic/claude-sonnet-4-5" },
+    },
+  },
+}
+```
+
+## 注意事項
+
+- 模型參考格式為 `openrouter/<provider>/<model>`。
+- 更多模型和供應商選項，請參閱 [/concepts/model-providers](/concepts/model-providers)。
+- OpenRouter 在底層使用你的 API 金鑰進行 Bearer token 驗證。

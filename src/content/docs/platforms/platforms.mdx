@@ -1,0 +1,50 @@
+---
+title: "平台總覽"
+description: "OpenClaw 的平台支援概覽，包括作業系統選項、VPS 託管供應商，以及 Gateway 服務安裝說明。"
+order: 1
+section: "platforms"
+officialDoc: "https://docs.openclaw.ai/platforms"
+---
+
+OpenClaw 核心以 TypeScript 撰寫。**Node 是推薦的執行環境**。
+不建議將 Bun 用於 Gateway（WhatsApp/Telegram 存在已知問題）。
+
+macOS（選單列應用程式）和行動裝置節點（iOS/Android）已有配套應用程式。Windows 和 Linux 的配套應用程式已在規劃中，但 Gateway 目前已完整支援。
+Windows 的原生配套應用程式同樣在規劃中；建議透過 WSL2 使用 Gateway。
+
+## 選擇您的作業系統
+
+- macOS：[macOS](/docs/platforms/macos)
+- iOS：[iOS](/docs/platforms/ios)
+- Android：[Android](/docs/platforms/android)
+- Windows：[Windows](/docs/platforms/windows)
+- Linux：[Linux](/docs/platforms/linux)
+
+## VPS 與託管
+
+- VPS 中心：[VPS hosting](/docs/vps)
+- Fly.io：[Fly.io](/docs/install/fly)
+- Hetzner (Docker)：[Hetzner](/docs/install/hetzner)
+- GCP (Compute Engine)：[GCP](/docs/install/gcp)
+- exe.dev (VM + HTTPS proxy)：[exe.dev](/docs/install/exe-dev)
+
+## 常用連結
+
+- 安裝指南：[入門指南](/docs/start/getting-started)
+- Gateway 操作手冊：[Gateway](/docs/gateway)
+- Gateway 設定：[Configuration](/docs/gateway/configuration)
+- 服務狀態：`openclaw gateway status`
+
+## Gateway 服務安裝（CLI）
+
+使用以下任一方式（皆支援）：
+
+- 精靈（建議）：`openclaw onboard --install-daemon`
+- 直接安裝：`openclaw gateway install`
+- 設定流程：`openclaw configure` → 選擇 **Gateway service**
+- 修復/遷移：`openclaw doctor`（提供安裝或修復服務的選項）
+
+服務目標取決於作業系統：
+
+- macOS：LaunchAgent（`ai.openclaw.gateway` 或 `ai.openclaw.<profile>`；舊版 `com.openclaw.*`）
+- Linux/WSL2：systemd user service（`openclaw-gateway[-<profile>].service`）

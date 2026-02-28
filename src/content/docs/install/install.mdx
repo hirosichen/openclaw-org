@@ -1,0 +1,86 @@
+---
+title: "安裝指南"
+description: "OpenClaw 安裝方式總覽，包含安裝腳本、套件管理器、原始碼建置等多種選項。"
+order: 1
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install"
+---
+
+OpenClaw 提供多種安裝方式，建議使用安裝腳本作為主要安裝方法，同時也提供其他替代方案適用於不同平台和工作流程。
+
+## 系統需求
+
+- Node 22 或更高版本（安裝腳本會自動安裝）
+- macOS、Linux 或 Windows（Windows 建議使用 WSL2）
+- 從原始碼建置時需要 pnpm
+
+## 安裝腳本（建議方式）
+
+最快的安裝方式，會自動處理 Node 偵測、安裝和初始設定：
+
+macOS / Linux / WSL2：
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+Windows PowerShell：
+
+```powershell
+iwr -useb https://openclaw.ai/install.ps1 | iex
+```
+
+安裝腳本會自動處理 Node 偵測、安裝及初始設定流程。
+
+## 套件管理器安裝
+
+若系統已安裝 Node 22 以上版本，可直接使用套件管理器安裝：
+
+```bash
+npm install -g openclaw@latest
+```
+
+或使用 pnpm（需核准建置腳本）：
+
+```bash
+pnpm add -g openclaw@latest
+```
+
+## 從原始碼安裝
+
+開發者可從 GitHub 儲存庫複製並在本地建置：
+
+```bash
+git clone https://github.com/openclaw/openclaw.git
+cd openclaw
+pnpm install
+pnpm build
+pnpm link --global
+```
+
+## 其他部署方式
+
+- [Docker](/docs/install/docker) — 容器化部署
+- [Podman](/docs/install/podman) — 無 root 權限容器部署
+- [Nix](/docs/install/nix) — Nix 套件管理器整合
+- [Ansible](/docs/install/ansible) — 自動化伺服器部署
+- [Bun](/docs/install/bun) — 實驗性 Bun 執行環境支援
+- [Fly.io](/docs/install/fly) — 雲端部署
+
+## 安裝後驗證
+
+安裝完成後，執行以下指令確認安裝正確：
+
+```bash
+openclaw doctor
+openclaw status
+openclaw dashboard
+```
+
+`openclaw dashboard` 會開啟瀏覽器控制介面。
+
+## 疑難排解
+
+### `openclaw: command not found`
+
+這通常是 PATH 設定問題。請確認安裝路徑已加入系統 PATH 環境變數中。檢查您的 shell 啟動檔案（如 `~/.bashrc`、`~/.zshrc`），確保包含正確的路徑設定。

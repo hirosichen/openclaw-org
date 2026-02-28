@@ -1,0 +1,59 @@
+---
+title: "Talk Mode"
+description: "Talk Mode 啟用連續語音對話，系統聆聽語音、將逐字稿傳送至模型，並透過文字轉語音播放回應。"
+order: 5
+section: "nodes"
+officialDoc: "https://docs.openclaw.ai/nodes/talk"
+---
+
+## 核心功能
+
+Talk Mode 以三階段迴圈運作：聆聽語音 → 將逐字稿傳送至模型（main session，`chat.send`） → 等待回應 → 透過 ElevenLabs 播放回應（串流播放）。
+
+## macOS 行為
+
+- 啟用時顯示常駐疊加層
+- 視覺階段指示器（Listening/Thinking/Speaking）
+- 在短暫停頓（靜音窗口）後自動傳送
+- 回應會出現在 WebChat 中
+- 預設的 interrupt-on-speech 會在使用者說話時中斷播放
+
+## 語音指令
+
+回應可以一行 JSON 開頭來控制語音設定。系統支援的 key 包括：
+
+- `voice` / `voice_id` / `voiceId`：語音 ID
+- `model` / `model_id` / `modelId`：模型 ID
+- `speed`：語速
+- `stability`：穩定度
+- `latency_tier`：延遲等級
+- `once: true`：僅對當前回應套用設定；否則設定會成為新的預設值
+
+未知的 key 會被忽略，JSON 行在播放前會被移除。
+
+## 設定
+
+設定位於 `~/.openclaw/openclaw.json`：
+
+```json5
+{
+  talk: {
+    voiceId: "<elevenlabs-voice-id>",       // 預設：環境變數或第一個可用的 ElevenLabs 語音
+    modelId: "eleven_v3",                    // 預設：eleven_v3
+    outputFormat: "pcm_22050",               // 因平台而異（大多數使用 PCM，MP3 為選用）
+    apiKey: "<elevenlabs-api-key>",
+    interruptOnSpeech: true,                 // 預設：true
+  },
+}
+```
+
+## macOS UI 元素
+
+- 選單列切換和 Config 分頁用於 Talk Mode
+- 疊加層含視覺狀態和互動控制（點擊可停止/退出）
+
+## 技術需求
+
+- 需要 Speech 和 Microphone 權限
+- 使用 ElevenLabs streaming API，透過增量播放降低延遲
+- 跨平台支援多種輸出格式（macOS、iOS、Android）

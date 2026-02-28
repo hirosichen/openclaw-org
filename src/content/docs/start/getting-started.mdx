@@ -1,0 +1,104 @@
+---
+title: "快速入門"
+description: "從零開始到首次對話的最簡設定指南"
+order: 2
+section: "start"
+officialDoc: "https://docs.openclaw.ai/start/getting-started"
+---
+
+目標：以最少的設定，從零到完成第一次對話。
+
+> **提示：** 最快的對話方式：開啟 Control UI（無需設定頻道）。執行 `openclaw dashboard` 後在瀏覽器中聊天，或在 Gateway 主機上開啟 `http://127.0.0.1:18789/`。文件：[Dashboard](/docs/web/dashboard) 與 [Control UI](/docs/web/control-ui)。
+
+## 先決條件
+
+- Node 22 或更新版本
+
+> **提示：** 如果不確定版本，請使用 `node --version` 檢查你的 Node 版本。
+
+## 快速設定（CLI）
+
+### 步驟 1：安裝 OpenClaw（建議方式）
+
+**macOS/Linux：**
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+**Windows (PowerShell)：**
+
+```powershell
+iwr -useb https://openclaw.ai/install.ps1 | iex
+```
+
+> **注意：** 其他安裝方式與需求請參閱：[Install](/docs/install/install)。
+
+### 步驟 2：執行引導精靈
+
+```bash
+openclaw onboard --install-daemon
+```
+
+精靈會設定認證、Gateway 設定以及選用的頻道。詳情請參閱 [Onboarding Wizard](/docs/start/wizard)。
+
+### 步驟 3：檢查 Gateway
+
+如果你已安裝服務，它應該已經在執行中：
+
+```bash
+openclaw gateway status
+```
+
+### 步驟 4：開啟 Control UI
+
+```bash
+openclaw dashboard
+```
+
+> **確認：** 如果 Control UI 成功載入，你的 Gateway 已準備就緒。
+
+## 選用的檢查與額外功能
+
+**在前景執行 Gateway**
+
+適用於快速測試或疑難排解。
+
+```bash
+openclaw gateway --port 18789
+```
+
+**傳送測試訊息**
+
+需要已設定的頻道。
+
+```bash
+openclaw message send --target +15555550123 --message "Hello from OpenClaw"
+```
+
+## 實用的環境變數
+
+如果你以服務帳號執行 OpenClaw，或需要自訂設定/狀態位置：
+
+- `OPENCLAW_HOME` — 設定用於內部路徑解析的主目錄。
+- `OPENCLAW_STATE_DIR` — 覆寫狀態目錄。
+- `OPENCLAW_CONFIG_PATH` — 覆寫設定檔路徑。
+
+完整環境變數參考：[Environment vars](/docs/help/environment)。
+
+## 深入探索
+
+- [Onboarding Wizard（詳細說明）](/docs/start/wizard)：完整的 CLI 精靈參考與進階選項。
+- [macOS app onboarding](/docs/start/onboarding)：macOS 應用程式的首次執行流程。
+
+## 完成後你將擁有
+
+- 一個執行中的 Gateway
+- 已設定的認證
+- Control UI 存取權限或已連線的頻道
+
+## 下一步
+
+- DM 安全性與核准：[Pairing](/docs/channels/pairing)
+- 連接更多頻道：[Channels](/docs/channels/channels)
+- 進階工作流程與從原始碼建置：[Setup](/docs/start/setup)

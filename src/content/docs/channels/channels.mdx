@@ -1,0 +1,31 @@
+---
+title: "聊天頻道"
+description: "OpenClaw 支援的聊天平台整合概覽，透過 Gateway 系統連接多種通訊服務。"
+order: 1
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels"
+---
+
+OpenClaw 透過其 Gateway 系統整合多種聊天平台。所有平台皆支援文字訊息，但媒體和表情回應的支援程度因頻道而異。
+
+## 支援的平台
+
+OpenClaw 支援超過 20 個以上的聊天頻道，包括主流服務如 [WhatsApp](/docs/channels/whatsapp)、[Telegram](/docs/channels/telegram)、[Discord](/docs/channels/discord) 和 [Slack](/docs/channels/slack)，以及專業平台如 [Signal](/docs/channels/signal)、[Matrix](/docs/channels/matrix) 和 Nostr。
+
+部分整合（包括 Feishu、[Mattermost](/docs/channels/mattermost)、Microsoft Teams、[Matrix](/docs/channels/matrix)、Nostr 和 [LINE](/docs/channels/line)）以獨立外掛方式發布，需要單獨安裝而非包含在核心套件中。
+
+## 推薦選項
+
+- 對於 iMessage 使用者，建議使用 BlueBubbles 作為首選方案，提供完整的功能支援（編輯、撤回、特效、表情回應、群組管理）。
+- [Telegram](/docs/channels/telegram) 通常是最快的設定選項，只需要簡單的 bot token 設定。
+- [WhatsApp](/docs/channels/whatsapp) 需要 QR 配對並維護較多的本地狀態。
+
+## 運作特性
+
+多個頻道可以同時運作，OpenClaw 會自動路由訊息。系統為了安全性強制執行私訊配對和允許清單機制。
+
+## 其他資源
+
+- [群組行為](/docs/channels/groups) — 跨頻道群組聊天行為說明
+- [配對機制](/docs/channels/pairing) — 配對與存取控制
+- [疑難排解](/docs/channels/troubleshooting) — 頻道相關問題排解

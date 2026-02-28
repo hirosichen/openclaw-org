@@ -1,65 +1,64 @@
 ---
-title: Signal 整合
-description: 設定 Signal 連接 OpenClaw（實驗性）
-order: 6
-section: channels
-officialDoc: https://github.com/nickthecook/openclaw
+title: "Signal"
+description: "透過 signal-cli 整合 OpenClaw 與 Signal 通訊，支援連結帳號和獨立機器人號碼。"
+order: 7
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/signal"
 ---
 
-## Signal 整合（實驗性）
+OpenClaw 透過 `signal-cli` 支援 Signal 通訊，這是一個外部 CLI 整合，透過 HTTP JSON-RPC + SSE 協定與 Gateway 通訊。
 
-Signal 以其強大的端對端加密聞名，OpenClaw 透過 Signal CLI 提供實驗性的整合支援。
+## 設定方式
 
-## 前置需求
+提供兩種設定路徑：
 
-- Signal 帳號（需要一個獨立的電話號碼）
-- [signal-cli](https://github.com/AsamK/signal-cli) 已安裝
+### 方式 A：QR 連結
 
-## 設定步驟
+使用 `signal-cli link -n "OpenClaw"` 連結現有的 Signal 帳號，並用 Signal 掃描 QR code。
 
-### 1. 安裝 signal-cli
+### 方式 B：SMS 註冊
+
+透過 SMS 驗證和在 signalcaptchas.org 完成驗證碼來註冊專用的機器人號碼。
+
+強烈建議使用獨立的 Signal 號碼作為機器人，以避免帳號衝突和工作階段干擾。
+
+## 系統需求
+
+- 安裝在 Linux 上的 OpenClaw（已在 Ubuntu 24 上測試）
+- Gateway 主機上可用的 `signal-cli`
+- SMS 註冊需要能接收驗證訊息的電話號碼
+- 註冊期間需要瀏覽器存取 Signal 的驗證碼服務
+
+## 關鍵設定欄位
+
+- `account` — 機器人電話號碼，E.164 格式
+- `cliPath` — `signal-cli` 可執行檔路徑
+- `dmPolicy` — 存取控制方式（建議使用 `pairing`）
+- `allowFrom` — 允許傳送訊息的電話號碼或 UUID 值
+
+## 存取控制
+
+### 私訊
+
+私訊預設使用配對系統，未知傳送者會收到有效期 1 小時的臨時代碼。使用以下指令核准：
 
 ```bash
-# macOS
-brew install signal-cli
-
-# Linux
-sudo apt install signal-cli
+openclaw pairing approve signal <CODE>
 ```
 
-### 2. 註冊號碼
+### 群組
 
-```bash
-signal-cli -u +886XXXXXXXXX register
-signal-cli -u +886XXXXXXXXX verify CODE
-```
+群組使用可設定的策略獨立運作：`open`、`allowlist` 或 `disabled`。
 
-### 3. 設定 OpenClaw
+## 主要功能
 
-```bash
-openclaw channel enable signal
-openclaw channel config signal --phone-number +886XXXXXXXXX
-```
+- 文字分段，可設定限制（預設 4,000 字元）
+- 可選的段落感知分割模式（`chunkMode="newline"`）
+- 打字指示器和已讀回執
+- 支援私訊和群組的表情回應
+- 媒體附件處理，大小上限預設 8 MB
+- 群組聊天歷史上下文預設限制為 50 則訊息
 
-### 4. 啟動
+## 重要注意事項
 
-```bash
-openclaw channel test signal
-```
-
-## 注意事項
-
-- Signal 整合目前為實驗性功能
-- 需要一個專用電話號碼
-- 不支援所有 Signal 功能（如視訊通話）
-- 群組支援有限
-
-## 設定範例
-
-```yaml
-channels:
-  signal:
-    enabled: true
-    phone_number: "+886XXXXXXXXX"
-    signal_cli_path: /usr/local/bin/signal-cli
-```
+在個人 Signal 帳號上執行機器人會觸發迴圈保護。建議在正式環境中使用專用的機器人號碼，以防止帳號和工作階段衝突。

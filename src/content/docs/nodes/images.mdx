@@ -1,0 +1,64 @@
+---
+title: "圖片與媒體支援"
+description: "WhatsApp Baileys Web 頻道的媒體處理說明文件，涵蓋傳送操作、Gateway 自動回覆和代理回應功能。"
+order: 4
+section: "nodes"
+officialDoc: "https://docs.openclaw.ai/nodes/images"
+---
+
+WhatsApp 頻道透過 **Baileys Web** 運作。本文件記錄目前傳送、gateway 和代理回覆的媒體處理規則。
+
+## 目標
+
+- 透過 `openclaw message send --media` 傳送帶有說明文字的媒體。
+- 允許來自 web 收件匣的自動回覆包含媒體與文字。
+- 保持各類型限制合理且可預測。
+
+## CLI 介面
+
+- `openclaw message send --media <path-or-url> [--message <caption>]`
+  - `--media` 為選用；說明文字可以為空以進行純媒體傳送。
+  - `--dry-run` 印出已解析的酬載；`--json` 輸出 `{ channel, to, messageId, mediaUrl, caption }`。
+
+## WhatsApp Web 頻道行為
+
+- 輸入：本機檔案路徑**或** HTTP(S) URL。
+- 流程：載入為 Buffer、偵測媒體類型，並建置正確的酬載：
+  - **圖片：** 調整大小並重新壓縮為 JPEG（最大邊 2048px），目標為 `agents.defaults.mediaMaxMb`（預設 5 MB），上限 6 MB。
+  - **音訊/語音/影片：** 直接傳遞，上限 16 MB；音訊作為語音訊息傳送（`ptt: true`）。
+  - **文件：** 其他所有類型，上限 100 MB，可用時保留檔名。
+- WhatsApp GIF 風格播放：傳送 MP4 並設定 `gifPlayback: true`（CLI：`--gif-playback`），使行動客戶端循環內嵌播放。
+- MIME 偵測優先順序為 magic bytes、然後 headers、然後副檔名。
+- 說明文字來自 `--message` 或 `reply.text`；允許空的說明文字。
+
+## 自動回覆管線
+
+- `getReplyFromConfig` 回傳 `{ text?, mediaUrl?, mediaUrls? }`。
+- 當媒體存在時，web sender 使用與 `openclaw message send` 相同的管線解析本機路徑或 URL。
+- 如提供多個媒體項目，會依序傳送。
+
+## 入站媒體至指令
+
+- 當入站 web 訊息包含媒體時，OpenClaw 下載至暫存檔並公開範本變數：
+  - `{{MediaUrl}}`：入站媒體的虛擬 URL。
+  - `{{MediaPath}}`：執行指令前寫入的本機暫存路徑。
+- 當啟用每 session 的 Docker 沙箱時，入站媒體會複製到沙箱工作空間，`MediaPath`/`MediaUrl` 會被重寫為相對路徑，如 `media/inbound/<filename>`。
+- 媒體理解（如透過 `tools.media.*` 或共用的 `tools.media.models` 設定）在範本化之前執行，可將 `[Image]`、`[Audio]` 和 `[Video]` 區塊插入 `Body`。
+  - 音訊設定 `{{Transcript}}` 並使用逐字稿進行指令解析，使斜線指令仍可運作。
+  - 影片和圖片描述會保留任何說明文字用於指令解析。
+- 預設僅處理第一個匹配的圖片/音訊/影片附件；設定 `tools.media.<cap>.attachments` 以處理多個附件。
+
+## 限制與錯誤
+
+**出站傳送上限（WhatsApp web send）**
+
+- 圖片：重新壓縮後約 6 MB 上限。
+- 音訊/語音/影片：16 MB 上限；文件：100 MB 上限。
+- 超大或無法讀取的媒體 → 日誌中顯示明確錯誤，回覆會被跳過。
+
+**媒體理解上限（轉錄/描述）**
+
+- 圖片預設：10 MB（`tools.media.image.maxBytes`）。
+- 音訊預設：20 MB（`tools.media.audio.maxBytes`）。
+- 影片預設：50 MB（`tools.media.video.maxBytes`）。
+- 超大媒體會跳過理解，但回覆仍以原始主體送出。

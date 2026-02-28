@@ -5,17 +5,17 @@ const steps = [
   {
     step: '1',
     title: '安裝 OpenClaw',
-    code: 'curl -fsSL https://get.openclaw.org | bash',
+    code: 'npm install openclaw@latest',
   },
   {
     step: '2',
-    title: '設定 AI 模型',
-    code: 'openclaw config set model openai:gpt-4',
+    title: '新手引導與安裝服務',
+    code: 'openclaw onboard --install-daemon',
   },
   {
     step: '3',
-    title: '啟動助理',
-    code: 'openclaw start',
+    title: '配對 WhatsApp 並啟動閘道器',
+    code: 'openclaw channels login\nopenclaw gateway --port 18789',
   },
 ];
 ---
@@ -26,7 +26,7 @@ const steps = [
   <div class="max-w-3xl mx-auto">
     <h2 class="text-3xl font-bold text-center text-text mb-3 animate-on-scroll">快速開始</h2>
     <p class="text-center text-subtext-0 mb-10 animate-on-scroll">
-      只需三個步驟，即可在你的電腦上啟動 AI 助理。
+      只需三個步驟，即可在你的電腦上啟動 AI 代理閘道器。
     </p>
 
     <div class="space-y-5 stagger-children">
@@ -44,7 +44,7 @@ const steps = [
     </div>
 
     <div class="text-center mt-10 animate-on-scroll">
-      <Button href="/docs/getting-started/installation" variant="primary" size="lg">
+      <Button href="/docs/install/install" variant="primary" size="lg">
         查看完整安裝指南 →
       </Button>
     </div>

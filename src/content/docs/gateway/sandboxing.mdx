@@ -1,0 +1,66 @@
+---
+title: "沙箱"
+description: "使用 Docker 容器隔離工具執行以降低風險暴露"
+order: 7
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/sandboxing"
+---
+
+## 概述
+
+OpenClaw 支援選用的 Docker 容器沙箱化，以隔離工具執行並降低風險暴露。Gateway 保留在主機上，而工具在啟用時於隔離容器中執行。
+
+## 沙箱化的關鍵元件
+
+- 工具執行操作（exec、read、write、edit、apply_patch、process）
+- 選用的沙箱化瀏覽器，使用 Chrome DevTools Protocol
+- 瀏覽器自動啟動設定和專用 Docker 網路
+- 使用短期 token 的密碼保護 noVNC 觀察者存取
+
+## 執行模式
+
+`sandbox.mode` 設定決定何時套用沙箱化：
+
+- **`off`**：完全停用
+- **`non-main`**：僅非 main 工作階段使用容器
+- **`all`**：每個工作階段都在沙箱中執行
+
+## 容器範圍選項
+
+`sandbox.scope` 控制容器分配策略：
+
+- **`session`**（預設）：每個工作階段一個獨立容器
+- **`agent`**：每個 agent 一個容器
+- **`shared`**：所有沙箱化工作階段共用一個容器
+
+## 工作空間存取控制
+
+`workspaceAccess` 參數管理沙箱可見性：
+
+- **`none`**（預設）：僅隔離的沙箱工作空間
+- **`ro`**：在 `/agent` 掛載唯讀的 agent 工作空間
+- **`rw`**：在 `/workspace` 掛載讀寫工作空間存取
+
+## 自訂掛載設定
+
+可使用 `docker.binds` 以 `host:container:mode` 格式掛載額外目錄。每個 agent 和全域的 binds 會合併而非覆蓋。
+
+## 安全考量
+
+- 敏感資料掛載應使用唯讀模式
+- 危險路徑（docker.sock、/etc、/proc、/sys、/dev）被封鎖
+- 預設封鎖加入主機命名空間
+- 主機網路已封鎖以符合安全規範
+- 容器預設無網路存取
+
+## 設定需求
+
+預設沙箱映像檔：`openclaw-sandbox:bookworm-slim`（透過 `scripts/sandbox-setup.sh` 建置）。
+
+- 預設不包含 Node.js
+- 瀏覽器沙箱映像檔需要另外的設定指令碼
+- 容器預設無網路存取
+
+## 工具策略整合
+
+沙箱規則與工具 allow/deny 策略並行運作 — 被拒絕的工具無論沙箱化狀態如何都會維持封鎖。

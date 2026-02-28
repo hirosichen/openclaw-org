@@ -1,0 +1,77 @@
+---
+title: "Mattermost"
+description: "透過 Mattermost 外掛整合 OpenClaw，支援 bot token 和 WebSocket 事件的頻道、群組和私訊通訊。"
+order: 13
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/mattermost"
+---
+
+OpenClaw 透過外掛架構支援 Mattermost 這個自託管團隊通訊平台。此整合透過 bot token 和 WebSocket 事件實現跨頻道、群組和私訊的機器人互動。
+
+## 安裝
+
+Mattermost 外掛需要單獨安裝。透過 npm 安裝：
+
+```bash
+openclaw plugins install @openclaw/mattermost
+```
+
+或從本地 git 倉庫安裝：
+
+```bash
+openclaw plugins install ./extensions/mattermost
+```
+
+## 設定
+
+最小設定需要三個元素：
+
+- **Bot token** — 從 Mattermost 管理介面取得
+- **Base URL** — 如 `https://chat.example.com`
+- **DM policy** — 存取控制方式
+
+也可以使用環境變數作為預設帳號的替代方案：`MATTERMOST_BOT_TOKEN` 和 `MATTERMOST_URL`。
+
+## 聊天行為模式
+
+平台提供三種回應模式：
+
+- `oncall`（預設）— 僅在被提及時回應
+- `onmessage` — 回應所有訊息
+- `onchar` — 前綴觸發回應（如 `>` 或 `!`），同時仍回應直接提及
+
+## 存取控制
+
+### 私訊
+
+預設使用配對代碼系統，未知使用者需要核准後才能通訊。
+
+### 頻道
+
+透過允許清單控制頻道存取，可透過設定旗標啟用可選的使用者名稱匹配。
+
+## 訊息互動
+
+### 外送傳遞
+
+目標格式包括：
+
+- `channel:<id>` — 傳送到頻道
+- `user:<id>` — 傳送私訊
+- `@username` — 使用者名稱解析
+
+### 表情回應
+
+訊息工具支援表情回應功能，語法如 `emoji=thumbsup`，包括透過 `remove=true` 移除回應。
+
+## 多帳號支援
+
+組織可以使用帳號結構中的獨立 bot token 和 base URL 同時設定多個 Mattermost 實例。
+
+## 疑難排解
+
+常見的設定問題通常源於：
+
+- 缺少頻道成員資格
+- 不正確的 bot token
+- 環境變數錯誤套用到非預設帳號

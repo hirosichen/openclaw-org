@@ -1,60 +1,63 @@
 ---
-title: WhatsApp 整合
-description: 設定 WhatsApp Business API 連接 OpenClaw
-order: 4
-section: channels
-officialDoc: https://github.com/nickthecook/openclaw
+title: "WhatsApp"
+description: "透過 WhatsApp Web (Baileys) 整合 OpenClaw 與 WhatsApp，支援私訊和群組聊天。"
+order: 2
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/whatsapp"
 ---
 
-## WhatsApp 整合
+OpenClaw 的 WhatsApp 整合透過 WhatsApp Web (Baileys) 運作，已達到正式環境就緒狀態。Gateway 管理連結工作階段和連線生命週期。
 
-透過 WhatsApp Business API 將 OpenClaw 連接到 WhatsApp。
+## 快速設定
 
-## 前置需求
+設定包含四個步驟：
 
-- Meta Business 帳號
-- WhatsApp Business API 存取權限
-- 已驗證的電話號碼
+1. 在 `openclaw.json` 中定義存取策略（私訊和群組策略搭配允許清單）
+2. 透過 QR code 連結 WhatsApp：`openclaw channels login --channel whatsapp`
+3. 啟動 Gateway：`openclaw gateway`
+4. 如有需要，核准配對請求
 
-## 設定步驟
+系統支援專用號碼和個人號碼兩種部署方式。建議使用專用的 WhatsApp 號碼以獲得更乾淨的操作體驗。
 
-### 1. 設定 Meta Business
+## 存取控制
 
-1. 前往 [Meta for Developers](https://developers.facebook.com/)
-2. 建立應用程式並啟用 WhatsApp 產品
-3. 取得 **Access Token** 和 **Phone Number ID**
+兩個主要的策略層級控制訊息接收：
 
-### 2. 設定 OpenClaw
+### 私訊策略
 
-```bash
-openclaw channel enable whatsapp
-openclaw channel config whatsapp \
-  --access-token YOUR_ACCESS_TOKEN \
-  --phone-number-id YOUR_PHONE_NUMBER_ID
-```
+`dmPolicy` 設定接受以下模式：
 
-### 3. 設定 Webhook
+- `pairing`（預設）— 需要核准新的傳送者
+- `allowlist` — 僅限預先核准的電話號碼
+- `open` — 允許任何傳送者
+- `disabled` — 封鎖所有私訊
 
-在 Meta Developer Console 設定 Webhook URL，指向：
+系統會將電話號碼正規化為 E.164 格式，並將配對結果持久化儲存。
 
-```
-https://your-domain.com/webhook/whatsapp
-```
+### 群組策略
 
-### 4. 驗證
+採用雙層控制：群組成員允許清單搭配傳送者策略。預設需要提及才會回應，除非另行設定。系統會檢查明確提及、正規表示式模式或回覆機器人的偵測。
 
-```bash
-openclaw channel test whatsapp
-```
+## 訊息處理
 
-## 設定範例
+接收的訊息會進行正規化處理。僅包含媒體的訊息會轉換為佔位符（如 `<media:image>`），引用回覆會附加帶有傳送者識別的上下文。對於群組，未處理的訊息可在機器人最終被觸發時作為上下文緩衝。
 
-```yaml
-channels:
-  whatsapp:
-    enabled: true
-    access_token: YOUR_TOKEN
-    phone_number_id: YOUR_PHONE_ID
-    webhook_path: /webhook/whatsapp
-    verify_token: YOUR_VERIFY_TOKEN
-```
+## 傳送功能
+
+- 文字分段預設為 4,000 字元，可設定模式偏好（`length` 或 `newline`）
+- 支援圖片、影片、音訊和文件等媒體類型
+- 自動最佳化過大的媒體，並在多媒體傳送中對第一個項目套用說明文字
+
+## 多帳號支援
+
+帳號憑證儲存在 `~/.openclaw/credentials/whatsapp/<accountId>/creds.json`。如果存在 `default` 帳號則使用該帳號，否則按字母順序使用第一個設定的帳號 ID。帳號層級的設定會覆寫頻道預設值。
+
+## 疑難排解
+
+常見問題包括：
+
+- **取消連結** — 使用 `openclaw channels login` 重新連結
+- **重新連線迴圈** — 使用 `openclaw doctor` 診斷
+- **群組訊息過濾** — 驗證 `groupPolicy` 和允許清單設定
+- **執行環境不相容** — 注意 Bun 和 Node 的差異警告
+- **外送訊息失敗** — 確保目標帳號有活動中的 WhatsApp 監聽器

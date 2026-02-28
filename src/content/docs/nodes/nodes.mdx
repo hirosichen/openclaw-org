@@ -1,0 +1,122 @@
+---
+title: "Nodes"
+description: "節點裝置（macOS/iOS/Android/headless）連接至 Gateway WebSocket，公開 canvas、camera 和系統操作等指令介面。"
+order: 1
+section: "nodes"
+officialDoc: "https://docs.openclaw.ai/nodes"
+---
+
+## 概覽
+
+節點是連接至 Gateway **WebSocket** 的配套裝置（macOS/iOS/Android/headless），具有特定角色指定。它們是外設，而非 gateway——不會執行自己的 gateway 服務。來自 Telegram 或 WhatsApp 的訊息會到達 gateway，而非節點。
+
+## 配對與狀態
+
+節點在連線時需要裝置配對。管理指令包括：
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+openclaw nodes status
+openclaw nodes describe --node <idOrNameOrIp>
+```
+
+## 遠端節點主機
+
+節點主機在遠端機器上執行 `system.run`/`system.which` 指令。設定需要：
+
+- **Gateway 主機**：接收訊息並路由工具呼叫
+- **節點主機**：在節點機器上執行指令
+- 核准透過 `~/.openclaw/exec-approvals.json` 強制執行
+
+前景啟動：
+
+```bash
+openclaw node run --host <gateway-host> --port 18789 --display-name "Build Node"
+```
+
+對於繫結至 loopback 的 gateway，使用 SSH 通道設定：
+
+```bash
+ssh -N -L 18790:127.0.0.1:18789 user@gateway-host
+export OPENCLAW_GATEWAY_TOKEN="<gateway-token>"
+openclaw node run --host 127.0.0.1 --port 18790 --display-name "Build Node"
+```
+
+## Canvas 操作
+
+螢幕擷取：
+
+```bash
+openclaw nodes canvas snapshot --node <idOrNameOrIp> --format png
+openclaw nodes canvas snapshot --node <idOrNameOrIp> --format jpg --max-width 1200 --quality 0.9
+```
+
+Canvas 控制包括呈現 URL/本機檔案、導覽、JavaScript 執行和 A2UI 酬載遞送。
+
+## Camera 與媒體
+
+拍照：
+
+```bash
+openclaw nodes camera snap --node <idOrNameOrIp>
+openclaw nodes camera snap --node <idOrNameOrIp> --facing front
+```
+
+錄影片段：
+
+```bash
+openclaw nodes camera clip --node <idOrNameOrIp> --duration 10s
+openclaw nodes camera clip --node <idOrNameOrIp> --duration 3000 --no-audio
+```
+
+節點必須在前景；Android 會提示權限請求。
+
+## 螢幕錄製
+
+```bash
+openclaw nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10
+openclaw nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10 --no-audio
+```
+
+持續時間上限為 60 秒。
+
+## 位置服務
+
+```bash
+openclaw nodes location get --node <idOrNameOrIp>
+openclaw nodes location get --node <idOrNameOrIp> --accuracy precise --max-age 15000 --location-timeout 10000
+```
+
+預設為停用；需要系統權限。
+
+## SMS（Android）
+
+```bash
+openclaw nodes invoke --node <idOrNameOrIp> --command sms.send --params '{"to":"+15555550123","message":"Hello from OpenClaw"}'
+```
+
+## 系統指令
+
+macOS 節點公開 `system.run`、`system.notify` 和 `system.execApprovals` 操作：
+
+```bash
+openclaw nodes run --node <idOrNameOrIp> -- echo "Hello from mac node"
+openclaw nodes notify --node <idOrNameOrIp> --title "Ping" --body "Gateway ready"
+```
+
+## Exec 節點繫結
+
+```bash
+openclaw config set tools.exec.node "node-id-or-name"
+openclaw config get agents.list
+openclaw config set agents.list[0].tools.exec.node "node-id-or-name"
+```
+
+## Headless 節點主機
+
+跨平台的 headless 選項，支援 Linux/Windows（無 UI），僅公開系統操作。
+
+## Mac 節點模式
+
+macOS 選單列應用程式透過 Gateway WebSocket 以節點身分連線，支援遠端 SSH 通道連線。

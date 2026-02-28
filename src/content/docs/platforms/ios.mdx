@@ -1,54 +1,105 @@
 ---
-title: iOS 平台指南
-description: 在 iOS 裝置上使用 OpenClaw 的指南
-order: 4
-section: platforms
-officialDoc: https://github.com/nickthecook/openclaw
+title: "iOS 應用程式（Node）"
+description: "OpenClaw iOS 應用程式的說明文件，作為節點連接至 Gateway，提供 Canvas、Camera、Location 及語音功能。"
+order: 5
+section: "platforms"
+officialDoc: "https://docs.openclaw.ai/platforms/ios"
 ---
 
-## iOS 上使用 OpenClaw
+可用性：內部預覽。iOS 應用程式尚未公開發行。
 
-OpenClaw 主要在你的電腦上運行，但你可以透過 iOS 裝置上的聊天 App 與它互動。
+## 功能介紹
 
-## 使用方式
+- 透過 WebSocket 連接至 Gateway（LAN 或 tailnet）。
+- 公開節點功能：Canvas、Screen snapshot、Camera capture、Location、Talk mode、Voice wake。
+- 接收 `node.invoke` 指令並回報節點狀態事件。
 
-### 透過聊天 App
+## 系統需求
 
-最簡單的方式是透過 iOS 上已安裝的聊天 App 與 OpenClaw 互動：
+- Gateway 在另一台裝置上執行（macOS、Linux 或 Windows via WSL2）。
+- 網路路徑：
+  - 同一 LAN，透過 Bonjour，**或**
+  - Tailnet，透過 unicast DNS-SD（範例網域：`openclaw.internal.`），**或**
+  - 手動輸入 host/port（備援方式）。
 
-1. **LINE** — 加入你的 OpenClaw Bot 好友
-2. **Telegram** — 搜尋你的 Bot 帳號
-3. **WhatsApp** — 加入 Bot 的電話號碼
+## 快速入門（配對 + 連線）
 
-### 透過 Web 介面
+1. 啟動 Gateway：
 
-用 Safari 或 Chrome 造訪 OpenClaw 的 Web 介面：
-
+```bash
+openclaw gateway --port 18789
 ```
-http://your-computer-ip:3000
+
+2. 在 iOS 應用程式中，開啟 Settings 並選擇已發現的 gateway（或啟用 Manual Host 並輸入 host/port）。
+
+3. 在 Gateway 主機上核准配對請求：
+
+```bash
+openclaw nodes pending
+openclaw nodes approve <requestId>
 ```
 
-建議將頁面加入主畫面以獲得類似 App 的體驗。
+4. 驗證連線：
 
-## 設定遠端存取
+```bash
+openclaw nodes status
+openclaw gateway call node.list --params "{}"
+```
 
-要從 iOS 裝置存取家中的 OpenClaw，你需要：
+## 探索路徑
 
-1. 設定[遠端存取](/docs/gateway/remote-access)
-2. 確保你的電腦在運行 OpenClaw 服務
-3. 連接到相同的網路或使用隧道
+### Bonjour（LAN）
 
-## 捷徑整合
+Gateway 在 `local.` 上公告 `_openclaw-gw._tcp`。iOS 應用程式會自動列出這些項目。
 
-你可以使用 iOS 捷徑（Shortcuts）來快速與 OpenClaw 互動：
+### Tailnet（跨網路）
 
-1. 打開「捷徑」App
-2. 建立新捷徑
-3. 新增「取得 URL 內容」動作
-4. 設定你的 OpenClaw API 端點
+如果 mDNS 被阻擋，請使用 unicast DNS-SD 區域（選擇一個網域；範例：`openclaw.internal.`）和 Tailscale split DNS。
+請參閱 [Bonjour](/docs/gateway/bonjour) 了解 CoreDNS 範例。
 
-## 注意事項
+### 手動 host/port
 
-- OpenClaw 本身不在 iOS 上運行
-- 需要你的電腦保持開機和運行 OpenClaw
-- 建議設定穩定的網路連線
+在 Settings 中啟用 **Manual Host**，輸入 gateway host + port（預設 `18789`）。
+
+## Canvas + A2UI
+
+iOS 節點會渲染 WKWebView canvas。使用 `node.invoke` 來驅動它：
+
+```bash
+openclaw nodes invoke --node "iOS Node" --command canvas.navigate --params '{"url":"http://<gateway-host>:18789/__openclaw__/canvas/"}'
+```
+
+注意事項：
+
+- Gateway canvas host 提供 `/__openclaw__/canvas/` 和 `/__openclaw__/a2ui/`。
+- 它由 Gateway HTTP 伺服器提供服務（與 `gateway.port` 相同的連接埠，預設 `18789`）。
+- iOS 節點在連線時，如果 canvas host URL 已公告，會自動導覽至 A2UI。
+- 使用 `canvas.navigate` 和 `{"url":""}` 可返回內建的 scaffold。
+
+### Canvas eval / snapshot
+
+```bash
+openclaw nodes invoke --node "iOS Node" --command canvas.eval --params '{"javaScript":"(() => { const {ctx} = window.__openclaw; ctx.clearRect(0,0,innerWidth,innerHeight); ctx.lineWidth=6; ctx.strokeStyle=\"#ff2d55\"; ctx.beginPath(); ctx.moveTo(40,40); ctx.lineTo(innerWidth-40, innerHeight-40); ctx.stroke(); return \"ok\"; })()"}'
+```
+
+```bash
+openclaw nodes invoke --node "iOS Node" --command canvas.snapshot --params '{"maxWidth":900,"format":"jpeg"}'
+```
+
+## Voice wake + Talk mode
+
+- Voice wake 和 Talk mode 可在 Settings 中使用。
+- iOS 可能會暫停背景音訊；當應用程式不在前景時，語音功能僅能盡力而為。
+
+## 常見錯誤
+
+- `NODE_BACKGROUND_UNAVAILABLE`：將 iOS 應用程式帶到前景（canvas/camera/screen 指令需要前景執行）。
+- `A2UI_HOST_NOT_CONFIGURED`：Gateway 未公告 canvas host URL；請檢查 [Gateway configuration](/docs/gateway/configuration) 中的 `canvasHost`。
+- 配對提示未出現：執行 `openclaw nodes pending` 並手動核准。
+- 重新安裝後無法重新連線：Keychain 配對 token 已清除；請重新配對節點。
+
+## 相關文件
+
+- [Pairing](/docs/gateway/pairing)
+- [Discovery](/docs/gateway/discovery)
+- [Bonjour](/docs/gateway/bonjour)

@@ -1,0 +1,55 @@
+---
+title: "Bun（實驗性）"
+description: "使用 Bun 執行環境搭配 OpenClaw 的實驗性支援說明，包含已知限制和注意事項。"
+order: 7
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/bun"
+---
+
+目標：使用 **Bun** 執行此儲存庫（選用，不建議用於 WhatsApp/Telegram），同時不偏離 pnpm 工作流程。
+
+**不建議用於 Gateway 執行環境**（WhatsApp/Telegram 相容性問題）。生產環境請使用 Node。
+
+## 目前狀態
+
+- Bun 是用於直接執行 TypeScript 的選用本地執行環境（`bun run ...`、`bun --watch ...`）。
+- `pnpm` 是建置的預設工具，仍然完整支援（且被部分文件工具使用）。
+- Bun 無法使用 `pnpm-lock.yaml`，會忽略它。
+
+## 安裝
+
+預設方式：
+
+```sh
+bun install
+```
+
+注意：`bun.lock`/`bun.lockb` 已列入 gitignore，因此不會造成儲存庫異動。若您不想寫入鎖定檔：
+
+```sh
+bun install --no-save
+```
+
+## 建置 / 測試（Bun）
+
+```sh
+bun run build
+bun run vitest run
+```
+
+## Bun 生命週期腳本（預設被封鎖）
+
+Bun 可能會封鎖相依套件的生命週期腳本，除非明確信任（`bun pm untrusted` / `bun pm trust`）。在此儲存庫中，常見被封鎖的腳本並非必要：
+
+- `@whiskeysockets/baileys` `preinstall`：檢查 Node 主版本 >= 20（我們使用 Node 22+）。
+- `protobufjs` `postinstall`：發出關於不相容版本方案的警告（無建置產出物）。
+
+若您遇到需要這些腳本的實際執行問題，請明確信任它們：
+
+```sh
+bun pm trust @whiskeysockets/baileys protobufjs
+```
+
+## 注意事項
+
+- 部分腳本仍硬編碼使用 pnpm（例如 `docs:build`、`ui:*`、`protocol:check`）。目前請透過 pnpm 執行這些腳本。

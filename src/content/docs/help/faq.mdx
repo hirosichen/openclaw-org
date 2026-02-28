@@ -1,67 +1,64 @@
 ---
-title: 常見問題
-description: OpenClaw 常見問題與解答
-order: 1
-section: help
-officialDoc: https://github.com/nickthecook/openclaw
+title: "常見問題"
+description: "關於 OpenClaw 安裝、設定、部署和操作的常見問題解答"
+order: 2
+section: "help"
+officialDoc: "https://docs.openclaw.ai/help/faq"
 ---
 
-## 一般問題
+## 安裝與執行環境
 
-### OpenClaw 是什麼？
+### 系統需求
 
-OpenClaw 是一個在你的電腦上運行的開源個人 AI 助理平台。它可以連接各種聊天 App（LINE、Telegram、WhatsApp 等），讓你透過熟悉的介面與 AI 互動。
+- 需要 Node.js >= 22；建議使用 pnpm
+- 可在 Raspberry Pi 上執行（個人使用最低 512MB-1GB RAM）
+- 可透過 npm 或 git-based hackable install 安裝
+- 入門設定通常需要 5-15 分鐘
 
-### OpenClaw 是免費的嗎？
+### 驗證
 
-OpenClaw 本身是免費開源軟體。但使用雲端 AI 模型（如 OpenAI、Anthropic）需要支付相應的 API 費用。你也可以選擇使用免費的本地模型。
+- Claude 訂閱可透過 setup-token（非 API key）運作
+- OpenAI Codex 支援 OAuth
+- 本機模型可作為 API key 的替代方案
 
-### 我的資料安全嗎？
+## 設定要點
 
-是的。OpenClaw 在你的本機運行，所有資料（對話記錄、記憶、設定）都儲存在你的裝置上，不會上傳到任何第三方伺服器。
+### 資料儲存
 
-### 支援哪些 AI 模型？
+- 狀態存放在 `~/.openclaw`（設定、憑證、工作階段）
+- Agent 工作空間可設定，預設為 `~/.openclaw/workspace`
+- 記憶持久化在 markdown 檔案中（MEMORY.md、每日筆記）
 
-OpenClaw 支援以下模型提供者：
+### Gateway 設定
 
-- OpenAI（GPT-4、GPT-3.5）
-- Anthropic（Claude）
-- Google（Gemini）
-- 本地模型（透過 Ollama、llama.cpp 等）
+- 預設連接埠：18789
+- 預設啟用 token 驗證（即使在 localhost 上）
+- 非 loopback 繫結需要設定驗證
+- 熱重載支援大多數設定變更
 
-## 安裝相關
+## 操作指南
 
-### 安裝失敗怎麼辦？
+### 模型選擇
 
-1. 確認系統需求符合
-2. 嘗試使用套件管理器安裝
-3. 查看[疑難排解指南](/docs/help/troubleshooting)
-4. 前往 GitHub Issues 搜尋類似問題
+對於高風險工作使用能負擔的最佳模型，日常聊天則使用較便宜的模型。
 
-### 可以在樹莓派上運行嗎？
+### 多 Agent 路由
 
-可以。OpenClaw 支援 ARM64 架構，可以在 Raspberry Pi 4 或更新版本上運行。建議搭配本地 AI 模型以獲得最佳效能。
+- 單一 Gateway 可託管多個 agent
+- 每個 agent 維護獨立的工作空間和工作階段歷史
+- 可實現每個 agent 的專業化工作流程
 
-## 使用相關
+### 工作階段管理
 
-### 如何更換 AI 模型？
+- 工作階段在可設定的閒置時間後過期（預設 60 分鐘）
+- `/new` 指令開始全新對話
+- Sub-agent 可用於平行任務執行
 
-```bash
-openclaw config set model anthropic:claude-3-opus
-```
+## 部署選項
 
-### 如何重置所有設定？
+- 筆電/桌機適合主動使用
+- VPS 適合全天候可靠性
+- Mac mini 作為常駐主機，搭配 node 周邊裝置
+- Windows 使用者建議使用 WSL2
 
-```bash
-openclaw config reset
-```
-
-### 可以同時使用多個聊天頻道嗎？
-
-可以。OpenClaw 支援同時啟用多個頻道，所有頻道共享相同的代理和記憶系統。
-
-## 關於本網站
-
-### 這個網站和 OpenClaw 官方有關係嗎？
-
-**沒有**。本網站是獨立社群專案，與 OpenClaw 官方無任何關聯。內容僅供參考，可能與官方最新版本有出入。詳見[完整免責聲明](/about)。
+OpenClaw 不只是一個 Claude 包裝器，而是一個本機優先的控制平面，支援多個訊息平台、有狀態工作階段和工具整合。

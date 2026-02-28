@@ -1,0 +1,62 @@
+---
+title: "Agent 迴圈"
+description: "OpenClaw Agent 迴圈的完整執行路徑，從訊息接收到最終回覆持久化的全流程說明。"
+order: 4
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/agent-loop"
+---
+
+## 概覽
+
+Agent 迴圈代表 Agent 的完整執行路徑，涵蓋從訊息接收到最終回覆持久化的全部流程。
+
+## 核心流程
+
+Agent 迴圈遵循以下序列：驗證 → 工作階段解析 → 上下文組裝 → 模型推理 → 工具執行 → 串流回覆 → 狀態持久化。
+
+進入點包括 Gateway RPC（`agent` 和 `agent.wait`）以及 CLI 命令。
+
+- `agent` RPC 驗證參數、解析工作階段，並立即回傳 `runId`。
+- 實際的 Agent 執行接著進行模型解析、技能載入，以及嵌入式 Pi-Agent 執行環境的調用。
+
+## 事件串流
+
+系統發出三個主要的事件串流，實現 Agent 執行階段的即時監控：
+
+- **`lifecycle`**：階段標記
+- **`assistant`**：模型輸出差異（delta）
+- **`tool`**：工具執行事件
+
+## 並行控制
+
+執行在每個工作階段的佇列中序列化，並可選擇性地使用全域佇列，防止競爭條件並維護一致的工作階段歷史。
+
+## 擴充點
+
+OpenClaw 提供兩個 Hook 系統供開發者攔截和修改 Agent 行為：
+
+### Gateway Hook
+
+- `agent:bootstrap`
+- 命令相關 Hook
+
+### 外掛 Hook
+
+涵蓋完整生命週期，包括：
+
+- `before_model_resolve`
+- `before_prompt_build`
+- `before_tool_call`
+- `after_tool_call`
+- `agent_end`
+- 訊息處理階段
+
+## 逾時行為
+
+- `agent.wait` 方法預設為 30 秒逾時。
+- Agent 執行環境預設強制 600 秒的執行限制。
+- 兩者均可透過參數設定。
+
+## 壓縮與重試
+
+壓縮機制管理 Token 使用量，並可在清理緩衝區後觸發重試，以防止重複輸出。

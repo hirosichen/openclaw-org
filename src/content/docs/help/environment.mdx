@@ -1,0 +1,113 @@
+---
+title: "環境變數"
+description: "OpenClaw 環境變數的優先順序、設定方式與路徑相關變數"
+order: 5
+section: "help"
+officialDoc: "https://docs.openclaw.ai/help/environment"
+---
+
+## 概述
+
+OpenClaw 從多個來源提取環境變數，規則為：**永不覆蓋現有值**。
+
+## 優先順序（由高至低）
+
+1. **程序環境**（Gateway 程序來自父 shell/daemon）
+2. **當前工作目錄中的 `.env`**（dotenv 預設；不覆蓋）
+3. **全域 `.env`**，位於 `~/.openclaw/.env`（不覆蓋）
+4. **設定 `env` 區塊**，位於 `~/.openclaw/openclaw.json`（缺少時套用）
+5. **選用的登入 shell 匯入**（透過 `env.shellEnv.enabled` 或 `OPENCLAW_LOAD_SHELL_ENV=1` 啟用）
+
+若設定檔不存在，則跳過步驟 4；若已啟用，shell 匯入仍會運作。
+
+## 設定 env 區塊
+
+兩種等效的不覆蓋方法：
+
+```json5
+{
+  env: {
+    OPENROUTER_API_KEY: "sk-or-...",
+    vars: {
+      GROQ_API_KEY: "gsk-...",
+    },
+  },
+}
+```
+
+## Shell 環境匯入
+
+`env.shellEnv` 執行您的登入 shell，僅匯入**缺少的**預期鍵：
+
+```json5
+{
+  env: {
+    shellEnv: {
+      enabled: true,
+      timeoutMs: 15000,
+    },
+  },
+}
+```
+
+環境變數等效：
+
+- `OPENCLAW_LOAD_SHELL_ENV=1`
+- `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000`
+
+## 設定中的環境變數替換
+
+在設定字串值中使用 `${VAR_NAME}` 語法參考環境變數：
+
+```json5
+{
+  models: {
+    providers: {
+      "vercel-gateway": {
+        apiKey: "${VERCEL_GATEWAY_API_KEY}",
+      },
+    },
+  },
+}
+```
+
+## Secret refs 與 `${ENV}` 字串
+
+OpenClaw 支援兩種模式：
+
+- `${VAR}` 設定值中的字串替換
+- SecretRef 物件（`{ source: "env", provider: "default", id: "VAR" }`）
+
+兩者都在啟動時從程序環境解析。
+
+## 路徑相關環境變數
+
+| 變數 | 用途 |
+|------|------|
+| `OPENCLAW_HOME` | 覆蓋所有內部路徑解析使用的家目錄（`~/.openclaw/`、agent 目錄、工作階段、憑證）。在以專用服務使用者執行 OpenClaw 時很有用。 |
+| `OPENCLAW_STATE_DIR` | 覆蓋狀態目錄（預設 `~/.openclaw`）。 |
+| `OPENCLAW_CONFIG_PATH` | 覆蓋設定檔路徑（預設 `~/.openclaw/openclaw.json`）。 |
+
+## 日誌記錄
+
+| 變數 | 用途 |
+|------|------|
+| `OPENCLAW_LOG_LEVEL` | 覆蓋檔案和主控台的日誌等級（例如 `debug`、`trace`）。優先於設定中的 `logging.level` 和 `logging.consoleLevel`。無效值會被忽略並顯示警告。 |
+
+### OPENCLAW_HOME
+
+設定後，`OPENCLAW_HOME` 取代系統家目錄（`$HOME` / `os.homedir()`）用於所有內部路徑解析。這可為無頭服務帳號實現完整的檔案系統隔離。
+
+**優先順序：** `OPENCLAW_HOME` > `$HOME` > `USERPROFILE` > `os.homedir()`
+
+**範例**（macOS LaunchDaemon）：
+
+```xml
+<key>EnvironmentVariables</key>
+<dict>
+  <key>OPENCLAW_HOME</key>
+  <string>/Users/kira</string>
+</dict>
+```
+
+`OPENCLAW_HOME` 可設為波浪號路徑（例如 `~/svc`），使用前會以 `$HOME` 展開。

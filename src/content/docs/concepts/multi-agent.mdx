@@ -1,68 +1,77 @@
 ---
-title: 多代理協作
-description: 了解如何使用多個代理協同工作
-order: 4
-section: concepts
-officialDoc: https://github.com/nickthecook/openclaw
+title: "多 Agent 路由"
+description: "OpenClaw 多 Agent 路由機制，在單一 Gateway 中運行多個隔離 Agent，包括設定流程、路由架構與安全功能。"
+order: 7
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/multi-agent"
 ---
 
-## 多代理系統
+## 概覽
 
-OpenClaw 支援多個代理之間的協作，讓不同專長的代理共同完成複雜任務。
+OpenClaw 支援在單一 Gateway 實例中運行多個隔離的 Agent。每個 Agent 獨立運作，擁有自己的工作區、驗證機制和工作階段儲存，而多個頻道帳號則能將訊息路由到不同的 Agent。
 
-## 協作模式
+## 核心概念
 
-### 委派模式
+### 什麼定義了一個 Agent
 
-主代理將子任務委派給專門的代理：
+一個 Agent 由三個部分組成：
 
-```yaml
-# ~/.openclaw/agents/manager.yaml
-name: 專案經理
-delegates:
-  - coder    # 程式開發
-  - writer   # 文件撰寫
-  - analyst  # 資料分析
-```
+- 包含設定檔的**工作區**（AGENTS.md、SOUL.md、USER.md）
+- 專用的**狀態目錄**（`agentDir`），用於驗證和模型登錄
+- **工作階段儲存**，用於聊天歷史
 
-### 管線模式
+### 憑證隔離
 
-代理依序處理，前一個代理的輸出作為下一個的輸入：
+驗證設定檔為每個 Agent 獨立。每個 Agent 從自己的 `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` 讀取，不應共享相同的 `agentDir` 以防止碰撞。
 
-```yaml
-pipeline:
-  - agent: researcher   # 資料收集
-  - agent: analyst      # 分析
-  - agent: writer       # 報告撰寫
-```
+## 設定流程
 
-### 討論模式
+快速入門包含四個步驟：
 
-多個代理參與討論，從不同角度分析問題：
+1. 使用 CLI 精靈為每個 Agent 建立隔離的工作區
+2. 建立頻道帳號（Discord Bot、Telegram Bot、WhatsApp 號碼）
+3. 在設定檔中設定 Agent、帳號和綁定
+4. 重新啟動並使用診斷命令驗證路由
 
-```yaml
-discussion:
-  agents:
-    - optimist
-    - critic
-    - moderator
-  rounds: 3
-```
+## 路由架構
 
-## 設定多代理
+綁定使用確定性匹配規則決定訊息流向。系統依以下優先順序評估匹配：
 
-```bash
-# 啟動多代理模式
-openclaw chat --multi-agent manager
+1. **Peer**（特定的 DM/群組 ID）— 最高優先
+2. **Parent peer** 繼承路由
+3. **Discord 角色 + Guild** 組合
+4. **Guild ID**
+5. **Team ID**
+6. **Account ID**
+7. **頻道層級** 後備
+8. **預設 Agent**
 
-# 監控代理活動
-openclaw agent monitor
-```
+若同一層級中有多個綁定匹配，設定順序中的第一個獲勝。若一個綁定設定了多個匹配欄位（例如 peer + guildId），所有指定的欄位都必須匹配（AND 語義）。
 
-## 使用場景
+## 頻道特定範例
 
-| 場景 | 代理組合 | 模式 |
-|------|----------|------|
-| 程式碼審查 | coder + reviewer | 委派 |
-| 研究報告 | researcher + writer | 管線 |
-| 決策分析 | optimist + critic | 討論 |
+### Discord
+
+每個 Bot 接收一個唯一的 `accountId`，對應到單一 Agent。Token 儲存在 `channels.discord.accounts.<id>.token`。
+
+### Telegram
+
+Bot Token 位於 `channels.telegram.accounts.<id>.botToken`，透過 BotFather 為每個 Agent 建立獨立的 Bot。
+
+### WhatsApp
+
+多個電話號碼對應到不同的 `accountId` 值，使一台伺服器能夠託管多個帳號而不會混淆工作階段。
+
+## 進階功能
+
+### 每個 Agent 的沙箱
+
+自 v2026.1.6 起，Agent 可擁有個別的沙箱模式和工具限制。設定允許在 Agent 層級指定允許/拒絕的工具以及可選的 Docker 設定命令。
+
+### 家庭 Agent 範例
+
+專用的家庭 Agent 可綁定到特定的 WhatsApp 群組，搭配提及閘控和受限的工具存取，展示安全隔離的可能性。
+
+## 多頻道範例
+
+可透過頻道分割 Agent 職責 — 例如將 WhatsApp 對話路由到較快的 Sonnet 模型，而將 Telegram 互動導向 Claude Opus 以進行更深入的分析。

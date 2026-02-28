@@ -1,0 +1,300 @@
+---
+title: "工作階段管理"
+description: "OpenClaw 的工作階段管理系統，包括 DM 範圍、安全 DM 模式、維護策略、生命週期管理及傳送策略。"
+order: 6
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/sessions"
+---
+
+## 概覽
+
+OpenClaw 將**每個 Agent 的一個直接聊天工作階段**視為主要工作階段。直接聊天合併為 `agent:<agentId>:<mainKey>`（預設 `main`），而群組/頻道聊天擁有各自的金鑰。`session.mainKey` 會被遵循。
+
+使用 `session.dmScope` 控制**直接訊息**的分組方式：
+
+- `main`（預設）：所有 DM 共享主要工作階段以保持連續性。
+- `per-peer`：依發送者 ID 跨頻道隔離。
+- `per-channel-peer`：依頻道 + 發送者隔離（建議用於多使用者收件匣）。
+- `per-account-channel-peer`：依帳號 + 頻道 + 發送者隔離（建議用於多帳號收件匣）。
+
+使用 `session.identityLinks` 將帶有供應商前綴的對等 ID 對應到規範身份，以便同一人在使用 `per-peer`、`per-channel-peer` 或 `per-account-channel-peer` 時跨頻道共享 DM 工作階段。
+
+## 安全 DM 模式（建議用於多使用者設定）
+
+> **安全警告：** 如果你的 Agent 可以接收**多人**的 DM，強烈建議啟用安全 DM 模式。
+
+**預設設定下的問題範例：**
+
+- Alice 傳送關於私人主題的訊息給你的 Agent（例如：醫療預約）
+- Bob 傳送訊息詢問「我們之前在聊什麼？」
+- 因為兩個 DM 共享同一工作階段，模型可能會使用 Alice 的先前上下文來回答 Bob
+
+**修復方式：** 設定 `dmScope` 來隔離每個使用者的工作階段：
+
+```json5
+// ~/.openclaw/openclaw.json
+{
+  session: {
+    // 安全 DM 模式：依頻道 + 發送者隔離 DM 上下文。
+    dmScope: "per-channel-peer",
+  },
+}
+```
+
+**何時應啟用此功能：**
+
+- 你有多個發送者的配對批准
+- 你使用了包含多個條目的 DM 允許清單
+- 你設定了 `dmPolicy: "open"`
+- 多個電話號碼或帳號可以傳訊給你的 Agent
+
+注意事項：
+
+- 預設為 `dmScope: "main"` 以保持連續性（所有 DM 共享主要工作階段）。這適合單一使用者設定。
+- 本地 CLI 入門引導在未設定時預設寫入 `session.dmScope: "per-channel-peer"`（已有的明確值會被保留）。
+- 對於同一頻道上的多帳號收件匣，建議使用 `per-account-channel-peer`。
+- 如果同一人透過多個頻道聯繫你，使用 `session.identityLinks` 將其 DM 工作階段合併為一個規範身份。
+- 你可以使用 `openclaw security audit` 驗證你的 DM 設定（請參閱 [安全性](/docs/cli/security)）。
+
+## Gateway 是唯一的真實來源
+
+所有工作階段狀態由 Gateway（「主」OpenClaw）擁有。UI 客戶端必須向 Gateway 查詢工作階段清單和 Token 計數，而非讀取本地檔案。
+
+- 在**遠端模式**下，你所關心的工作階段儲存位於遠端 Gateway 主機上，而非你的 Mac。
+- UI 中顯示的 Token 計數來自 Gateway 的儲存欄位（`inputTokens`、`outputTokens`、`totalTokens`、`contextTokens`）。客戶端不會解析 JSONL 逐字稿來「修正」總計。
+
+## 狀態儲存位置
+
+- 在 **Gateway 主機**上：
+  - 儲存檔案：`~/.openclaw/agents/<agentId>/sessions/sessions.json`（每個 Agent）。
+- 逐字稿：`~/.openclaw/agents/<agentId>/sessions/<SessionId>.jsonl`（Telegram 主題工作階段使用 `.../<SessionId>-topic-<threadId>.jsonl`）。
+- 儲存為 `sessionKey -> { sessionId, updatedAt, ... }` 的對應。刪除條目是安全的；它們會在需要時重新建立。
+- 群組條目可包含 `displayName`、`channel`、`subject`、`room` 和 `space` 以在 UI 中標記工作階段。
+- 工作階段條目包含 `origin` 元資料（標籤 + 路由提示），以便 UI 解釋工作階段的來源。
+- OpenClaw **不會**讀取舊版 Pi/Tau 工作階段資料夾。
+
+## 維護
+
+OpenClaw 對工作階段儲存執行維護，以限制 `sessions.json` 和逐字稿檔案的增長。
+
+### 預設值
+
+- `session.maintenance.mode`：`warn`
+- `session.maintenance.pruneAfter`：`30d`
+- `session.maintenance.maxEntries`：`500`
+- `session.maintenance.rotateBytes`：`10mb`
+- `session.maintenance.resetArchiveRetention`：預設為 `pruneAfter`（`30d`）
+- `session.maintenance.maxDiskBytes`：未設定（停用）
+- `session.maintenance.highWaterBytes`：啟用預算時預設為 `maxDiskBytes` 的 `80%`
+
+### 運作方式
+
+維護在工作階段儲存寫入時執行，你也可以使用 `openclaw sessions cleanup` 手動觸發。
+
+- `mode: "warn"`：報告哪些內容會被清除，但不修改條目/逐字稿。
+- `mode: "enforce"`：依此順序執行清理：
+  1. 修剪超過 `pruneAfter` 的過期條目
+  2. 將條目數量限制在 `maxEntries`（最舊的優先）
+  3. 封存已移除且不再被參照的條目的逐字稿檔案
+  4. 依保留策略清除舊的 `*.deleted.<timestamp>` 和 `*.reset.<timestamp>` 封存
+  5. 當 `sessions.json` 超過 `rotateBytes` 時輪替
+  6. 若設定了 `maxDiskBytes`，則向 `highWaterBytes` 強制執行磁碟預算（最舊的檔案優先，然後是最舊的工作階段）
+
+### 大型儲存的效能注意事項
+
+大型工作階段儲存在高流量設定中很常見。維護工作屬於寫入路徑，因此非常大的儲存可能會增加寫入延遲。
+
+最增加成本的因素：
+
+- 非常高的 `session.maintenance.maxEntries` 值
+- 長時間的 `pruneAfter` 視窗使過期條目持續存在
+- `~/.openclaw/agents/<agentId>/sessions/` 中有大量逐字稿/封存檔案
+- 啟用磁碟預算（`maxDiskBytes`）但未設定合理的修剪/上限
+
+建議做法：
+
+- 在生產環境中使用 `mode: "enforce"`，以便增長自動受限
+- 同時設定時間和數量限制（`pruneAfter` + `maxEntries`），而非僅設其一
+- 在大型部署中設定 `maxDiskBytes` + `highWaterBytes` 作為硬性上限
+- 保持 `highWaterBytes` 明顯低於 `maxDiskBytes`（預設為 80%）
+- 在設定變更後執行 `openclaw sessions cleanup --dry-run --json` 以驗證預期影響
+- 對於頻繁活躍的工作階段，在手動清理時傳遞 `--active-key`
+
+### 自訂範例
+
+使用保守的強制策略：
+
+```json5
+{
+  session: {
+    maintenance: {
+      mode: "enforce",
+      pruneAfter: "45d",
+      maxEntries: 800,
+      rotateBytes: "20mb",
+      resetArchiveRetention: "14d",
+    },
+  },
+}
+```
+
+為工作階段目錄啟用硬碟預算：
+
+```json5
+{
+  session: {
+    maintenance: {
+      mode: "enforce",
+      maxDiskBytes: "1gb",
+      highWaterBytes: "800mb",
+    },
+  },
+}
+```
+
+針對大型安裝調校（範例）：
+
+```json5
+{
+  session: {
+    maintenance: {
+      mode: "enforce",
+      pruneAfter: "14d",
+      maxEntries: 2000,
+      rotateBytes: "25mb",
+      maxDiskBytes: "2gb",
+      highWaterBytes: "1.6gb",
+    },
+  },
+}
+```
+
+從 CLI 預覽或強制執行維護：
+
+```bash
+openclaw sessions cleanup --dry-run
+openclaw sessions cleanup --enforce
+```
+
+## 工作階段修剪
+
+OpenClaw 在 LLM 呼叫前，預設會從記憶體中的上下文修剪**舊的工具結果**。這**不會**改寫 JSONL 歷史記錄。詳情請參閱 [工作階段修剪](/docs/concepts/session-pruning)。
+
+## 壓縮前記憶刷新
+
+當工作階段接近自動壓縮時，OpenClaw 可以執行一次**靜默記憶刷新**回合，提醒模型將持久筆記寫入磁碟。這僅在工作區可寫時執行。詳情請參閱 [記憶](/docs/concepts/memory) 和 [壓縮](/docs/concepts/compaction)。
+
+## 傳輸對應至工作階段金鑰
+
+- 直接聊天遵循 `session.dmScope`（預設 `main`）。
+  - `main`：`agent:<agentId>:<mainKey>`（跨裝置/頻道的連續性）。
+    - 多個電話號碼和頻道可以對應到同一個 Agent 主要金鑰；它們作為傳輸通道進入一個對話。
+  - `per-peer`：`agent:<agentId>:dm:<peerId>`。
+  - `per-channel-peer`：`agent:<agentId>:<channel>:dm:<peerId>`。
+  - `per-account-channel-peer`：`agent:<agentId>:<channel>:<accountId>:dm:<peerId>`（accountId 預設為 `default`）。
+  - 若 `session.identityLinks` 匹配帶有供應商前綴的對等 ID（例如 `telegram:123`），規範金鑰會取代 `<peerId>`，使同一人跨頻道共享工作階段。
+- 群組聊天隔離狀態：`agent:<agentId>:<channel>:group:<id>`（房間/頻道使用 `agent:<agentId>:<channel>:channel:<id>`）。
+  - Telegram 論壇主題在群組 ID 後附加 `:topic:<threadId>` 以進行隔離。
+  - 舊版 `group:<id>` 金鑰仍可識別以供遷移使用。
+- 入站上下文可能仍使用 `group:<id>`；頻道從 `Provider` 推斷並正規化為規範的 `agent:<agentId>:<channel>:group:<id>` 格式。
+- 其他來源：
+  - 排程任務：`cron:<job.id>`
+  - Webhook：`hook:<uuid>`（除非由 Hook 明確設定）
+  - Node 執行：`node-<nodeId>`
+
+## 生命週期
+
+- 重設策略：工作階段在過期前持續重用，過期在下一則入站訊息時評估。
+- 每日重設：預設為 **Gateway 主機本地時間凌晨 4:00**。當工作階段的最後更新早於最近的每日重設時間時，即為過期。
+- 閒置重設（可選）：`idleMinutes` 新增滑動閒置視窗。當同時設定每日和閒置重設時，**最先過期的**會強制建立新工作階段。
+- 舊版僅閒置模式：若你設定了 `session.idleMinutes` 但沒有任何 `session.reset`/`resetByType` 設定，OpenClaw 會維持僅閒置模式以保持向後相容。
+- 按類型覆寫（可選）：`resetByType` 讓你覆寫 `direct`、`group` 和 `thread` 工作階段的策略（thread = Slack/Discord 討論串、Telegram 主題、連接器提供的 Matrix 討論串）。
+- 按頻道覆寫（可選）：`resetByChannel` 覆寫特定頻道的重設策略（適用於該頻道的所有工作階段類型，優先於 `reset`/`resetByType`）。
+- 重設觸發器：精確的 `/new` 或 `/reset`（加上 `resetTriggers` 中的任何額外觸發器）會啟動新的工作階段 ID 並將訊息的其餘部分傳遞。`/new <model>` 接受模型別名、`provider/model` 或供應商名稱（模糊匹配）以設定新工作階段的模型。若單獨傳送 `/new` 或 `/reset`，OpenClaw 會執行一個簡短的「問候」回合以確認重設。
+- 手動重設：從儲存中刪除特定金鑰或移除 JSONL 逐字稿；下一則訊息會重新建立它們。
+- 隔離的排程任務每次執行時總是產生新的 `sessionId`（不重用閒置工作階段）。
+
+## 傳送策略（可選）
+
+在不列出個別 ID 的情況下，阻止特定工作階段類型的訊息送達。
+
+```json5
+{
+  session: {
+    sendPolicy: {
+      rules: [
+        { action: "deny", match: { channel: "discord", chatType: "group" } },
+        { action: "deny", match: { keyPrefix: "cron:" } },
+        // 匹配原始工作階段金鑰（包含 `agent:<id>:` 前綴）。
+        { action: "deny", match: { rawKeyPrefix: "agent:main:discord:" } },
+      ],
+      default: "allow",
+    },
+  },
+}
+```
+
+執行時覆寫（僅擁有者）：
+
+- `/send on` → 允許此工作階段
+- `/send off` → 拒絕此工作階段
+- `/send inherit` → 清除覆寫並使用設定規則
+
+請以獨立訊息傳送以便正確註冊。
+
+## 設定（可選的重新命名範例）
+
+```json5
+// ~/.openclaw/openclaw.json
+{
+  session: {
+    scope: "per-sender",
+    dmScope: "main",
+    identityLinks: {
+      alice: ["telegram:123456789", "discord:987654321012345678"],
+    },
+    reset: {
+      mode: "daily",
+      atHour: 4,
+      idleMinutes: 120,
+    },
+    resetByType: {
+      thread: { mode: "daily", atHour: 4 },
+      direct: { mode: "idle", idleMinutes: 240 },
+      group: { mode: "idle", idleMinutes: 120 },
+    },
+    resetByChannel: {
+      discord: { mode: "idle", idleMinutes: 10080 },
+    },
+    resetTriggers: ["/new", "/reset"],
+    store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+    mainKey: "main",
+  },
+}
+```
+
+## 檢視
+
+- `openclaw status` — 顯示儲存路徑和最近的工作階段。
+- `openclaw sessions --json` — 傾印每個條目（使用 `--active <minutes>` 過濾）。
+- `openclaw gateway call sessions.list --params '{}'` — 從執行中的 Gateway 取得工作階段（使用 `--url`/`--token` 存取遠端 Gateway）。
+- 在聊天中傳送 `/status` 作為獨立訊息，查看 Agent 是否可達、工作階段上下文的使用量、目前的 thinking/verbose 開關，以及 WhatsApp Web 憑證的最後重新整理時間。
+- 傳送 `/context list` 或 `/context detail` 查看系統提示中的內容和注入的工作區檔案（以及最大的上下文貢獻者）。
+- 傳送 `/stop`（或獨立的中止片語如 `stop`、`stop action`、`stop run`、`stop openclaw`）以中止目前的執行、清除該工作階段的排隊後續訊息，並停止從中產生的任何子 Agent 執行（回覆中包含已停止的計數）。
+- 傳送 `/compact`（可選指令）作為獨立訊息以摘要較舊的上下文並釋放視窗空間。詳情請參閱 [壓縮](/docs/concepts/compaction)。
+- JSONL 逐字稿可直接開啟以檢視完整回合。
+
+## 提示
+
+- 將主要金鑰專用於 1:1 流量；讓群組保留各自的金鑰。
+- 自動化清理時，刪除個別金鑰而非整個儲存，以保留其他地方的上下文。
+
+## 工作階段來源元資料
+
+每個工作階段條目記錄其來源（盡力而為）在 `origin` 中：
+
+- `label`：人類可讀標籤（從對話標籤 + 群組主題/頻道解析）
+- `provider`：正規化的頻道 ID（包含擴充功能）
+- `from`/`to`：來自入站信封的原始路由 ID
+- `accountId`：供應商帳號 ID（多帳號時）
+- `threadId`：頻道支援時的討論串/主題 ID

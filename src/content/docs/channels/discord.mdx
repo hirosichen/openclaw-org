@@ -1,57 +1,51 @@
 ---
-title: Discord 整合
-description: 設定 Discord Bot 連接 OpenClaw
-order: 5
-section: channels
-officialDoc: https://github.com/nickthecook/openclaw
+title: "Discord"
+description: "透過 Discord Bot API 整合 OpenClaw，支援私訊和伺服器頻道通訊。"
+order: 4
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/discord"
 ---
 
-## Discord Bot 整合
-
-將 OpenClaw 連接到 Discord，在伺服器或私訊中使用 AI 助理。
+OpenClaw 的 Discord 整合透過 Discord 官方 Gateway 實現代理通訊，支援私訊和伺服器（Guild）頻道，可完整自訂權限和行為。
 
 ## 設定步驟
 
-### 1. 建立 Discord Application
+1. **建立應用程式和機器人** — 在 Discord Developer Portal 中建立新應用程式並新增機器人使用者
+2. **啟用必要的 Intents** — 包括 Message Content Intent（必要）和 Server Members Intent（建議用於使用者解析）
+3. **取得 bot token** — 在 Bot 設定中重設/產生憑證
+4. **設定 OAuth2 範圍** — `bot` 和 `applications.commands`，搭配檢視頻道、傳送訊息、讀取歷史記錄、嵌入連結和附加檔案的基本權限
+5. **收集必要的 ID** — 在 Discord 中啟用開發者模式後，取得伺服器 ID 和使用者 ID
+6. **設定環境變數** — 在啟動 Gateway 前設定 `DISCORD_BOT_TOKEN` 或使用設定檔中的 token
 
-1. 前往 [Discord Developer Portal](https://discord.com/developers/applications)
-2. 點選「New Application」建立應用程式
-3. 在「Bot」頁面建立 Bot
-4. 記下 **Bot Token**
+Bot token 是機密資訊（如同密碼），應透過環境變數安全儲存。
 
-### 2. 邀請 Bot 到伺服器
+## 存取控制
 
-使用 OAuth2 URL Generator 生成邀請連結，並選擇所需權限。
+系統實作多層安全機制：
 
-### 3. 設定 OpenClaw
+- **私訊策略** — 透過 `pairing`（預設）、`allowlist`、`open` 或 `disabled` 模式控制私訊存取
+- **伺服器策略** — 透過 `open`、`allowlist`（建議）或 `disabled` 設定管理伺服器範圍的存取
+- **提及要求** — 伺服器頻道預設強制要求提及，可依伺服器或頻道自訂
+- **角色路由** — 根據 Discord 角色 ID 將成員導向不同的代理
 
-```bash
-openclaw channel enable discord
-openclaw channel config discord --bot-token YOUR_BOT_TOKEN
-```
+## 進階功能
 
-### 4. 測試
+### 互動元件
 
-```bash
-openclaw channel test discord
-```
+平台支援 Discord 元件 v2，包括按鈕、選擇選單和模態表單，可設定每個操作的權限和可重複使用的元件設定。
 
-## Discord 特有功能
+### 語音整合
 
-- **Slash Commands** — `/ask` 快速提問
-- **Thread 支援** — 在討論串中對話
-- **Embed** — 豐富的嵌入式訊息
-- **多伺服器** — 同時服務多個伺服器
+機器人可加入語音頻道進行持續對話，支援自動加密和文字轉語音輸出（需設定提供者）。
 
-## 設定範例
+### 對話串綁定
 
-```yaml
-channels:
-  discord:
-    enabled: true
-    bot_token: YOUR_BOT_TOKEN
-    features:
-      slash_commands: true
-      thread_support: true
-      embed_responses: true
-```
+Discord 對話串可綁定到特定的工作階段目標，維持對話連續性，可設定閒置逾時和最長存活時間。
+
+### 論壇頻道
+
+透過向論壇父層傳送訊息自動建立對話串討論，也可使用明確的對話串建立方式。
+
+## 監控與疑難排解
+
+常用診斷指令包括 `openclaw doctor`、`openclaw channels status --probe` 和透過 `openclaw logs --follow` 檢視日誌。主要問題涉及 Intent 設定、允許清單不符和提及模式驗證。

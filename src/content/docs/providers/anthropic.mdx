@@ -1,0 +1,201 @@
+---
+title: "Anthropic"
+description: "在 OpenClaw 中設定 Anthropic Claude 模型，支援 API 金鑰和 setup-token 兩種驗證方式。"
+order: 3
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/anthropic"
+---
+
+Anthropic 建構了 **Claude** 模型家族，並透過 API 提供存取。在 OpenClaw 中，你可以使用 API 金鑰或 **setup-token** 進行驗證。
+
+## 選項 A：Anthropic API 金鑰
+
+**適合：** 標準 API 存取和按用量計費。在 Anthropic Console 中建立你的 API 金鑰。
+
+### CLI 設定
+
+```bash
+openclaw onboard
+# 選擇：Anthropic API key
+# 或非互動式
+openclaw onboard --anthropic-api-key "$ANTHROPIC_API_KEY"
+```
+
+### 設定片段
+
+```json5
+{
+  env: { ANTHROPIC_API_KEY: "sk-ant-..." },
+  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-6" } } },
+}
+```
+
+## Prompt 快取（Anthropic API）
+
+OpenClaw 支援 Anthropic 的 prompt 快取功能。這**僅限 API**；訂閱驗證不會遵循快取設定。
+
+### 設定
+
+使用模型設定中的 `cacheRetention` 參數：
+
+| 值 | 快取持續時間 | 說明 |
+| --- | --- | --- |
+| `none` | 不快取 | 停用 prompt 快取 |
+| `short` | 5 分鐘 | API Key 驗證的預設值 |
+| `long` | 1 小時 | 延長快取（需要 beta 旗標） |
+
+```json5
+{
+  agents: {
+    defaults: {
+      models: {
+        "anthropic/claude-opus-4-6": {
+          params: { cacheRetention: "long" },
+        },
+      },
+    },
+  },
+}
+```
+
+### 預設值
+
+使用 Anthropic API Key 驗證時，OpenClaw 會自動為所有 Anthropic 模型套用 `cacheRetention: "short"`（5 分鐘快取）。你可以在設定中明確設定 `cacheRetention` 來覆寫。
+
+### 每個代理的 cacheRetention 覆寫
+
+使用模型層級的 params 作為基準，然後透過 `agents.list[].params` 覆寫特定代理。
+
+```json5
+{
+  agents: {
+    defaults: {
+      model: { primary: "anthropic/claude-opus-4-6" },
+      models: {
+        "anthropic/claude-opus-4-6": {
+          params: { cacheRetention: "long" }, // 大多數代理的基準
+        },
+      },
+    },
+    list: [
+      { id: "research", default: true },
+      { id: "alerts", params: { cacheRetention: "none" } }, // 僅覆寫此代理
+    ],
+  },
+}
+```
+
+快取相關參數的設定合併順序：
+
+- `agents.defaults.models["provider/model"].params`
+- `agents.list[].params`（匹配 `id`，按鍵覆寫）
+
+這讓一個代理可以保持長期快取，而同一模型上的另一個代理可以停用快取，以避免在突發/低重用流量上的寫入成本。
+
+### Bedrock Claude 注意事項
+
+- Bedrock 上的 Anthropic Claude 模型（`amazon-bedrock/*anthropic.claude*`）在設定時接受 `cacheRetention` 透傳。
+- 非 Anthropic 的 Bedrock 模型在執行時會被強制設為 `cacheRetention: "none"`。
+- Anthropic API 金鑰的智慧預設也會在未明確設定值時，為 Claude-on-Bedrock 模型參考設定 `cacheRetention: "short"`。
+
+### 舊版參數
+
+較舊的 `cacheControlTtl` 參數仍支援向後相容：
+
+- `"5m"` 對應 `short`
+- `"1h"` 對應 `long`
+
+建議遷移到新的 `cacheRetention` 參數。
+
+OpenClaw 在 Anthropic API 請求中包含 `extended-cache-ttl-2025-04-11` beta 旗標；若你覆寫供應商標頭請保留它（參閱 [/gateway/configuration](/gateway/configuration)）。
+
+## 1M 上下文視窗（Anthropic beta）
+
+Anthropic 的 1M 上下文視窗受 beta 限制。在 OpenClaw 中，使用 `params.context1m: true` 為支援的 Opus/Sonnet 模型啟用。
+
+```json5
+{
+  agents: {
+    defaults: {
+      models: {
+        "anthropic/claude-opus-4-6": {
+          params: { context1m: true },
+        },
+      },
+    },
+  },
+}
+```
+
+OpenClaw 會將此對應到 Anthropic 請求中的 `anthropic-beta: context-1m-2025-08-07`。
+
+注意：Anthropic 目前在使用 OAuth/訂閱 token（`sk-ant-oat-*`）時會拒絕 `context-1m-*` beta 請求。OpenClaw 會自動為 OAuth 驗證跳過 context1m beta 標頭，並保留所需的 OAuth beta。
+
+## 選項 B：Claude setup-token
+
+**適合：** 使用你的 Claude 訂閱。
+
+### 如何取得 setup-token
+
+Setup-token 由 **Claude Code CLI** 建立，而非 Anthropic Console。你可以在**任何機器**上執行：
+
+```bash
+claude setup-token
+```
+
+將 token 貼入 OpenClaw（精靈：**Anthropic token (paste setup-token)**），或在閘道主機上執行：
+
+```bash
+openclaw models auth setup-token --provider anthropic
+```
+
+若你在不同的機器上產生了 token，請貼上：
+
+```bash
+openclaw models auth paste-token --provider anthropic
+```
+
+### CLI 設定（setup-token）
+
+```bash
+# 在引導過程中貼上 setup-token
+openclaw onboard --auth-choice setup-token
+```
+
+### 設定片段（setup-token）
+
+```json5
+{
+  agents: { defaults: { model: { primary: "anthropic/claude-opus-4-6" } } },
+}
+```
+
+## 注意事項
+
+- 使用 `claude setup-token` 產生 setup-token 並貼上，或在閘道主機上執行 `openclaw models auth setup-token`。
+- 若你在 Claude 訂閱上看到「OAuth token refresh failed ...」，請使用 setup-token 重新驗證。參閱 [/gateway/troubleshooting#oauth-token-refresh-failed-anthropic-claude-subscription](/gateway/troubleshooting#oauth-token-refresh-failed-anthropic-claude-subscription)。
+- 驗證詳情和重用規則請參閱 [/concepts/oauth](/concepts/oauth)。
+
+## 疑難排解
+
+**401 錯誤 / token 突然失效**
+
+- Claude 訂閱驗證可能過期或被撤銷。重新執行 `claude setup-token` 並貼到**閘道主機**。
+- 若 Claude CLI 登入在不同的機器上，請在閘道主機上使用 `openclaw models auth paste-token --provider anthropic`。
+
+**找不到供應商「anthropic」的 API 金鑰**
+
+- 驗證是**按代理**的。新代理不會繼承主代理的金鑰。
+- 為該代理重新執行引導，或在閘道主機上貼上 setup-token / API 金鑰，然後使用 `openclaw models status` 驗證。
+
+**找不到設定檔 `anthropic:default` 的憑證**
+
+- 執行 `openclaw models status` 查看哪個驗證設定檔處於啟用狀態。
+- 重新執行引導，或為該設定檔貼上 setup-token / API 金鑰。
+
+**無可用的驗證設定檔（全部在冷卻/不可用中）**
+
+- 檢查 `openclaw models status --json` 中的 `auth.unusableProfiles`。
+- 新增另一個 Anthropic 設定檔或等待冷卻期結束。
+
+更多資訊：[/gateway/troubleshooting](/gateway/troubleshooting) 和 [/help/faq](/help/faq)。

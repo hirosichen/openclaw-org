@@ -1,0 +1,79 @@
+---
+title: "Matrix"
+description: "透過 Matrix 外掛整合 OpenClaw，支援私訊、聊天室、對話串、媒體、表情回應和端對端加密。"
+order: 12
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/matrix"
+---
+
+Matrix 是一個開放、去中心化的通訊協定。OpenClaw 的 Matrix 外掛讓你的代理以 Matrix 使用者身份連接到任何 homeserver，支援私訊、聊天室、對話串、媒體、表情回應、投票、位置分享和端對端加密（E2EE）。
+
+## 安裝
+
+Matrix 外掛與核心安裝分開發布。透過 npm 安裝：
+
+```bash
+openclaw plugins install @openclaw/matrix
+```
+
+或從本地 git checkout 安裝：
+
+```bash
+openclaw plugins install ./extensions/matrix
+```
+
+## 設定步驟
+
+1. **建立 Matrix 帳號** — 在任何 homeserver 上建立帳號（可在 matrix.org/ecosystem/hosting 瀏覽選項）
+2. **取得 access token** — 透過 Matrix 登入 API 或使用使用者名稱/密碼憑證
+3. **設定憑證** — 透過環境變數（`MATRIX_HOMESERVER`、`MATRIX_ACCESS_TOKEN`）或設定檔
+4. **重新啟動 Gateway** — 開始傳送訊息
+
+關鍵設定選項包括 `homeserver` URL、`accessToken`、`userId`，以及可選的 `encryption: true` 用於 E2EE 支援。
+
+## 端對端加密
+
+透過 Rust crypto SDK 支援 E2EE。啟用後，加密聊天室會自動解密。首次連線時會進行裝置驗證 — 你需要在另一個 Matrix 客戶端（如 Element）中核准驗證請求以啟用金鑰分享。
+
+啟用方式：
+
+```json
+{
+  "channels": {
+    "matrix": {
+      "encryption": true
+    }
+  }
+}
+```
+
+## 存取控制
+
+- **私訊** — 預設配對策略，未知傳送者需要核准代碼
+- **聊天室** — 預設允許清單策略並搭配提及閘道，聊天室必須被明確允許
+- 允許清單接受完整的 Matrix 使用者 ID（格式：`@user:server`），不接受顯示名稱
+
+## 多帳號支援
+
+透過 `channels.matrix.accounts` 設定多個帳號，每個帳號作為獨立的 Matrix 使用者運作。每個帳號的設定繼承自最上層設定，並可覆寫特定選項如私訊策略或加密設定。
+
+## 主要功能
+
+- **對話串** — 支援回覆對話串，可設定模式（`off`、`inbound`、`always`）
+- **媒體** — 完整支援接收和外送媒體，可設定大小限制
+- **表情回應** — 透過工具傳送和讀取
+- **自動加入** — 可設定聊天室邀請處理，支援可選的允許清單
+- **投票** — 傳送投票和將 poll-start 轉換為文字
+
+## 疑難排解
+
+使用以下指令進行診斷：
+
+```bash
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+```
+
+常見問題包括聊天室被群組策略封鎖、待處理的私訊核准，或加密設定不匹配。

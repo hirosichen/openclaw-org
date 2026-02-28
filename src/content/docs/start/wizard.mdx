@@ -1,0 +1,65 @@
+---
+title: "引導精靈（CLI）"
+description: "OpenClaw CLI 引導精靈的完整參考，提供適用於 macOS、Linux 或 Windows (WSL2) 的引導式設定流程"
+order: 5
+section: "start"
+officialDoc: "https://docs.openclaw.ai/start/wizard"
+---
+
+OpenClaw 引導精靈為 macOS、Linux 或 Windows（透過 WSL2）提供引導式設定流程。它透過互動式流程設定本機或遠端 Gateway、頻道、技能與工作區預設值。
+
+## 主要指令
+
+```bash
+openclaw onboard
+```
+
+> **提示：** 你也可以執行 `openclaw dashboard` 立即在瀏覽器中聊天，無需設定任何頻道。
+
+## 快速設定選項
+
+精靈提供兩條路徑：
+
+- **QuickStart** — 使用合理的預設值，包括在連接埠 18789 上的本機 Gateway、自動產生的權杖認證，以及按頻道對等的 DM 隔離。
+- **Advanced** — 進階模式會公開每個設定步驟，讓你完全控制整個設定過程。
+
+## 設定步驟（本機模式）
+
+精靈將引導你完成以下步驟：
+
+1. **模型/認證選擇** — Anthropic、OpenAI 或自訂供應商
+2. **工作區位置** — 預設為 `~/.openclaw/workspace`
+3. **Gateway 設定** — 連接埠、綁定位址、認證、Tailscale
+4. **頻道設定** — WhatsApp、Telegram、Discord 等
+5. **背景服務安裝** — LaunchAgent 或 systemd
+6. **健康檢查驗證**
+7. **技能安裝**
+
+## 重要注意事項
+
+- 重新執行精靈會保留現有設定，除非使用 `--reset` 旗標。
+- 使用 `--non-interactive` 旗標進行腳本化操作；`--json` 不代表非互動模式。
+- 遠端模式僅設定用戶端連線，不會修改遠端主機。
+- 使用 `openclaw configure` 可在之後重新設定。
+
+## 安全金鑰參考模式
+
+對於非互動式腳本化操作，精靈支援安全金鑰參考模式，避免在純文字中暴露 API 金鑰。
+
+## 新增額外代理
+
+使用以下指令建立獨立的代理：
+
+```bash
+openclaw agents add <name>
+```
+
+## 網路搜尋功能
+
+建議設定 Brave Search API 以啟用網路搜尋功能。
+
+## 相關資源
+
+- [`openclaw onboard` 指令參考](/docs/cli/onboard)
+- [引導設定總覽](/docs/start/onboarding-overview)
+- [macOS 應用程式引導](/docs/start/onboarding)

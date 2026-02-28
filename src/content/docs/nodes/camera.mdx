@@ -1,0 +1,90 @@
+---
+title: "Camera 擷取"
+description: "OpenClaw 在 iOS、Android 和 macOS 平台上代理工作流程中的 camera 擷取功能說明文件。"
+order: 3
+section: "nodes"
+officialDoc: "https://docs.openclaw.ai/nodes/camera"
+---
+
+## 概覽
+
+OpenClaw 在三個平台上為代理工作流程啟用 camera 擷取：iOS 節點、Android 節點和 macOS 應用程式。所有實作皆透過 `node.invoke` 支援拍照（JPG）和短影片片段（MP4，含選用音訊）。所有 camera 存取都受到**使用者控制的設定**閘控。
+
+## iOS 節點
+
+**使用者設定：**
+
+- 位於 iOS Settings → Camera → Allow Camera（`camera.enabled`）
+- 預設啟用；停用狀態回傳 `CAMERA_DISABLED`
+
+**可用指令：**
+
+`camera.list` 回傳裝置陣列，包含 id、name、position 和 deviceType。
+
+`camera.snap` 接受參數：facing（front|back，預設 front）、maxWidth（預設 1600）、quality（0-1，預設 0.9）、format（jpg）、delayMs 和 deviceId。回應包含 format、base64 圖片資料、width 和 height。照片會重新壓縮以將 base64 酬載保持在 5 MB 以下。
+
+`camera.clip` 參數：facing、durationMs（預設 3000，最大 60000）、includeAudio（預設 true）、format（mp4）、deviceId。回應包含 format、base64 影片、durationMs 和 hasAudio。
+
+**前景需求：** iOS 節點僅允許在**前景**執行 `camera.*` 指令。背景呼叫回傳 `NODE_BACKGROUND_UNAVAILABLE`。
+
+**CLI 範例：**
+
+```bash
+openclaw nodes camera snap --node <id>
+openclaw nodes camera snap --node <id> --facing front
+openclaw nodes camera clip --node <id> --duration 3000
+openclaw nodes camera clip --node <id> --no-audio
+```
+
+## Android 節點
+
+**使用者設定：**
+
+- Android Settings → Camera → Allow Camera（`camera.enabled`）
+- 預設啟用；停用回傳 `CAMERA_DISABLED`
+
+**所需權限：**
+
+- `CAMERA`：用於 snap 和 clip 操作
+- `RECORD_AUDIO`：用於 `includeAudio=true` 時的 clip
+
+**前景需求：** 背景呼叫回傳 `NODE_BACKGROUND_UNAVAILABLE`。
+
+**指令：**
+
+`camera.list` 回傳裝置資訊陣列。
+
+**酬載防護：** 照片重新壓縮以保持 base64 在 5 MB 以下。
+
+## macOS 應用程式
+
+**使用者設定：**
+
+- Settings → General → Allow Camera（`openclaw.cameraEnabled`）
+- 預設：**關閉**
+
+**CLI 指令：**
+
+```bash
+openclaw nodes camera list --node <id>
+openclaw nodes camera snap --node <id>
+openclaw nodes camera snap --node <id> --max-width 1280
+openclaw nodes camera snap --node <id> --delay-ms 2000
+openclaw nodes camera clip --node <id> --duration 10s
+openclaw nodes camera clip --node <id> --no-audio
+```
+
+**注意事項：** 在 macOS 上，`camera.snap` 會在暖機/曝光穩定後等待 `delayMs`（預設 2000ms）再進行擷取。
+
+## 螢幕錄製（僅限 macOS）
+
+```bash
+openclaw nodes screen record --node <id> --duration 10s --fps 15
+```
+
+需要 macOS Screen Recording 權限（TCC）。
+
+## 安全性與限制
+
+- 需要作業系統的 camera 和麥克風存取權限提示
+- 影片片段有上限（目前 `<= 60s`）以避免過大的節點酬載

@@ -1,0 +1,61 @@
+---
+title: "串流與分塊"
+description: "OpenClaw 的兩種串流機制：Block streaming 用於頻道訊息，Preview streaming 用於平台特定的暫時訊息更新。"
+order: 12
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/streaming"
+---
+
+## 概覽
+
+OpenClaw 實作兩種不同的串流機制：Block streaming 用於頻道訊息，Preview streaming 用於 Telegram、Discord 和 Slack 等平台的暫時訊息更新。
+
+## Block Streaming（頻道訊息）
+
+Block streaming 在生成持續進行時，以逐漸增大的區塊傳送助理輸出。系統使用 `EmbeddedBlockChunker` 管理輸出邊界。
+
+### 關鍵設定選項
+
+- `agents.defaults.blockStreamingDefault`：功能開關（`"on"` 或 `"off"`）
+- `agents.defaults.blockStreamingBreak`：決定刷新時機（`"text_end"` 或 `"message_end"`）
+- `agents.defaults.blockStreamingChunk`：設定大小參數（`minChars`、`maxChars`、`breakPreference`）
+- 頻道特定覆寫可透過 `*.blockStreaming` 和 `*.textChunkLimit`
+
+Block streaming 預設為**關閉**，除非 `*.blockStreaming` 明確設為 `true`。
+
+### 分塊策略
+
+演算法在遵守最小和最大字元邊界的同時，優先選擇自然斷點。斷點偏好層級：段落 → 換行 → 句子 → 空白 → 硬斷。
+
+程式碼區塊會受到特殊處理，永遠不會在程式碼圍欄內分割，以維持有效的 Markdown 格式。
+
+## 合併與節奏
+
+連續的 block 區塊可以在閒置間隙（`idleMs`）期間合併，以減少碎片化。`agents.defaults.humanDelay` 設定在 block 之間新增隨機化的暫停，以模擬更自然的對話流程，支援 `"natural"`（800–2500ms）和 `"custom"` 模式。
+
+## Preview Streaming（平台特定）
+
+Preview streaming 在生成期間更新暫時訊息，支援以下模式：
+
+| 模式 | 行為 |
+|------|------|
+| `off` | 停用 |
+| `partial` | 單一可替換的預覽 |
+| `block` | 分塊/附加的更新 |
+| `progress` | 狀態預覽，然後最終回答 |
+
+平台支援各異：
+
+- **Telegram** 和 **Discord**：支援所有模式（`off`、`partial`、`block`）
+- **Slack**：提供獨有的 `progress` 功能，搭配可選的原生串流 API
+
+## 設定參考
+
+完整的 block streaming 設定鍵：
+
+- `agents.defaults.blockStreamingDefault`（`on|off`，預設 off）
+- `agents.defaults.blockStreamingBreak`（`text_end|message_end`）
+- `agents.defaults.blockStreamingChunk`（`minChars|maxChars|breakPreference`）
+- `agents.defaults.blockStreamingCoalesce`（基於閒置的批次處理）
+- `agents.defaults.humanDelay`（block 回覆之間的擬人化暫停）
+- 頻道覆寫：`*.blockStreaming` 和 `*.blockStreamingCoalesce`

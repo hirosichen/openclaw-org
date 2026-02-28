@@ -3,7 +3,10 @@ import ThemeToggle from './ThemeToggle.astro';
 
 const navItems = [
   { label: '首頁', href: '/' },
-  { label: '文件', href: '/docs/getting-started/installation' },
+  { label: '開始使用', href: '/docs/start/getting-started' },
+  { label: '安裝', href: '/docs/install/install' },
+  { label: '頻道', href: '/docs/channels/channels' },
+  { label: '文件', href: '/docs/concepts/architecture' },
   { label: '關於', href: '/about' },
 ];
 
@@ -34,7 +37,7 @@ const currentPath = Astro.url.pathname;
         </a>
       ))}
       <a
-        href="https://github.com/nickthecook/openclaw"
+        href="https://github.com/openclaw/openclaw"
         target="_blank"
         rel="noopener noreferrer"
         class="text-subtext-1 hover:text-text transition-colors"
@@ -77,7 +80,7 @@ const currentPath = Astro.url.pathname;
       ))}
       <div class="flex items-center gap-4 pt-2 border-t border-surface-0">
         <a
-          href="https://github.com/nickthecook/openclaw"
+          href="https://github.com/openclaw/openclaw"
           target="_blank"
           rel="noopener noreferrer"
           class="text-subtext-1 hover:text-text transition-colors"

@@ -1,0 +1,124 @@
+---
+title: "解除安裝"
+description: "OpenClaw 的解除安裝指南，涵蓋 CLI 可用時的簡易方式及手動服務移除步驟。"
+order: 9
+section: "install"
+officialDoc: "https://docs.openclaw.ai/install/uninstall"
+---
+
+兩種路徑：
+
+- **簡易方式**：若 `openclaw` 仍已安裝。
+- **手動服務移除**：若 CLI 已移除但服務仍在執行。
+
+## 簡易方式（CLI 仍已安裝）
+
+建議使用內建的解除安裝程式：
+
+```bash
+openclaw uninstall
+```
+
+非互動式（自動化 / npx）：
+
+```bash
+openclaw uninstall --all --yes --non-interactive
+npx -y openclaw uninstall --all --yes --non-interactive
+```
+
+手動步驟（效果相同）：
+
+1. 停止 Gateway 服務：
+
+```bash
+openclaw gateway stop
+```
+
+2. 解除安裝 Gateway 服務（launchd/systemd/schtasks）：
+
+```bash
+openclaw gateway uninstall
+```
+
+3. 刪除狀態 + 設定：
+
+```bash
+rm -rf "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+```
+
+若您將 `OPENCLAW_CONFIG_PATH` 設定至狀態目錄外的自訂位置，請一併刪除該檔案。
+
+4. 刪除工作區（選用，移除代理檔案）：
+
+```bash
+rm -rf ~/.openclaw/workspace
+```
+
+5. 移除 CLI 安裝（選擇您使用的方式）：
+
+```bash
+npm rm -g openclaw
+pnpm remove -g openclaw
+bun remove -g openclaw
+```
+
+6. 若您安裝了 macOS 應用程式：
+
+```bash
+rm -rf /Applications/OpenClaw.app
+```
+
+注意事項：
+
+- 若您使用了設定檔（`--profile` / `OPENCLAW_PROFILE`），請為每個狀態目錄重複步驟 3（預設為 `~/.openclaw-<profile>`）。
+- 在遠端模式中，狀態目錄位於 **Gateway 主機**上，因此也請在該處執行步驟 1-4。
+
+## 手動服務移除（CLI 未安裝）
+
+當 Gateway 服務持續執行但 `openclaw` 缺少時使用此方法。
+
+### macOS（launchd）
+
+預設標籤為 `ai.openclaw.gateway`（或 `ai.openclaw.<profile>`；舊版 `com.openclaw.*` 可能仍然存在）：
+
+```bash
+launchctl bootout gui/$UID/ai.openclaw.gateway
+rm -f ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+```
+
+若您使用了設定檔，請將標籤和 plist 名稱替換為 `ai.openclaw.<profile>`。若存在舊版 `com.openclaw.*` plist 也請一併移除。
+
+### Linux（systemd 使用者單元）
+
+預設單元名稱為 `openclaw-gateway.service`（或 `openclaw-gateway-<profile>.service`）：
+
+```bash
+systemctl --user disable --now openclaw-gateway.service
+rm -f ~/.config/systemd/user/openclaw-gateway.service
+systemctl --user daemon-reload
+```
+
+### Windows（排程工作）
+
+預設工作名稱為 `OpenClaw Gateway`（或 `OpenClaw Gateway (<profile>)`）。工作腳本位於您的狀態目錄下。
+
+```powershell
+schtasks /Delete /F /TN "OpenClaw Gateway"
+Remove-Item -Force "$env:USERPROFILE\.openclaw\gateway.cmd"
+```
+
+若您使用了設定檔，請刪除對應的工作名稱和 `~\.openclaw-<profile>\gateway.cmd`。
+
+## 一般安裝 vs 原始碼安裝
+
+### 一般安裝（install.sh / npm / pnpm / bun）
+
+若您使用 `https://openclaw.ai/install.sh` 或 `install.ps1`，CLI 是透過 `npm install -g openclaw@latest` 安裝的。使用 `npm rm -g openclaw` 移除（或使用 `pnpm remove -g` / `bun remove -g`，視您的安裝方式而定）。
+
+### 原始碼安裝（git clone）
+
+若您從儲存庫執行（`git clone` + `openclaw ...` / `bun run openclaw ...`）：
+
+1. 在刪除儲存庫**之前**先解除安裝 Gateway 服務（使用上方的簡易方式或手動服務移除）。
+2. 刪除儲存庫目錄。
+3. 如上所述移除狀態 + 工作區。

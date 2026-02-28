@@ -1,0 +1,49 @@
+---
+title: "功能概覽"
+description: "OpenClaw 的核心功能總覽，涵蓋多頻道訊息整合、Agent 路由、媒體處理、使用者介面及驗證機制。"
+order: 2
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/features"
+---
+
+## 整合頻道
+
+- 透過單一 Gateway 支援 WhatsApp、Telegram、Discord 及 iMessage。
+- 透過外掛擴充支援 Mattermost 等額外服務。
+
+## 核心能力
+
+### 通訊功能
+
+- 跨主要平台的多頻道訊息整合。
+- 群組聊天支援，透過提及（mention）觸發啟用。
+- 長回應的串流功能。
+
+### Agent 與路由
+
+- 多 Agent 路由，每個工作區或發送者擁有隔離的工作階段。
+- Agent 橋接支援 Pi RPC 模式與工具串流。
+
+### 媒體處理
+
+- 雙向支援圖片、音訊及文件。
+- 可選的語音訊息轉錄功能。
+
+## 使用者介面
+
+- Web 控制面板 UI。
+- macOS 選單列伴隨應用程式。
+- iOS 與 Android 行動 Node，支援 Canvas 整合。
+
+## 工作階段管理
+
+- 直接聊天合併為共享的 `main` 工作階段；群組為隔離狀態。
+- 透過 OAuth 提供 Anthropic 與 OpenAI 的訂閱驗證。
+
+## 附加功能
+
+- 可選的語音轉錄 Hook。
+- macOS 上的本地 iMessage 整合。
+- Agent 橋接支援 Pi RPC 模式與工具串流。
+
+> **注意：** 舊版 Claude、Codex、Gemini 及 Opencode 路徑已被移除。Pi 是唯一的程式撰寫 Agent 路徑。

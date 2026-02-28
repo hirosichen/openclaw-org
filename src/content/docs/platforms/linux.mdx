@@ -1,85 +1,90 @@
 ---
-title: Linux 平台指南
-description: 在 Linux 上安裝和使用 OpenClaw 的完整指南
-order: 2
-section: platforms
-officialDoc: https://github.com/nickthecook/openclaw
+title: "Linux 應用程式"
+description: "在 Linux 系統上執行 OpenClaw Gateway 的說明文件，Node.js 為推薦的執行環境。"
+order: 3
+section: "platforms"
+officialDoc: "https://docs.openclaw.ai/platforms/linux"
 ---
 
-## Linux 安裝
+Gateway 在 Linux 上完整支援。**Node 是推薦的執行環境**。
+不建議將 Bun 用於 Gateway（WhatsApp/Telegram 存在已知問題）。
 
-### 使用安裝腳本（推薦）
+原生 Linux 配套應用程式正在規劃中。歡迎社群貢獻。
 
-```bash
-curl -fsSL https://get.openclaw.org | bash
+## 新手快速路徑（VPS）
+
+1. 安裝 Node 22+
+2. `npm i -g openclaw@latest`
+3. `openclaw onboard --install-daemon`
+4. 從您的筆電：`ssh -N -L 18789:127.0.0.1:18789 <user>@<host>`
+5. 開啟 `http://127.0.0.1:18789/` 並貼上您的 token
+
+逐步 VPS 指南：[exe.dev](/docs/install/exe-dev)
+
+## 安裝
+
+- [入門指南](/docs/start/getting-started)
+- [安裝與更新](/docs/install/updating)
+- 選用流程：[Bun（實驗性）](/docs/install/bun)、[Nix](/docs/install/nix)、[Docker](/docs/install/docker)
+
+## Gateway
+
+- [Gateway 操作手冊](/docs/gateway)
+- [設定](/docs/gateway/configuration)
+
+## Gateway 服務安裝（CLI）
+
+使用以下任一方式：
+
+```
+openclaw onboard --install-daemon
 ```
 
-### Ubuntu / Debian
+或：
 
-```bash
-sudo apt update
-sudo apt install openclaw
+```
+openclaw gateway install
 ```
 
-### Fedora / RHEL
+或：
 
-```bash
-sudo dnf install openclaw
+```
+openclaw configure
 ```
 
-### Arch Linux
+出現提示時選擇 **Gateway service**。
 
-```bash
-yay -S openclaw
+修復/遷移：
+
+```
+openclaw doctor
 ```
 
-## 系統需求
+## 系統控制（systemd user unit）
 
-- Ubuntu 20.04+、Debian 11+、Fedora 36+、Arch Linux
-- x86_64 或 ARM64
-- 至少 4 GB RAM
+OpenClaw 預設安裝 systemd **使用者**服務。對於共用或常駐伺服器，請使用**系統**服務。完整的 unit 範例與指引請參閱 [Gateway 操作手冊](/docs/gateway)。
 
-## Linux 特有設定
+最小設定：
 
-### Systemd 服務
+建立 `~/.config/systemd/user/openclaw-gateway[-<profile>].service`：
 
-```bash
-# 安裝 systemd 服務
-openclaw service install
-
-# 啟動
-sudo systemctl start openclaw
-sudo systemctl enable openclaw
-
-# 檢查狀態
-sudo systemctl status openclaw
 ```
-
-### 服務設定檔
-
-```ini
-# /etc/systemd/system/openclaw.service
 [Unit]
-Description=OpenClaw AI Assistant
-After=network.target
+Description=OpenClaw Gateway (profile: <profile>, v<version>)
+After=network-online.target
+Wants=network-online.target
 
 [Service]
-Type=simple
-User=openclaw
-ExecStart=/usr/bin/openclaw start
+ExecStart=/usr/local/bin/openclaw gateway --port 18789
 Restart=always
+RestartSec=5
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 ```
 
-### 防火牆設定
+啟用服務：
 
-```bash
-# UFW
-sudo ufw allow 3000/tcp
-
-# firewalld
-sudo firewall-cmd --add-port=3000/tcp --permanent
-sudo firewall-cmd --reload
+```
+systemctl --user enable --now openclaw-gateway[-<profile>].service
 ```

@@ -1,0 +1,134 @@
+---
+title: "Control UI（瀏覽器）"
+description: "Control UI 是由 Gateway 提供的 Vite + Lit 單頁應用程式，直接透過 Gateway WebSocket 介面通訊。"
+order: 2
+section: "web"
+officialDoc: "https://docs.openclaw.ai/web/control-ui"
+---
+
+## 概覽
+
+Control UI 執行在 `http://<host>:18789/`，可透過 `gateway.controlUi.basePath` 設定選用前綴。它使用 Vite + Lit 建置，直接與 Gateway WebSocket 通訊。
+
+## 快速本機存取
+
+- 預設 URL：`http://127.0.0.1:18789/` 或 `http://localhost:18789/`
+- 如果頁面無法載入，請先啟動 Gateway：`openclaw gateway`
+- 認證使用 WebSocket 交握參數：`connect.params.auth.token` 或 `connect.params.auth.password`
+- Dashboard 設定允許儲存 token；密碼不會被持久化
+
+## 裝置配對
+
+新的瀏覽器/裝置連線需要一次性的配對核准——即使在相同的 Tailnet 上且 `gateway.auth.allowTailscale: true` 也是如此。錯誤訊息顯示：`disconnected (1008): pairing required`
+
+核准流程：
+
+```
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+重要事項：
+
+- 本機連線（127.0.0.1）自動核准
+- 遠端連線需要明確核准
+- 切換瀏覽器設定檔需要重新配對
+- 撤銷方式：`openclaw devices revoke --device <id> --role <role>`
+
+## 功能
+
+Control UI 支援：
+
+- 聊天，包含模型串流與工具呼叫
+- 頻道狀態（WhatsApp、Telegram、Discord、Slack、外掛）含 QR 登入
+- 實例在線列表
+- Session 管理，含 thinking/verbose 覆寫
+- Cron 排程管理含執行歷史
+- 技能狀態與設定
+- 節點列表與功能
+- 執行核准管理
+- 設定檢視/編輯含驗證
+- 除錯工具（狀態、健康檢查、事件日誌、RPC 呼叫）
+- 即時 gateway 日誌追蹤含篩選器
+- 套件/git 更新含重啟報告
+
+## 聊天行為
+
+- `chat.send` 為非阻塞式，立即回傳 `{ runId, status: "started" }`
+- 回應透過聊天事件串流
+- 支援冪等鍵以重新傳送
+- 歷史回應有大小限制；大型訊息會被截斷或替換為佔位符
+- `chat.inject` 附加助手備註而不觸發代理執行
+- 停止機制：UI 按鈕、`/stop` 指令，或獨立的中止片語
+- 中止的執行會在逐字稿中保留部分助手文字並附加中止元資料
+
+## Tailnet 存取
+
+### Integrated Tailscale Serve（建議）
+
+```
+openclaw gateway --tailscale serve
+```
+
+在 `https://<magicdns>/` 開啟，當 `gateway.auth.allowTailscale` 為 true 時會自動使用 Tailscale identity header 認證。
+
+### 使用 Token 繫結至 Tailnet
+
+```
+openclaw gateway --bind tailnet --token "$(openssl rand -hex 32)"
+```
+
+在 `http://<tailscale-ip>:18789/` 開啟
+
+## HTTP 安全性
+
+純 HTTP 且無 WebCrypto 時，預設會阻擋 Control UI 連線。解決方案：
+
+- 透過 Tailscale Serve 使用 HTTPS
+- 在本機開啟 `http://127.0.0.1:18789/`
+- 啟用 `allowInsecureAuth`（不會繞過裝置身分驗證）
+- 緊急情況：`dangerouslyDisableDeviceAuth`（嚴重的安全性降級）
+
+## 建置 UI
+
+```
+pnpm ui:build
+```
+
+使用選用的 base path：
+
+```
+OPENCLAW_CONTROL_UI_BASE_PATH=/openclaw/ pnpm ui:build
+```
+
+開發伺服器：
+
+```
+pnpm ui:dev
+```
+
+## 遠端 Gateway 測試
+
+啟動開發伺服器並使用查詢參數連接至遠端 Gateway：
+
+```
+http://localhost:5173/?gatewayUrl=ws://<gateway-host>:18789
+```
+
+搭配認證：
+
+```
+http://localhost:5173/?gatewayUrl=wss://<gateway-host>:18789&token=<gateway-token>
+```
+
+遠端存取的設定需求：
+
+```json
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["http://localhost:5173"]
+    }
+  }
+}
+```

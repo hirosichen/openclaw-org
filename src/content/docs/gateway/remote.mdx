@@ -1,0 +1,77 @@
+---
+title: "遠端存取"
+description: "透過 SSH、tunnel 和 tailnet 進行遠端存取的設定指南"
+order: 4
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/remote"
+---
+
+## 核心概念
+
+Gateway WebSocket 繫結至設定連接埠上的 loopback（預設為 18789）。遠端存取使用 SSH 連接埠轉發或 tailnet/VPN tunnel。
+
+核心原則：**一個 Gateway 服務擁有狀態與頻道。Node 是周邊裝置。**
+
+## 常見 VPN/Tailnet 設定
+
+### 在 tailnet 中的常駐 Gateway
+
+持久主機（VPS/家用伺服器）可透過 Tailscale 或 SSH 存取。支援 Tailscale Serve 用於 Control UI 或 SSH tunnel 備用方案。
+
+### 家用桌機 Gateway 搭配遠端筆電
+
+筆電使用 macOS app 的「Remote over SSH」模式；app 自動管理 tunnel。
+
+### 筆電 Gateway 搭配遠端機器存取
+
+SSH tunnel 或 Tailscale Serve 可安全暴露服務，同時保持 Gateway 僅繫結 loopback。
+
+## 指令流程（各處執行什麼）
+
+範例流程：Telegram 訊息 → Gateway → agent 決策 → node 工具呼叫 → 結果回傳。
+
+重要注意事項：
+
+- Node 不執行 Gateway 服務
+- 每台主機僅執行一個 Gateway，除非使用隔離的 profile
+- macOS app 的「node mode」作為 Node 用戶端透過 Gateway WebSocket 運作
+
+## SSH Tunnel（CLI + 工具）
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+tunnel 啟動後，健康檢查和狀態指令透過 `ws://127.0.0.1:18789` 到達遠端 Gateway。連接埠號碼可透過 `gateway.port` 設定替換。
+
+## CLI 遠端預設值
+
+可在設定中設定持久的遠端目標，包含 URL 和 token 憑證。
+
+## 憑證優先順序
+
+- 明確的憑證永遠覆蓋其他設定
+- 本機模式遵循特定的環境變數和設定優先順序
+- 遠端模式使用不同的優先順序
+- Probe/status token 在遠端模式下較嚴格
+- 舊版環境變數僅限相容性路徑
+
+## Chat UI over SSH
+
+WebChat 直接連線至 Gateway WebSocket（無需獨立的 HTTP 連接埠）。透過 SSH 轉發連接埠 18789，或使用 macOS app 的自動 tunnel 管理。
+
+## macOS app「Remote over SSH」
+
+Menu bar app 管理完整設定，包括遠端狀態檢查、WebChat 和 Voice Wake 轉發。
+
+## 安全規則（遠端/VPN）
+
+首要原則：**除非確定需要繫結，否則保持 Gateway 僅繫結 loopback。**
+
+- Loopback + SSH/Tailscale Serve = 最安全的預設值
+- 非 loopback 繫結需要 auth token/password
+- `gateway.remote.token`/`.password` 是用戶端憑證，不是伺服器 auth 設定
+- `gateway.remote.tlsFingerprint` 為 `wss://` 固定遠端 TLS 憑證
+- 當 `gateway.auth.allowTailscale: true` 時，Tailscale Serve 可透過 identity header 驗證
+- HTTP API 端點仍然需要 token/password 驗證
+- 瀏覽器控制視為操作者存取，應使用 tailnet-only + 刻意的 node 配對

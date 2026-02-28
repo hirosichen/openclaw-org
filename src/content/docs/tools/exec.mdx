@@ -1,0 +1,167 @@
+---
+title: "Exec 工具"
+description: "在工作區中執行 shell 命令，支援前景與背景執行模式以及多層安全框架。"
+order: 5
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/exec"
+---
+
+在工作區中執行 shell 命令。支援前景 + 背景執行（透過 `process`）。若 `process` 被禁止，`exec` 將同步執行並忽略 `yieldMs`/`background`。背景工作階段的作用範圍為每個代理；`process` 僅能看到來自同一代理的工作階段。
+
+## 參數
+
+* `command`（必填）
+* `workdir`（預設為 cwd）
+* `env`（鍵/值覆寫）
+* `yieldMs`（預設 10000）：延遲後自動背景執行
+* `background`（布林值）：立即背景執行
+* `timeout`（秒數，預設 1800）：到期後終止
+* `pty`（布林值）：可用時在虛擬終端中執行（僅限 TTY 的 CLI、編碼代理、終端 UI）
+* `host`（`sandbox | gateway | node`）：執行位置
+* `security`（`deny | allowlist | full`）：`gateway`/`node` 的強制模式
+* `ask`（`off | on-miss | always`）：`gateway`/`node` 的核准提示
+* `node`（字串）：`host=node` 時的節點 id/名稱
+* `elevated`（布林值）：請求提升模式（閘道主機）；`security=full` 僅在 elevated 解析為 `full` 時強制
+
+注意事項：
+
+* `host` 預設為 `sandbox`。
+* 沙箱關閉時忽略 `elevated`（exec 已在主機上執行）。
+* `gateway`/`node` 核准由 `~/.openclaw/exec-approvals.json` 控制。
+* `node` 需要已配對的節點（配套應用程式或無頭節點主機）。
+* 若有多個節點可用，設定 `exec.node` 或 `tools.exec.node` 以選擇一個。
+* 在非 Windows 主機上，exec 在設定時使用 `SHELL`；若 `SHELL` 為 `fish`，它偏好從 `PATH` 中使用 `bash`（或 `sh`）以避免 fish 不相容的腳本，若兩者都不存在則退回到 `SHELL`。
+* 在 Windows 主機上，exec 偏好 PowerShell 7（`pwsh`）探索（Program Files、ProgramW6432、然後 PATH），然後退回到 Windows PowerShell 5.1。
+* 主機執行（`gateway`/`node`）拒絕 `env.PATH` 和載入器覆寫（`LD_*`/`DYLD_*`）以防止二進位劫持或注入程式碼。
+* 重要：沙箱**預設關閉**。若沙箱關閉且明確設定/請求 `host=sandbox`，exec 現在會封閉失敗而非靜默在閘道主機上執行。請啟用沙箱或使用 `host=gateway` 搭配核准。
+
+## 設定
+
+* `tools.exec.notifyOnExit`（預設：true）：為 true 時，背景 exec 工作階段在退出時排入系統事件並請求心跳。
+* `tools.exec.approvalRunningNoticeMs`（預設：10000）：當核准控制的 exec 執行超過此時間時發出單一「running」通知（0 停用）。
+* `tools.exec.host`（預設：`sandbox`）
+* `tools.exec.security`（預設：sandbox 為 `deny`，未設定時 gateway + node 為 `allowlist`）
+* `tools.exec.ask`（預設：`on-miss`）
+* `tools.exec.node`（預設：未設定）
+* `tools.exec.pathPrepend`：要加到 exec 執行的 `PATH` 前面的目錄清單（僅限 gateway + sandbox）。
+* `tools.exec.safeBins`：可在無明確允許清單條目下執行的僅限 stdin 的安全二進位檔。行為詳情請參閱 [Safe bins](/docs/tools/exec-approvals#safe-bins-stdin-only)。
+* `tools.exec.safeBinTrustedDirs`：`safeBins` 路徑檢查信任的額外明確目錄。`PATH` 條目永遠不會被自動信任。內建預設為 `/bin` 和 `/usr/bin`。
+* `tools.exec.safeBinProfiles`：每個安全二進位檔的選用自訂 argv 政策（`minPositional`、`maxPositional`、`allowedValueFlags`、`deniedFlags`）。
+
+範例：
+
+```json5
+{
+  tools: {
+    exec: {
+      pathPrepend: ["~/bin", "/opt/oss/bin"],
+    },
+  },
+}
+```
+
+### PATH 處理
+
+* `host=gateway`：將你的登入 shell `PATH` 合併到 exec 環境。`env.PATH` 覆寫在主機執行時被拒絕。守護程序本身仍以最小 `PATH` 執行：
+  * macOS：`/opt/homebrew/bin`、`/usr/local/bin`、`/usr/bin`、`/bin`
+  * Linux：`/usr/local/bin`、`/usr/bin`、`/bin`
+* `host=sandbox`：在容器內執行 `sh -lc`（登入 shell），因此 `/etc/profile` 可能會重設 `PATH`。OpenClaw 在 profile 來源化後透過內部環境變數加入 `env.PATH`（無 shell 插值）；`tools.exec.pathPrepend` 也在此適用。
+* `host=node`：僅傳送你傳入的非封鎖環境覆寫到節點。`env.PATH` 覆寫在主機執行時被拒絕且被節點主機忽略。若你需要在節點上的額外 PATH 條目，請設定節點主機服務環境（systemd/launchd）或在標準位置安裝工具。
+
+每個代理的節點綁定（在設定中使用代理清單索引）：
+
+```bash
+openclaw config get agents.list
+openclaw config set agents.list[0].tools.exec.node "node-id-or-name"
+```
+
+Control UI：Nodes 分頁包含一個小型「Exec node binding」面板用於相同設定。
+
+## 工作階段覆寫（`/exec`）
+
+使用 `/exec` 設定**每個工作階段**的 `host`、`security`、`ask` 和 `node` 預設值。傳送不帶引數的 `/exec` 以顯示目前的值。
+
+範例：
+
+```
+/exec host=gateway security=allowlist ask=on-miss node=mac-1
+```
+
+## 授權模型
+
+`/exec` 僅對**已授權的傳送者**（頻道允許清單/配對加上 `commands.useAccessGroups`）生效。它僅更新**工作階段狀態**，不會寫入設定。要硬性停用 exec，請透過工具政策拒絕（`tools.deny: ["exec"]` 或每個代理）。除非你明確設定 `security=full` 和 `ask=off`，否則主機核准仍然適用。
+
+## Exec 核准（配套應用程式 / 節點主機）
+
+沙箱代理可以在 `exec` 於閘道或節點主機上執行前要求每次請求核准。參閱 [Exec 核准](/docs/tools/exec-approvals) 了解政策、允許清單和 UI 流程。
+
+當需要核准時，exec 工具會立即回傳 `status: "approval-pending"` 和核准 ID。一旦核准（或拒絕/超時），閘道會發出系統事件（`Exec finished` / `Exec denied`）。若命令在 `tools.exec.approvalRunningNoticeMs` 後仍在執行，會發出單一 `Exec running` 通知。
+
+## 允許清單 + 安全二進位檔
+
+手動允許清單強制執行僅匹配**已解析的二進位檔路徑**（無基礎名稱匹配）。當 `security=allowlist` 時，shell 命令僅在每個管線區段都在允許清單中或為安全二進位檔時才自動允許。在允許清單模式下，串連（`;`、`&&`、`||`）和重新導向會被拒絕，除非每個頂層區段都滿足允許清單（包括安全二進位檔）。不支援重新導向。
+
+使用這兩個控制進行不同的工作：
+
+* `tools.exec.safeBins`：小型、僅限 stdin 的串流過濾器。
+* `tools.exec.safeBinTrustedDirs`：安全二進位檔可執行路徑的明確額外信任目錄。
+* `tools.exec.safeBinProfiles`：自訂安全二進位檔的明確 argv 政策。
+* 允許清單：可執行路徑的明確信任。
+
+不要將 `safeBins` 視為通用允許清單，也不要新增直譯器/執行環境二進位檔（例如 `python3`、`node`、`ruby`、`bash`）。若你需要這些，請使用明確允許清單條目並保持核准提示啟用。
+
+## 範例
+
+前景：
+
+```json
+{ "tool": "exec", "command": "ls -la" }
+```
+
+背景 + 輪詢：
+
+```json
+{"tool":"exec","command":"npm run build","yieldMs":1000}
+{"tool":"process","action":"poll","sessionId":"<id>"}
+```
+
+傳送按鍵（tmux 風格）：
+
+```json
+{"tool":"process","action":"send-keys","sessionId":"<id>","keys":["Enter"]}
+{"tool":"process","action":"send-keys","sessionId":"<id>","keys":["C-c"]}
+{"tool":"process","action":"send-keys","sessionId":"<id>","keys":["Up","Up","Enter"]}
+```
+
+送出（僅傳送 CR）：
+
+```json
+{ "tool": "process", "action": "submit", "sessionId": "<id>" }
+```
+
+貼上（預設為括號模式）：
+
+```json
+{ "tool": "process", "action": "paste", "sessionId": "<id>", "text": "line1\nline2\n" }
+```
+
+## apply_patch（實驗性）
+
+`apply_patch` 是 `exec` 的子工具，用於結構化多檔案編輯。需明確啟用：
+
+```json5
+{
+  tools: {
+    exec: {
+      applyPatch: { enabled: true, workspaceOnly: true, allowModels: ["gpt-5.2"] },
+    },
+  },
+}
+```
+
+注意事項：
+
+* 僅適用於 OpenAI/OpenAI Codex 模型。
+* 工具政策仍然適用；`allow: ["exec"]` 隱含允許 `apply_patch`。
+* 設定位於 `tools.exec.applyPatch`。
+* `tools.exec.applyPatch.workspaceOnly` 預設為 `true`（僅限工作區）。僅在你有意讓 `apply_patch` 在工作區目錄外寫入/刪除時才設為 `false`。

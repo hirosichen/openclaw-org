@@ -1,94 +1,103 @@
 ---
-title: 閘道器疑難排解
-description: 解決 OpenClaw 閘道器常見問題
-order: 4
-section: gateway
-officialDoc: https://github.com/nickthecook/openclaw
+title: "疑難排解"
+description: "以症狀為導向的診斷，包含精確的指令順序與日誌特徵"
+order: 6
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/troubleshooting"
 ---
 
-## 常見問題
+## 前 60 秒
 
-### 閘道器無法啟動
-
-**症狀**：執行 `openclaw start` 時出現錯誤。
-
-**解決方案**：
-
-1. 檢查連接埠是否被佔用：
+依序執行以下診斷指令：
 
 ```bash
-lsof -i :3000
-```
-
-2. 嘗試使用不同的連接埠：
-
-```bash
-openclaw start --port 8080
-```
-
-3. 檢查設定檔語法：
-
-```bash
-openclaw config validate
-```
-
-### Webhook 收不到訊息
-
-**症狀**：頻道已設定但收不到訊息。
-
-**解決方案**：
-
-1. 確認 Webhook URL 正確且可從外部存取
-2. 檢查 SSL 憑證是否有效
-3. 查看閘道器日誌：
-
-```bash
+openclaw status
+openclaw status --all
+openclaw gateway probe
+openclaw gateway status
+openclaw doctor
+openclaw channels status --probe
 openclaw logs --follow
 ```
 
-4. 測試 Webhook 端點：
+健康系統應顯示 `Runtime: running` 和 `RPC probe: ok`。
+
+## 決策樹
+
+根據症狀選擇對應的故障類別：
+
+- 無回覆
+- 儀表板或 Control UI 連線問題
+- Gateway 啟動失敗
+- 頻道已連線但訊息未流通
+- Cron 或 heartbeat 失敗
+- Node 已配對但工具執行失敗
+- 瀏覽器工具故障
+
+## 無回覆
+
+檢查路由策略、頻道允許清單和配對狀態。在日誌中尋找如「drop guild message (mention required)」或「pairing request」等特徵。
+
+相關指令：
 
 ```bash
-curl -X POST http://localhost:3000/webhook/line \
-  -H "Content-Type: application/json" \
-  -d '{"test": true}'
+openclaw channels status --probe
+openclaw logs --follow
 ```
 
-### 回應延遲過長
+## 儀表板/Control UI 連線問題
 
-**症狀**：AI 回應時間超過預期。
-
-**解決方案**：
-
-1. 檢查 AI 模型的 API 回應時間
-2. 調整超時設定：
-
-```yaml
-gateway:
-  timeout: 30000  # 毫秒
-```
-
-3. 考慮使用更快的模型或本地模型
-
-### 連線被拒
-
-**症狀**：出現 `Connection refused` 錯誤。
-
-**解決方案**：
-
-1. 確認閘道器正在運行
-2. 檢查防火牆設定
-3. 確認綁定地址是否正確（`0.0.0.0` vs `127.0.0.1`）
-
-## 診斷工具
+驗證 probe URL、驗證模式和安全上下文。常見錯誤包括「device identity required」和「device nonce mismatch」，表示驗證流程問題。
 
 ```bash
-# 檢查系統狀態
-openclaw status
-
-# 查看詳細日誌
-openclaw logs --level debug
-
-# 檢查頻道連線
-openclaw channel status
+openclaw gateway status
+openclaw gateway probe
 ```
+
+## Gateway 服務無法持續執行
+
+檢查連接埠衝突、設定不匹配，並確保設定了 `gateway.mode=local`。
+
+常見日誌特徵：
+
+| 特徵 | 意義 |
+|------|------|
+| `refusing to bind gateway without auth` | 非 loopback 繫結需要設定驗證 |
+| `another gateway instance is already listening` / `EADDRINUSE` | 連接埠衝突 |
+| `Gateway start blocked: set gateway.mode=local` | 設定為 remote 模式 |
+
+## 頻道已連線但訊息未流通
+
+當頻道顯示已連線但訊息未流通時，檢查 DM 策略、群組允許清單設定和頻道權限。
+
+常見問題：
+
+- 群組中需要 mention
+- 配對待核准
+- API 權限/scope 缺失導致 401/403 錯誤
+
+## Cron/Heartbeat 問題
+
+```bash
+openclaw cron status
+```
+
+Heartbeat 在安靜時段或有進行中的請求時會跳過。
+
+常見問題：
+
+- 排程器已停用
+- 安靜時段跳過
+- 不存在的帳號目標
+
+## Node 工具執行失敗
+
+```bash
+openclaw node status
+```
+
+常見特徵包含背景可用性問題、OS 權限、需要核准和允許清單限制。
+
+## 瀏覽器工具故障
+
+驗證瀏覽器狀態和 profile 設定。常見問題包括 Chrome 啟動失敗、二進位路徑錯誤、擴充功能連線問題和 attach-only profile 無法連線。

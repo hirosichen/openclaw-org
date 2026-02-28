@@ -1,0 +1,44 @@
+---
+title: "Tailscale 整合"
+description: "透過 Tailscale Serve 和 Funnel 自動設定 Gateway 存取"
+order: 5
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/tailscale"
+---
+
+## 概述
+
+OpenClaw 可以自動設定 Tailscale 來暴露 Gateway 儀表板和 WebSocket 連接埠，同時保持 Gateway 繫結至 localhost。Tailscale 負責處理 HTTPS、路由和選用的身分驗證。
+
+## 設定模式
+
+提供三種運作模式：
+
+1. **Serve** — 透過 `tailscale serve` 進行私有 tailnet 存取，Gateway 在 `127.0.0.1` 上
+2. **Funnel** — 透過 `tailscale funnel` 進行公開 HTTPS 暴露（需要共享密碼）
+3. **Off** — 預設行為，無 Tailscale 自動化
+
+## 驗證選項
+
+系統支援兩種驗證方式：
+
+- **Token 模式**（當 `OPENCLAW_GATEWAY_TOKEN` 設定時為預設）
+- **Password 模式**（使用 `OPENCLAW_GATEWAY_PASSWORD` 或設定檔）
+
+在使用 Serve 模式且啟用 `gateway.auth.allowTailscale` 時，Control UI 和 WebSocket 連線可透過 Tailscale identity header 驗證，無需憑證。系統透過本機 Tailscale daemon 解析來源 IP 來驗證這些 header。但是，HTTP API 端點（例如 `/v1/*`、`/tools/invoke` 和 `/api/channels/*`）仍然需要 token/password 驗證。
+
+## 常見設定
+
+**Serve（僅 tailnet）：** Gateway 在本機監聽；透過 `https://<magicdns>/` 存取。
+
+**直接 Tailnet 繫結：** Gateway 在 Tailnet IP 上監聽，無需 Serve/Funnel 額外負擔。
+
+**Funnel（公開）：** 需要密碼驗證；可從公開網際網路存取。
+
+## 關鍵需求與限制
+
+- 必須安裝並驗證 Tailscale CLI
+- Funnel 模式需要在 tailnet 中啟用 HTTPS、MagicDNS、v1.38.3+ 和 funnel node 屬性
+- Funnel 僅支援透過 TLS 的連接埠 443、8443 和 10000
+- macOS Funnel 需要開源版本的 Tailscale app
+- 僅暴露 Gateway Control UI 和 WebSocket；Node 使用相同的 WebSocket 端點

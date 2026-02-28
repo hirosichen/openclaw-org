@@ -1,0 +1,81 @@
+---
+title: "健康檢查"
+description: "基於 CLI 的頻道連線驗證方法，消除疑難排解中的猜測"
+order: 8
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/health"
+---
+
+## 快速檢查
+
+五個診斷指令：
+
+1. `openclaw status` — 顯示本機摘要，包含 Gateway 可達性、模式狀態、頻道 auth 期限和工作階段/活動資料
+2. `openclaw status --all` — 全面本機診斷，唯讀、彩色格式化、除錯安全的輸出
+3. `openclaw status --deep` — 擴展診斷以探測執行中的 Gateway，包含每頻道支援
+4. `openclaw health --json` — 向執行中的 Gateway 請求完整健康快照（僅 WebSocket；排除直接 Baileys socket）
+5. WhatsApp/WebChat `/status` 指令 — 產生狀態回覆而不觸發 agent
+
+### 日誌檢查
+
+在 `/tmp/openclaw/openclaw-*.log` 中使用以下過濾詞彙：`web-heartbeat`、`web-reconnect`、`web-auto-reply`、`web-inbound`。
+
+## 深度診斷
+
+### 憑證驗證
+
+```bash
+ls -l ~/.openclaw/credentials/whatsapp/<accountId>/creds.json
+```
+
+修改時間應反映近期更新。
+
+### 工作階段儲存檢查
+
+```bash
+ls -l ~/.openclaw/agents/<agentId>/sessions/sessions.json
+```
+
+可設定路徑；計數和最近的接收者可透過 status 顯示。
+
+### 重新連結程序
+
+當出現狀態碼 409-515 或 `loggedOut` 訊息時：
+
+```bash
+openclaw channels logout
+openclaw channels login --verbose
+```
+
+狀態 515 時配對後自動重新啟動。
+
+## 故障排除
+
+### 驗證問題（狀態 409-515 或 logged out）
+
+執行重新連結指令。
+
+### Gateway 連線問題
+
+```bash
+openclaw gateway --port 18789
+```
+
+對佔用的連接埠使用 `--force` 旗標。
+
+### 缺少入站訊息
+
+驗證手機線上狀態、發送者允許清單設定、群組聊天規則和 mention 模式比對。
+
+## 專用 Health 指令
+
+`openclaw health --json` 向執行中的 Gateway 查詢健康快照，無需直接頻道 socket 存取。
+
+回傳內容：
+
+- 憑證/auth 期限資料
+- 每頻道探測摘要
+- 工作階段儲存資訊
+- 探測持續時間指標
+
+若 Gateway 不可達或探測失敗，以非零狀態退出。支援 `--timeout <ms>` 參數（預設 10 秒覆蓋）。

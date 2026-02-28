@@ -1,103 +1,67 @@
 ---
-title: 疑難排解
-description: 常見問題的診斷和解決方法
-order: 2
-section: help
-officialDoc: https://github.com/nickthecook/openclaw
+title: "疑難排解"
+description: "快速分診指南，根據症狀類別引導至特定修復路徑"
+order: 3
+section: "help"
+officialDoc: "https://docs.openclaw.ai/help/troubleshooting"
 ---
 
-## 診斷工具
+## 前 60 秒
 
-在排解問題之前，先收集診斷資訊：
+依序執行以下診斷指令以快速評估系統狀態：
 
 ```bash
-# 系統狀態總覽
 openclaw status
-
-# 詳細日誌
-openclaw logs --level debug --follow
-
-# 設定檢查
-openclaw config validate
-
-# 版本資訊
-openclaw --version
+openclaw status --all
+openclaw gateway probe
+openclaw gateway status
+openclaw doctor
+openclaw channels status --probe
+openclaw logs --follow
 ```
 
-## 安裝問題
+每個指令都有對應的正常輸出指標，包括執行狀態檢查、Gateway 可達性驗證、頻道連線確認和日誌活動監控。
 
-### 指令找不到 (command not found)
+## 決策樹
 
-**解決方案**：確認 OpenClaw 已加入 PATH：
+根據以下八個故障類別選擇對應的診斷路徑：
+
+1. 無回覆
+2. 儀表板或 Control UI 連線失敗
+3. Gateway 啟動問題
+4. 頻道已連線但訊息未流通
+5. Cron 或 heartbeat 失敗
+6. Node 已配對但工具執行失敗
+7. 瀏覽器工具故障
+
+## 無回覆
+
+包含診斷指令和預期輸出模式。常見日誌特徵包括 mention 閘控、待處理配對請求和過濾。深入參考 Gateway 疑難排解、頻道和配對程序文件。
+
+## 儀表板/Control UI
+
+診斷重點在 Gateway 狀態驗證、RPC probe 檢查和驗證確認。常見問題包括 device identity 需求、授權不匹配和不正確的 Gateway URL。
+
+## Gateway 服務
+
+處理啟動和執行問題。常見日誌特徵涉及 Gateway 模式設定、驗證繫結需求和連接埠衝突。參考 Gateway 設定和背景程序文件。
+
+## 頻道訊息流
+
+檢查已連線但無法運作的頻道。診斷重點包括傳輸狀態、配對驗證和 mention 偵測。常見問題涉及 mention 需求、待核准和權限/scope 問題。
+
+## Cron/Heartbeat
 
 ```bash
-# 檢查安裝位置
-which openclaw
-
-# 如果找不到，手動加入 PATH
-export PATH="$HOME/.openclaw/bin:$PATH"
+openclaw cron status
 ```
 
-將上述指令加入 `~/.bashrc` 或 `~/.zshrc` 以永久生效。
+正常輸出指標包括已啟用的排程器狀態和最近成功的工作執行。常見問題包括已停用的排程器、安靜時段跳過和不存在的帳號目標。
 
-### 權限問題
+## Node 工具執行
 
-```bash
-# 修復權限
-chmod +x $(which openclaw)
-```
+涵蓋已配對但執行失敗的 Node。診斷包括 Node 狀態和能力驗證。常見特徵涉及背景可用性、OS 權限、核准需求和允許清單限制。
 
-## 連線問題
+## 瀏覽器工具
 
-### AI 模型 API 連線失敗
-
-**症狀**：出現 `Connection refused` 或 `Timeout` 錯誤。
-
-**解決方案**：
-
-1. 檢查 API 金鑰是否正確
-2. 確認網路連線正常
-3. 檢查是否有防火牆或代理阻擋
-
-```bash
-# 測試 API 連線
-openclaw model test
-```
-
-### Webhook 無法接收訊息
-
-查看[閘道器疑難排解](/docs/gateway/troubleshooting)的相關章節。
-
-## 效能問題
-
-### 回應速度慢
-
-1. 嘗試使用更快的模型（如 GPT-3.5 代替 GPT-4）
-2. 減少記憶系統的 token 上限
-3. 檢查網路延遲
-
-```yaml
-# 調整效能設定
-model: openai:gpt-3.5-turbo
-memory:
-  short_term:
-    max_tokens: 2048
-```
-
-### 記憶體使用過高
-
-```bash
-# 檢查記憶體使用
-openclaw status --memory
-
-# 清除快取
-openclaw cache clear
-```
-
-## 仍需要幫助？
-
-如果以上方法都無法解決你的問題：
-
-1. 搜尋 [GitHub Issues](https://github.com/nickthecook/openclaw/issues)
-2. 建立新的 Issue 並附上診斷資訊
-3. 加入社群討論尋求協助
+處理瀏覽器狀態驗證和 profile 確認。常見問題包括 Chrome 啟動失敗、不正確的二進位路徑、擴充功能連線問題和無法連線的 attach-only profile。

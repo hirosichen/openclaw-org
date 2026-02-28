@@ -1,0 +1,58 @@
+---
+title: "配對機制"
+description: "OpenClaw 的配對系統，用於私訊存取控制和裝置網路參與的明確擁有者核准機制。"
+order: 9
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/pairing"
+---
+
+OpenClaw 實作了一個稱為「配對」的明確擁有者核准步驟，在兩個場景中運作：私訊存取控制和裝置/節點網路參與。
+
+## 私訊配對
+
+當頻道使用配對策略時，未知的傳送者會收到一個短代碼，他們的訊息在獲得核准前不會被處理。
+
+### 配對代碼特性
+
+- 8 個字元，大寫格式，不含易混淆字元
+- 1 小時後過期
+- 每個頻道預設限制 3 個待處理請求
+- 超出的請求會被忽略，直到先前的請求過期或獲得核准
+
+### 管理配對
+
+使用 CLI 指令管理核准：
+
+```bash
+openclaw pairing list [channel]
+openclaw pairing approve [channel] [CODE]
+```
+
+支援的頻道包括 Telegram、WhatsApp、Signal、iMessage、Discord、Slack 和 Feishu。
+
+### 狀態儲存
+
+配對資料儲存在 `~/.openclaw/credentials/` 下，待處理請求和已核准聯絡人使用獨立的檔案。非預設帳號維護有範圍限定的檔案，預設帳號使用無範圍限定的頻道層級檔案。
+
+這些檔案應視為敏感資料（它們控制對你的助理的存取）。請像對待有效密碼一樣保護配對代碼和設定代碼。
+
+## 裝置配對
+
+連接為 Gateway 裝置的節點需要透過裝置指令獲得核准。
+
+### 透過 Telegram 配對（建議用於 iOS）
+
+使用者可以向機器人發送 `/pair` 指令來接收設定代碼，其中包含 Gateway WebSocket URL 和配對 token（以 base64 編碼）。
+
+### 裝置管理
+
+使用以下指令管理裝置：
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+### 裝置配對狀態
+
+裝置配對狀態持久化在 `~/.openclaw/devices/` 目錄中，包含追蹤待處理請求和已配對裝置及其關聯 token 的檔案。

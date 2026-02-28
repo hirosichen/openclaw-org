@@ -1,0 +1,199 @@
+---
+title: "斜線命令"
+description: "OpenClaw 閘道處理的斜線命令系統，包含命令、指令和內嵌捷徑。"
+order: 8
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/slash-commands"
+---
+
+命令由閘道處理。大多數命令必須作為以 `/` 開頭的**獨立**訊息傳送。僅限主機的 bash 聊天命令使用 `! <cmd>`（`/bash <cmd>` 為別名）。
+
+有兩個相關系統：
+
+* **命令**：獨立的 `/...` 訊息。
+* **指令**：`/think`、`/verbose`、`/reasoning`、`/elevated`、`/exec`、`/model`、`/queue`。
+  * 指令在模型看到訊息之前被移除。
+  * 在一般聊天訊息（非純指令）中，它們被視為「內嵌提示」且**不會**持久化工作階段設定。
+  * 在純指令訊息（訊息僅包含指令）中，它們會持久化到工作階段並回覆確認。
+  * 指令僅對**已授權的傳送者**套用。若設定了 `commands.allowFrom`，它是唯一使用的允許清單；否則授權來自頻道允許清單/配對加上 `commands.useAccessGroups`。未授權的傳送者會將指令視為純文字。
+
+也有幾個**內嵌捷徑**（僅限已允許/授權的傳送者）：`/help`、`/commands`、`/status`、`/whoami`（`/id`）。它們會立即執行、在模型看到訊息之前被移除，其餘文字繼續正常流程。
+
+## 設定
+
+```json5
+{
+  commands: {
+    native: "auto",
+    nativeSkills: "auto",
+    text: true,
+    bash: false,
+    bashForegroundMs: 2000,
+    config: false,
+    debug: false,
+    restart: false,
+    allowFrom: {
+      "*": ["user1"],
+      discord: ["user:123"],
+    },
+    useAccessGroups: true,
+  },
+}
+```
+
+* `commands.text`（預設 `true`）啟用在聊天訊息中解析 `/...`。
+  * 在無原生命令的平台上（WhatsApp/WebChat/Signal/iMessage/Google Chat/MS Teams），即使設為 `false`，文字命令仍然有效。
+* `commands.native`（預設 `"auto"`）註冊原生命令。
+  * Auto：Discord/Telegram 啟用；Slack 關閉（直到你新增斜線命令）；無原生支援的供應商忽略。
+  * 設定 `channels.discord.commands.native`、`channels.telegram.commands.native` 或 `channels.slack.commands.native` 以按供應商覆寫（布林值或 `"auto"`）。
+  * `false` 在啟動時清除 Discord/Telegram 上先前註冊的命令。Slack 命令在 Slack 應用程式中管理，不會自動移除。
+* `commands.nativeSkills`（預設 `"auto"`）在支援時原生註冊**技能**命令。
+  * Auto：Discord/Telegram 啟用；Slack 關閉（Slack 需要為每個技能建立斜線命令）。
+* `commands.bash`（預設 `false`）啟用 `! <cmd>` 執行主機 shell 命令（`/bash <cmd>` 為別名；需要 `tools.elevated` 允許清單）。
+* `commands.bashForegroundMs`（預設 `2000`）控制 bash 在切換到背景模式前等待的時間（`0` 立即背景執行）。
+* `commands.config`（預設 `false`）啟用 `/config`（讀寫 `openclaw.json`）。
+* `commands.debug`（預設 `false`）啟用 `/debug`（僅執行時覆寫）。
+* `commands.allowFrom`（選用）設定每個供應商的命令授權允許清單。設定後，它是命令和指令的唯一授權來源（忽略頻道允許清單/配對和 `commands.useAccessGroups`）。使用 `"*"` 作為全域預設；供應商專屬鍵覆寫它。
+* `commands.useAccessGroups`（預設 `true`）在未設定 `commands.allowFrom` 時對命令強制執行允許清單/政策。
+
+## 命令清單
+
+文字 + 原生（啟用時）：
+
+* `/help`
+* `/commands`
+* `/skill <name> [input]`（按名稱執行技能）
+* `/status`（顯示目前狀態；可用時包含目前模型供應商的使用量/配額）
+* `/allowlist`（列出/新增/移除允許清單條目）
+* `/approve <id> allow-once|allow-always|deny`（解決 exec 核准提示）
+* `/context [list|detail|json]`（解釋「上下文」；`detail` 顯示每個檔案 + 每個工具 + 每個技能 + 系統提示大小）
+* `/export-session [path]`（別名：`/export`）（將目前工作階段匯出為含完整系統提示的 HTML）
+* `/whoami`（顯示你的傳送者 ID；別名：`/id`）
+* `/session idle <duration|off>`（管理聚焦討論串綁定的閒置自動取消聚焦）
+* `/session max-age <duration|off>`（管理聚焦討論串綁定的硬性最大時效自動取消聚焦）
+* `/subagents list|kill|log|info|send|steer|spawn`（檢視、控制或衍生目前工作階段的子代理）
+* `/acp spawn|cancel|steer|close|status|set-mode|set|cwd|permissions|timeout|model|reset-options|doctor|install|sessions`（檢視和控制 ACP 執行時工作階段）
+* `/agents`（列出此工作階段的討論串綁定代理）
+* `/focus <target>`（Discord：將此討論串或新討論串綁定到工作階段/子代理目標）
+* `/unfocus`（Discord：移除目前的討論串綁定）
+* `/kill <id|#|all>`（立即中止此工作階段的一個或所有執行中子代理；無確認訊息）
+* `/steer <id|#> <message>`（立即引導執行中的子代理：可能時在執行中操作，否則中止目前工作並在引導訊息上重新啟動）
+* `/tell <id|#> <message>`（`/steer` 的別名）
+* `/config show|get|set|unset`（持久化設定到磁碟，僅限擁有者；需要 `commands.config: true`）
+* `/debug show|set|unset|reset`（執行時覆寫，僅限擁有者；需要 `commands.debug: true`）
+* `/usage off|tokens|full|cost`（每次回應的使用量頁尾或本地費用摘要）
+* `/tts off|always|inbound|tagged|status|provider|limit|summary|audio`（控制 TTS）
+  * Discord：原生命令為 `/voice`（Discord 保留 `/tts`）；文字 `/tts` 仍然有效。
+* `/stop`
+* `/restart`
+* `/dock-telegram`（別名：`/dock_telegram`）（將回覆切換到 Telegram）
+* `/dock-discord`（別名：`/dock_discord`）（將回覆切換到 Discord）
+* `/dock-slack`（別名：`/dock_slack`）（將回覆切換到 Slack）
+* `/activation mention|always`（僅限群組）
+* `/send on|off|inherit`（僅限擁有者）
+* `/reset` 或 `/new [model]`（選用模型提示；其餘內容傳遞）
+* `/think <off|minimal|low|medium|high|xhigh>`（按模型/供應商的動態選項；別名：`/thinking`、`/t`）
+* `/verbose on|full|off`（別名：`/v`）
+* `/reasoning on|off|stream`（別名：`/reason`；啟用時傳送前綴為 `Reasoning:` 的獨立訊息；`stream` = 僅限 Telegram 草稿）
+* `/elevated on|off|ask|full`（別名：`/elev`；`full` 跳過 exec 核准）
+* `/exec host=<sandbox|gateway|node> security=<deny|allowlist|full> ask=<off|on-miss|always> node=<id>`（傳送 `/exec` 顯示目前值）
+* `/model <name>`（別名：`/models`；或來自 `agents.defaults.models.*.alias` 的 `/<alias>`）
+* `/queue <mode>`（加上選項如 `debounce:2s cap:25 drop:summarize`；傳送 `/queue` 查看目前設定）
+* `/bash <command>`（僅限主機；`! <command>` 的別名；需要 `commands.bash: true` + `tools.elevated` 允許清單）
+
+僅限文字：
+
+* `/compact [instructions]`（參閱 [壓縮](/docs/concepts/compaction)）
+* `! <command>`（僅限主機；一次一個；使用 `!poll` + `!stop` 進行長時間工作）
+* `!poll`（檢查輸出/狀態；接受選用的 `sessionId`；`/bash poll` 也有效）
+* `!stop`（停止執行中的 bash 工作；接受選用的 `sessionId`；`/bash stop` 也有效）
+
+注意事項：
+
+* 命令在命令和引數之間接受選用的 `:`（例如 `/think: high`、`/send: on`、`/help:`）。
+* `/new <model>` 接受模型別名、`provider/model` 或供應商名稱（模糊匹配）；若無匹配，文字被視為訊息內容。
+* `/restart` 預設啟用；設定 `commands.restart: false` 以停用。
+* Discord 專屬原生命令：`/vc join|leave|status` 控制語音頻道（需要 `channels.discord.voice` 和原生命令；不可作為文字使用）。
+* Discord 討論串綁定命令（`/focus`、`/unfocus`、`/agents`、`/session idle`、`/session max-age`）需要啟用有效的討論串綁定（`session.threadBindings.enabled` 和/或 `channels.discord.threadBindings.enabled`）。
+* `/verbose` 用於除錯和額外可見性；正常使用時保持**關閉**。
+* `/reasoning`（和 `/verbose`）在群組設定中有風險：它們可能揭示你不想公開的內部推理或工具輸出。建議保持關閉，特別是在群組聊天中。
+* **快速路徑：** 來自允許清單傳送者的純命令訊息會立即處理（繞過佇列 + 模型）。
+* **群組提及控制：** 來自允許清單傳送者的純命令訊息繞過提及要求。
+* **內嵌捷徑（僅限允許清單傳送者）：** 某些命令也可嵌入在一般訊息中使用，在模型看到其餘文字之前被移除。
+* 目前支援：`/help`、`/commands`、`/status`、`/whoami`（`/id`）。
+* 未授權的純命令訊息會被靜默忽略，內嵌的 `/...` token 被視為純文字。
+* **技能命令：** `user-invocable` 技能會公開為斜線命令。名稱經過消毒為 `a-z0-9_`（最多 32 字元）；衝突時附加數字後綴（例如 `_2`）。
+  * `/skill <name> [input]` 按名稱執行技能（在原生命令限制阻止每個技能命令時很有用）。
+  * 預設情況下，技能命令作為一般請求轉發給模型。
+  * 技能可選擇性宣告 `command-dispatch: tool` 以將命令直接路由到工具（確定性，無模型）。
+
+## 模型選擇（`/model`）
+
+`/model` 作為指令實作。
+
+範例：
+
+```
+/model
+/model list
+/model 3
+/model openai/gpt-5.2
+/model opus@anthropic:default
+/model status
+```
+
+注意事項：
+
+* `/model` 和 `/model list` 顯示精簡的編號選擇器（模型家族 + 可用供應商）。
+* 在 Discord 上，`/model` 和 `/models` 開啟互動式選擇器，包含供應商和模型下拉選單加上提交步驟。
+* `/model <#>` 從該選擇器中選擇（可能時偏好目前供應商）。
+* `/model status` 顯示詳細視圖，包含已設定的供應商端點（`baseUrl`）和 API 模式（`api`）（若可用）。
+
+## 除錯覆寫
+
+`/debug` 讓你設定**僅限執行時**的設定覆寫（記憶體，非磁碟）。僅限擁有者。預設停用；透過 `commands.debug: true` 啟用。
+
+範例：
+
+```
+/debug show
+/debug set messages.responsePrefix="[openclaw]"
+/debug set channels.whatsapp.allowFrom=["+1555","+4477"]
+/debug unset messages.responsePrefix
+/debug reset
+```
+
+注意事項：
+
+* 覆寫立即套用到新的設定讀取，但**不會**寫入 `openclaw.json`。
+* 使用 `/debug reset` 清除所有覆寫並回到磁碟上的設定。
+
+## 設定更新
+
+`/config` 寫入你磁碟上的設定（`openclaw.json`）。僅限擁有者。預設停用；透過 `commands.config: true` 啟用。
+
+範例：
+
+```
+/config show
+/config show messages.responsePrefix
+/config get messages.responsePrefix
+/config set messages.responsePrefix="[openclaw]"
+/config unset messages.responsePrefix
+```
+
+注意事項：
+
+* 設定在寫入前會驗證；無效的變更會被拒絕。
+* `/config` 更新在重啟後持續有效。
+
+## 平台注意事項
+
+* **文字命令**在正常聊天工作階段中執行（DM 共享 `main`，群組有自己的工作階段）。
+* **原生命令**使用隔離的工作階段：
+  * Discord：`agent:<agentId>:discord:slash:<userId>`
+  * Slack：`agent:<agentId>:slack:slash:<userId>`（前綴可透過 `channels.slack.slashCommand.sessionPrefix` 設定）
+  * Telegram：`telegram:slash:<userId>`（透過 `CommandTargetSessionKey` 定位聊天工作階段）
+* **`/stop`** 定位活動聊天工作階段以中止目前的執行。
+* **Slack：** `channels.slack.slashCommand` 仍然支援單一 `/openclaw` 風格命令。若你啟用 `commands.native`，必須為每個內建命令建立一個 Slack 斜線命令（與 `/help` 相同的名稱）。
+  * Slack 原生例外：註冊 `/agentstatus`（不是 `/status`），因為 Slack 保留了 `/status`。文字 `/status` 在 Slack 訊息中仍然有效。

@@ -1,0 +1,111 @@
+---
+title: "Web（Gateway）"
+description: "Gateway 從 WebSocket 連接埠提供瀏覽器 Control UI（Vite + Lit），涵蓋繫結模式、安全性與 web 介面設定。"
+order: 1
+section: "web"
+officialDoc: "https://docs.openclaw.ai/web"
+---
+
+Gateway 從與 Gateway WebSocket 相同的連接埠提供一個小型的**瀏覽器 Control UI**（Vite + Lit）：
+
+- 預設：`http://<host>:18789/`
+- 選用前綴：設定 `gateway.controlUi.basePath`（例如 `/openclaw`）
+
+功能詳情請參閱 [Control UI](/docs/web/control-ui)。
+本頁著重於繫結模式、安全性與 web 介面。
+
+## Webhooks
+
+當 `hooks.enabled=true` 時，Gateway 也會在相同的 HTTP 伺服器上公開一個小型 webhook 端點。
+認證與酬載詳情請參閱 [Gateway configuration](/docs/gateway/configuration) → `hooks`。
+
+## 設定（預設啟用）
+
+當資源檔存在（`dist/control-ui`）時，Control UI **預設啟用**。
+您可以透過設定控制它：
+
+```json5
+{
+  gateway: {
+    controlUi: { enabled: true, basePath: "/openclaw" }, // basePath 為選用
+  },
+}
+```
+
+## Tailscale 存取
+
+### Integrated Serve（建議）
+
+將 Gateway 保持在 loopback，讓 Tailscale Serve 代理它：
+
+```json5
+{
+  gateway: {
+    bind: "loopback",
+    tailscale: { mode: "serve" },
+  },
+}
+```
+
+然後啟動 gateway：
+
+```bash
+openclaw gateway
+```
+
+開啟：
+
+- `https://<magicdns>/`（或您設定的 `gateway.controlUi.basePath`）
+
+### Tailnet bind + token
+
+```json5
+{
+  gateway: {
+    bind: "tailnet",
+    controlUi: { enabled: true },
+    auth: { mode: "token", token: "your-token" },
+  },
+}
+```
+
+然後啟動 gateway（非 loopback 繫結需要 token）：
+
+```bash
+openclaw gateway
+```
+
+開啟：
+
+- `http://<tailscale-ip>:18789/`（或您設定的 `gateway.controlUi.basePath`）
+
+### 公共網際網路（Funnel）
+
+```json5
+{
+  gateway: {
+    bind: "loopback",
+    tailscale: { mode: "funnel" },
+    auth: { mode: "password" }, // 或 OPENCLAW_GATEWAY_PASSWORD
+  },
+}
+```
+
+## 安全性注意事項
+
+- Gateway 認證預設為必要（token/password 或 Tailscale identity headers）。
+- 非 loopback 繫結仍然**需要**共用的 token/password（`gateway.auth` 或環境變數）。
+- 精靈預設會產生 gateway token（即使在 loopback 上）。
+- UI 傳送 `connect.params.auth.token` 或 `connect.params.auth.password`。
+- 對於非 loopback 的 Control UI 部署，請明確設定 `gateway.controlUi.allowedOrigins`（完整 origins）。如未設定，gateway 啟動時會預設拒絕。
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` 啟用 Host-header origin 備援模式，但這是危險的安全性降級。
+- 使用 Serve 時，當 `gateway.auth.allowTailscale` 為 `true` 時，Tailscale identity headers 可滿足 Control UI/WebSocket 認證（無需 token/password）。HTTP API 端點仍需要 token/password。設定 `gateway.auth.allowTailscale: false` 以要求明確的憑證。請參閱 [Tailscale](/docs/gateway/tailscale) 和 [Security](/docs/gateway/security)。此無 token 流程假設 gateway 主機是受信任的。
+- `gateway.tailscale.mode: "funnel"` 需要 `gateway.auth.mode: "password"`（共用密碼）。
+
+## 建置 UI
+
+Gateway 從 `dist/control-ui` 提供靜態檔案。使用以下指令建置：
+
+```bash
+pnpm ui:build # 首次執行時自動安裝 UI 依賴
+```

@@ -1,0 +1,71 @@
+---
+title: "群組"
+description: "OpenClaw 跨平台群組聊天的管理方式，包括存取控制、提及觸發和工作階段管理。"
+order: 10
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/groups"
+---
+
+OpenClaw 在多個通訊平台（包括 WhatsApp、Telegram、Discord、Slack、Signal、iMessage、Microsoft Teams 和 Zalo）上一致地管理群組聊天。
+
+## 核心概念
+
+OpenClaw 在你現有的通訊帳號上運作，不需要獨立的機器人使用者。如果你在某個群組中，OpenClaw 就可以在那裡查看和回應。
+
+## 預設行為
+
+群組預設受到限制（`groupPolicy: "allowlist"`），回應通常需要提及機器人，除非明確停用。
+
+## 存取控制
+
+三個主要控制機制管理群組行為：
+
+1. **私訊存取** — 由 `*.allowFrom` 管理
+2. **群組存取** — 由 `*.groupPolicy` 加上允許清單管理
+3. **回覆觸發** — 透過提及閘道和 `/activation` 指令控制
+
+## 訊息流程
+
+訊息依照以下評估順序處理：檢查 `groupPolicy` 狀態 → 驗證群組允許清單 → 套用提及閘道規則。
+
+## 群組策略選項
+
+三種策略模式可用：
+
+- `"open"` — 繞過允許清單但保留提及閘道
+- `"disabled"` — 完全封鎖所有群組訊息
+- `"allowlist"`（預設）— 僅允許已設定的群組/聊天室
+
+## 常見設定模式
+
+### 允許所有群組並要求提及
+
+```json
+{
+  "groups": { "*": { "requireMention": true } }
+}
+```
+
+### 限制為特定組織
+
+使用 `groupPolicy: "allowlist"` 搭配明確的 `groupAllowFrom` 陣列，列出授權的傳送者識別碼。
+
+### 完全停用群組
+
+```json
+{
+  "groupPolicy": "disabled"
+}
+```
+
+## 工作階段管理
+
+群組工作階段使用與私訊不同的金鑰（`agent:<agentId>:<channel>:group:<id>`），允許不同的執行態勢。例如，你可以在主機層級存取下處理私訊請求，同時將群組互動限制在具有受限工具存取權的 Docker 容器中。
+
+## 提及閘道
+
+在支援回覆中繼資料的平台（Telegram、WhatsApp、Slack、Discord、Teams）上，回覆機器人訊息會被視為隱含的提及。模式使用不區分大小寫的正規表示式匹配設定的提及觸發詞。
+
+## 進階模式
+
+使用者可以使用單一代理結合個人私訊處理和公開群組沙盒化。對於角色之間的真正隔離，建議部署多個具有獨立綁定的代理。

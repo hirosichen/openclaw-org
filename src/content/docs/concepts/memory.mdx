@@ -1,69 +1,66 @@
 ---
-title: 記憶管理
-description: 了解 OpenClaw 的記憶系統如何運作
-order: 3
-section: concepts
-officialDoc: https://github.com/nickthecook/openclaw
+title: "記憶系統"
+description: "OpenClaw 的記憶架構，以純 Markdown 檔案儲存 Agent 上下文，包括每日日誌、長期記憶、搜尋功能及嵌入後端。"
+order: 5
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/memory"
 ---
 
-## 記憶系統概覽
+## 概覽
 
-OpenClaw 的記憶系統讓 AI 助理能夠記住使用者的偏好、對話歷史和重要資訊，提供更個人化的互動體驗。
+OpenClaw 的記憶架構將 Agent 上下文儲存為 Agent 工作區中的**純 Markdown 檔案**，以檔案作為權威來源，而非依賴記憶體內的暫存資料。
 
-## 記憶類型
+## 核心結構
 
-### 短期記憶
+系統使用兩個主要的記憶層：
 
-短期記憶存儲當前對話的上下文，在對話結束後自動清除：
+1. **每日日誌**（`memory/YYYY-MM-DD.md`）— 僅附加的檔案，用於工作階段特定的筆記
+2. **長期記憶**（`MEMORY.md`）— 經過整理的參考資訊，僅用於私人工作階段
 
-- 對話歷史
-- 臨時變數
-- 工具執行結果
+## 記憶工具
 
-### 長期記憶
+Agent 透過兩個工具存取記憶：
 
-長期記憶持久儲存在本機，跨對話保留：
+- **`memory_search`** — 使用向量嵌入和關鍵字匹配進行語義回憶
+- **`memory_get`** — 目標檔案讀取，支援可選的行範圍選擇
 
-- 使用者偏好
-- 重要事實
-- 學習到的模式
+當檔案不存在時，系統會優雅降級，回傳空內容而非錯誤。
 
-## 記憶設定
+## 何時持久化資訊
 
-```yaml
-# ~/.openclaw/config.yaml
-memory:
-  enabled: true
-  short_term:
-    max_tokens: 4096
-  long_term:
-    enabled: true
-    storage: sqlite
-    path: ~/.openclaw/memory.db
-    max_entries: 10000
-```
+- 決策、偏好和持久性事實寫入 `MEMORY.md`
+- 日常筆記和進行中的上下文寫入 `memory/YYYY-MM-DD.md`
+- 如果有人要求機器人記住某事，應寫入磁碟而非僅保留在活動上下文中
 
-## 管理記憶
+## 搜尋功能
 
-```bash
-# 查看記憶統計
-openclaw memory stats
+OpenClaw 支援**混合搜尋**，結合：
 
-# 搜尋記憶
-openclaw memory search "使用者偏好"
+- **向量相似度**：語義匹配，即使措辭不同也能匹配
+- **BM25 全文搜尋**：精確的 Token 匹配，適用於 ID、程式碼符號、錯誤訊息
 
-# 清除短期記憶
-openclaw memory clear --short-term
+可選的後處理包括：
 
-# 匯出記憶
-openclaw memory export backup.json
-```
+- **MMR 重新排序**：透過平衡相關性和多樣性來消除冗餘結果
+- **時間衰減**：提升較新記憶的排名，同時保留常青的參考檔案（可設定半衰期）
 
-## 隱私保護
+## 進階功能
 
-所有記憶資料都儲存在你的本機裝置上：
+### QMD 後端
 
-- 不會上傳到雲端
-- 使用加密儲存
-- 可以隨時完全刪除
-- 支援選擇性遺忘
+提供本地優先的替代方案，使用 BM25 + 向量 + 重新排序，並可選擇性地建立工作階段逐字稿索引。
+
+### 向量加速
+
+透過 sqlite-vec 擴充功能在 SQLite 中保持搜尋效率，而非使用 JavaScript。
+
+### 嵌入供應商
+
+支援多種嵌入供應商，並具有自動降級鏈：
+
+- 透過 `node-llama-cpp` 的本地模型
+- OpenAI、Gemini、Voyage 及 Mistral API
+
+### 自動記憶刷新
+
+在上下文壓縮前觸發，提示 Agent 在工作階段壓縮發生前將持久資訊寫入磁碟。

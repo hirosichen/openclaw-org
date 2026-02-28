@@ -1,0 +1,111 @@
+---
+title: "設定"
+description: "任務導向的設定指南與完整設定參考"
+order: 2
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/configuration"
+---
+
+## 概述
+
+OpenClaw 從 `~/.openclaw/openclaw.json` 讀取選用的 JSON5 設定檔。若檔案不存在，則使用安全預設值。使用者通常新增設定以連接頻道、控制訊息存取、設定模型、設定工具、啟用沙箱，或調整工作階段和自動化。
+
+## 主要設定方式
+
+**互動式設定：**
+
+- `openclaw onboard` — 完整設定精靈
+- `openclaw configure` — 設定精靈
+
+**CLI 指令：**
+
+```bash
+openclaw config get agents.defaults.workspace
+openclaw config set agents.defaults.heartbeat.every "2h"
+openclaw config unset tools.web.search.apiKey
+```
+
+**Control UI：** 在 http://127.0.0.1:18789 使用 Config 分頁存取
+
+**直接編輯：** 直接修改 `~/.openclaw/openclaw.json`，支援自動熱重載
+
+## 驗證需求
+
+OpenClaw 強制執行嚴格的 schema 驗證。未知的鍵、格式錯誤的類型或無效值會阻止 Gateway 啟動。當驗證失敗時，僅診斷指令可用（`openclaw doctor`、`openclaw logs`、`openclaw health`、`openclaw status`）。使用 `openclaw doctor --fix` 來套用修復。
+
+## 常見設定任務
+
+### 頻道
+
+支援的頻道包括 WhatsApp、Telegram、Discord、Slack、Signal、iMessage、Google Chat、Mattermost 和 MS Teams。所有頻道共享 DM 策略模式：`pairing`、`allowlist`、`open` 或 `disabled`。
+
+### 模型
+
+使用 `provider/model` 格式設定主要模型並選用備用模型（例如 `anthropic/claude-sonnet-4-5`）。透過 `imageMaxDimensionPx` 設定圖片縮放。
+
+### 存取控制
+
+- `dmPolicy` 控制每個頻道的私訊存取
+- `groupPolicy` 管理群組聊天存取
+- `mentionPatterns` 在群組中要求特定文字或原生提及
+
+### 工作階段
+
+使用 `dmScope` 選項設定對話連續性：`main`、`per-peer`、`per-channel-peer` 或 `per-account-channel-peer`。執行緒繫結支援 Discord 指令如 `/focus`、`/unfocus`、`/agents` 和 `/session idle`。
+
+### 沙箱
+
+使用 `sandbox.mode` 啟用隔離的 Docker 容器：`off`、`non-main` 或 `all`。需先執行 `scripts/sandbox-setup.sh` 來建置映像檔。
+
+### 自動化
+
+- **Heartbeat：** 可設定持續時間和目標頻道的定期回報
+- **Cron 工作：** 具有工作階段保留和執行記錄修剪的背景自動化
+- **Webhooks：** 具有 token 驗證和 agent 路由的 HTTP 端點
+
+### 多 Agent 路由
+
+使用 `agents.list` 和 `bindings` 來執行多個具有獨立工作空間的 agent，實現頻道專屬路由。
+
+### 設定檔拆分
+
+使用 `$include` 將設定組織到多個檔案中，支援陣列的深度合併。
+
+## 熱重載行為
+
+| 模式 | 行為 |
+|------|------|
+| **hybrid**（預設） | 安全變更立即套用；關鍵變更自動重新啟動 |
+| **hot** | 僅套用安全變更；需要重啟時記錄警告 |
+| **restart** | 任何設定變更都重新啟動 |
+| **off** | 停用檔案監視 |
+
+大多數欄位可在無停機時間下熱套用。Gateway 伺服器設定、discovery 和基礎架構變更需要重新啟動。
+
+## RPC 速率限制
+
+控制平面寫入 RPC 每個 `deviceId+clientIp` 限制為每 60 秒 3 個請求。達到限制時，回應會包含 `retryAfterMs`。
+
+**config.apply** — 驗證並替換整個設定，支援選用的重啟延遲和 session key 參數
+
+**config.patch** — 使用 JSON merge patch 語意合併部分更新；`null` 會刪除鍵
+
+## 環境變數
+
+OpenClaw 從父程序、當前目錄的 `.env` 和 `~/.openclaw/.env` 讀取。設定支援：
+
+- **行內環境變數：** 在設定中的 `env.vars` 下直接定義
+- **替換：** 使用 `${VAR_NAME}` 語法在字串值中參考變數
+- **Shell 環境匯入：** 選用功能，從登入 shell 匯入缺少的變數
+- **SecretRef 物件：** 支援 `env`、`file` 和 `exec` 來源以處理敏感資料
+
+## 最小設定範例
+
+```json5
+{
+  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+}
+```
+
+如需完整的逐欄位詳細資訊，請參閱 Configuration Reference 文件。

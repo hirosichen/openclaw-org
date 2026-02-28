@@ -1,64 +1,74 @@
 ---
-title: Slack 整合
-description: 設定 Slack App 連接 OpenClaw
-order: 7
-section: channels
-officialDoc: https://github.com/nickthecook/openclaw
+title: "Slack"
+description: "整合 OpenClaw 與 Slack，支援 Socket Mode 和 HTTP Events API 模式的私訊和頻道通訊。"
+order: 8
+section: "channels"
+officialDoc: "https://docs.openclaw.ai/channels/slack"
 ---
 
-## Slack App 整合
+OpenClaw 的 Slack 整合支援私訊和頻道通訊，已達正式環境就緒狀態。提供兩種運作模式：Socket Mode（預設）和 HTTP Events API 模式。
 
-將 OpenClaw 整合到 Slack 工作區，讓團隊成員都能使用 AI 助理。
+## 設定需求
 
-## 設定步驟
+根據選擇的模式，需要不同的 token 類型。
 
-### 1. 建立 Slack App
+### Socket Mode
 
-1. 前往 [Slack API](https://api.slack.com/apps)
-2. 點選「Create New App」
-3. 選擇「From scratch」
-4. 設定 App 名稱和工作區
+需要以下 token：
 
-### 2. 設定權限
+- **App Token**（`xapp-...`）— 具有 `connections:write` 權限
+- **Bot Token**（`xoxb-...`）
 
-在 OAuth & Permissions 頁面新增以下 Scope：
+在 Slack 應用程式設定中啟用 Socket Mode。可透過設定檔或環境變數（`SLACK_APP_TOKEN` 和 `SLACK_BOT_TOKEN`）提供 token。
 
-- `chat:write`
-- `app_mentions:read`
-- `im:history`
-- `im:read`
-- `im:write`
+系統會訂閱特定的 bot 事件，包括提及、訊息、表情回應和頻道活動。
 
-### 3. 安裝到工作區
+### HTTP Events API 模式
 
-點選「Install to Workspace」並授權。記下 **Bot User OAuth Token**。
+需要 Bot Token 加上 Slack 應用程式設定中的 Signing Secret，適用於 Socket Mode 不可行的環境。
 
-### 4. 設定 OpenClaw
+## 存取控制
 
-```bash
-openclaw channel enable slack
-openclaw channel config slack \
-  --bot-token xoxb-YOUR-TOKEN \
-  --signing-secret YOUR_SIGNING_SECRET
-```
+### 私訊
 
-### 5. 設定 Event Subscriptions
+策略可設定為 `pairing`（預設）、`allowlist`、`open` 或 `disabled`。Slack 私訊預設會合併到代理的主工作階段。
 
-設定 Request URL 指向：
+### 頻道
 
-```
-https://your-domain.com/webhook/slack
-```
+頻道存取遵循類似模式，設定為 `open`、`allowlist` 或 `disabled`。頻道訊息預設需要提及，但可按頻道自訂。
 
-## 設定範例
+頻道 ID 和名稱在啟動時解析，除非設定了正規表示式模式或隱含的對話串回覆，否則需要明確的應用程式提及。
 
-```yaml
-channels:
-  slack:
-    enabled: true
-    bot_token: xoxb-YOUR-TOKEN
-    signing_secret: YOUR_SECRET
-    features:
-      slash_commands: true
-      thread_replies: true
-```
+## 對話串處理
+
+對話串支援三種回覆模式：
+
+- `off` — 不使用對話串
+- `first` — 僅回覆初始訊息
+- `all` — 回覆每則訊息
+
+新的對話串工作階段開始時，預設會取得 20 則現有訊息的對話串歷史。
+
+## 文字串流
+
+平台透過 Slack 原生 API 支援即時預覽串流，模式包括 `partial`（預設）、`block`、`progress` 或 `off`。需要在 Slack 應用程式設定中啟用「Agents and AI Apps」並具有 `assistant:write` 範圍。
+
+## 訊息處理
+
+- 文字分段遵循可設定的限制（預設 4,000 字元），可使用段落優先分割
+- 接收附件下載預設上限為 20 MB
+- 透過 Slack API 進行外送檔案傳遞
+
+## Slack 指令
+
+啟用後支援原生 Slack 指令，根據選項數量在按鈕區塊、選擇選單或非同步過濾之間調整參數選單。
+
+## 疑難排解
+
+常見問題包括：
+
+- **缺少回覆** — 檢查頻道策略和允許清單
+- **私訊問題** — 驗證私訊設定和配對核准
+- **Socket Mode 問題** — 確認 token 設定
+- **HTTP 模式問題** — 確認 webhook 設定
+- **指令問題** — 確保指令註冊與啟用模式相符

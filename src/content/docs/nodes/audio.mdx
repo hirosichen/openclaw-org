@@ -1,0 +1,147 @@
+---
+title: "音訊與語音訊息"
+description: "OpenClaw 中音訊與語音訊息轉錄功能的說明文件，包括設定選項、自動偵測方法、供應商設定與限制。"
+order: 2
+section: "nodes"
+officialDoc: "https://docs.openclaw.ai/nodes/audio"
+---
+
+## 運作方式
+
+- **媒體理解（音訊）**：如果音訊理解已啟用（或自動偵測），OpenClaw 會：
+  1. 找到第一個音訊附件（本機路徑或 URL）並在需要時下載。
+  2. 在傳送至各模型項目前強制執行 `maxBytes` 限制。
+  3. 按順序執行第一個合格的模型項目（供應商或 CLI）。
+  4. 如果失敗或跳過（大小/逾時），則嘗試下一個項目。
+  5. 成功後，將 `Body` 替換為 `[Audio]` 區塊並設定 `{{Transcript}}`。
+- **指令解析**：轉錄成功後，`CommandBody`/`RawBody` 會設定為逐字稿，使斜線指令仍可運作。
+- **詳細日誌**：在 `--verbose` 模式下，會記錄轉錄執行與主體替換的時機。
+
+## 自動偵測（預設）
+
+如果您**未設定模型**且 `tools.media.audio.enabled` **未**設為 `false`，OpenClaw 會按此順序自動偵測，並在第一個可用選項時停止：
+
+1. **本機 CLI**（如已安裝）
+   - `sherpa-onnx-offline`（需要 `SHERPA_ONNX_MODEL_DIR` 包含 encoder/decoder/joiner/tokens）
+   - `whisper-cli`（來自 `whisper-cpp`；使用 `WHISPER_CPP_MODEL` 或內建的 tiny 模型）
+   - `whisper`（Python CLI；自動下載模型）
+2. **Gemini CLI**（`gemini`）使用 `read_many_files`
+3. **供應商 key**（OpenAI → Groq → Deepgram → Google）
+
+要停用自動偵測，請設定 `tools.media.audio.enabled: false`。
+要自訂，請設定 `tools.media.audio.models`。
+注意：二進位偵測在 macOS/Linux/Windows 上為盡力而為；請確保 CLI 在 `PATH` 上（我們會展開 `~`），或設定具有完整指令路徑的明確 CLI 模型。
+
+## 設定範例
+
+### 供應商 + CLI 備援（OpenAI + Whisper CLI）
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        maxBytes: 20971520,
+        models: [
+          { provider: "openai", model: "gpt-4o-mini-transcribe" },
+          {
+            type: "cli",
+            command: "whisper",
+            args: ["--model", "base", "{{MediaPath}}"],
+            timeoutSeconds: 45,
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+### 僅供應商，搭配範圍閘控
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        scope: {
+          default: "allow",
+          rules: [{ action: "deny", match: { chatType: "group" } }],
+        },
+        models: [{ provider: "openai", model: "gpt-4o-mini-transcribe" }],
+      },
+    },
+  },
+}
+```
+
+### 僅供應商（Deepgram）
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        models: [{ provider: "deepgram", model: "nova-3" }],
+      },
+    },
+  },
+}
+```
+
+### 僅供應商（Mistral Voxtral）
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        models: [{ provider: "mistral", model: "voxtral-mini-latest" }],
+      },
+    },
+  },
+}
+```
+
+## 注意事項與限制
+
+- 供應商認證遵循標準模型認證順序（auth profiles、環境變數、`models.providers.*.apiKey`）。
+- 使用 `provider: "deepgram"` 時，Deepgram 會讀取 `DEEPGRAM_API_KEY`。
+- Deepgram 設定詳情：[Deepgram (audio transcription)](/docs/providers/deepgram)。
+- Mistral 設定詳情：[Mistral](/docs/providers/mistral)。
+- 音訊供應商可透過 `tools.media.audio` 覆寫 `baseUrl`、`headers` 和 `providerOptions`。
+- 預設大小上限為 20MB（`tools.media.audio.maxBytes`）。超大音訊會跳過該模型並嘗試下一個項目。
+- 音訊的預設 `maxChars` 為**未設定**（完整逐字稿）。設定 `tools.media.audio.maxChars` 或每個項目的 `maxChars` 以裁剪輸出。
+- OpenAI 自動預設為 `gpt-4o-mini-transcribe`；設定 `model: "gpt-4o-transcribe"` 以獲得更高精確度。
+- 使用 `tools.media.audio.attachments` 處理多個語音訊息（`mode: "all"` + `maxAttachments`）。
+- 逐字稿可作為範本變數 `{{Transcript}}` 使用。
+- CLI 標準輸出有上限（5MB）；請保持 CLI 輸出簡潔。
+
+## 群組中的提及偵測
+
+當群組聊天設定 `requireMention: true` 時，OpenClaw 會在檢查提及**之前**轉錄音訊。這使得包含提及的語音訊息也能被處理。
+
+**運作方式：**
+
+1. 如果語音訊息沒有文字主體且群組需要提及，OpenClaw 會執行「預檢」轉錄。
+2. 逐字稿會被檢查是否包含提及模式（例如 `@BotName`、表情符號觸發器）。
+3. 如果找到提及，訊息會進入完整的回覆管線。
+4. 逐字稿用於提及偵測，讓語音訊息能通過提及閘門。
+
+**備援行為：**
+
+- 如果預檢期間轉錄失敗（逾時、API 錯誤等），訊息會基於純文字提及偵測進行處理。
+- 這確保混合訊息（文字 + 音訊）不會被錯誤丟棄。
+
+**範例：** 使用者在設定 `requireMention: true` 的 Telegram 群組中發送一則語音訊息說「Hey @Claude, what's the weather?」。語音訊息會被轉錄、偵測到提及，代理便會回覆。
+
+## 注意事項
+
+- 範圍規則使用先匹配優先。`chatType` 正規化為 `direct`、`group` 或 `room`。
+- 確保您的 CLI 以 exit code 0 退出並印出純文字；JSON 需要透過 `jq -r .text` 處理。
+- 保持合理的逾時設定（`timeoutSeconds`，預設 60 秒）以避免阻塞回覆佇列。
+- 預檢轉錄僅處理**第一個**音訊附件以進行提及偵測。額外音訊在主要媒體理解階段處理。

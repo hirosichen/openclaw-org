@@ -1,0 +1,137 @@
+---
+title: "除錯"
+description: "執行期除錯覆蓋、Gateway watch 模式和原始串流日誌工具"
+order: 4
+section: "help"
+officialDoc: "https://docs.openclaw.ai/help/debugging"
+---
+
+## 執行期除錯覆蓋
+
+`/debug` 指令啟用僅記憶體中的設定調整，而非寫入磁碟。此功能預設停用，需要 `commands.debug: true` 來啟用。
+
+可用指令：
+
+```bash
+/debug show
+/debug set messages.responsePrefix="[openclaw]"
+/debug unset messages.responsePrefix
+/debug reset
+```
+
+`reset` 指令會清除所有覆蓋並恢復為磁碟上的設定。
+
+## Gateway Watch 模式
+
+使用 `pnpm gateway:watch` 啟動具有檔案監視的 Gateway，以便快速迭代。此指令對應至：
+
+```bash
+node --watch-path src --watch-path tsconfig.json --watch-path package.json --watch-preserve-output scripts/run-node.mjs gateway --force
+```
+
+Gateway CLI 旗標可附加在 `gateway:watch` 之後，每次重啟時傳遞。
+
+## Dev Profile + Dev Gateway (--dev)
+
+兩個 `--dev` 旗標提供隔離的除錯環境：
+
+### Global --dev（profile）
+
+將狀態隔離在 `~/.openclaw-dev` 下，Gateway 連接埠預設為 `19001`。
+
+### gateway --dev
+
+在缺少時自動建立預設設定和工作空間，跳過 BOOTSTRAP.md。
+
+### 建議流程
+
+```bash
+pnpm gateway:dev
+OPENCLAW_PROFILE=dev openclaw tui
+```
+
+### Profile 隔離效果
+
+- `OPENCLAW_PROFILE=dev`
+- `OPENCLAW_STATE_DIR=~/.openclaw-dev`
+- `OPENCLAW_CONFIG_PATH=~/.openclaw-dev/openclaw.json`
+- `OPENCLAW_GATEWAY_PORT=19001`
+
+### Dev 啟動動作
+
+- 若不存在則寫入最小設定
+- 設定 `gateway.mode=local` 搭配 loopback 繫結
+- 設定 `agent.workspace` 至 dev 工作空間
+- 設定 `agent.skipBootstrap=true`
+- 建立工作空間檔案：AGENTS.md、SOUL.md、TOOLS.md、IDENTITY.md、USER.md、HEARTBEAT.md
+- 預設身分：C3-PO（protocol droid）
+- 透過 `OPENCLAW_SKIP_CHANNELS=1` 跳過頻道 provider
+
+### 重設流程
+
+```bash
+pnpm gateway:dev:reset
+```
+
+此指令會清除設定、憑證、工作階段和 dev 工作空間（使用 `trash` 而非 `rm`），然後重新建立預設 dev 設定。
+
+使用明確環境變數：
+
+```bash
+OPENCLAW_PROFILE=dev openclaw gateway --dev --reset
+```
+
+在啟動 dev 模式前停止現有的非 dev Gateway：
+
+```bash
+openclaw gateway stop
+```
+
+## 原始串流日誌（OpenClaw）
+
+OpenClaw 在過濾/格式化之前記錄原始 assistant 串流，揭示 reasoning 是以純文字還是獨立 thinking 區塊到達。
+
+透過 CLI 啟用：
+
+```bash
+pnpm gateway:watch --raw-stream
+```
+
+使用路徑覆蓋：
+
+```bash
+pnpm gateway:watch --raw-stream --raw-stream-path ~/.openclaw/logs/raw-stream.jsonl
+```
+
+環境變數：
+
+```bash
+OPENCLAW_RAW_STREAM=1
+OPENCLAW_RAW_STREAM_PATH=~/.openclaw/logs/raw-stream.jsonl
+```
+
+預設位置：`~/.openclaw/logs/raw-stream.jsonl`
+
+## 原始區塊日誌（pi-mono）
+
+在解析之前擷取原始 OpenAI 相容區塊：
+
+```bash
+PI_RAW_STREAM=1
+```
+
+使用路徑覆蓋：
+
+```bash
+PI_RAW_STREAM_PATH=~/.pi-mono/logs/raw-openai-completions.jsonl
+```
+
+預設位置：`~/.pi-mono/logs/raw-openai-completions.jsonl`
+
+> 僅由使用 pi-mono 的 `openai-completions` provider 的程序發出。
+
+## 安全注意事項
+
+- 原始串流日誌可能包含完整的 prompt、工具輸出和使用者資料
+- 保持日誌在本機並在除錯後刪除
+- 在分享日誌前清除密鑰和個人識別資訊

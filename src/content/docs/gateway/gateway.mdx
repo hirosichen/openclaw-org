@@ -1,0 +1,192 @@
+---
+title: "Gateway 操作手冊"
+description: "Gateway 服務的第一天啟動與第二天維運指南"
+order: 1
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway"
+---
+
+## 5 分鐘本機啟動
+
+**步驟 1：啟動 Gateway**
+
+```bash
+openclaw gateway --port 18789
+# debug/trace 鏡像輸出至 stdio
+openclaw gateway --port 18789 --verbose
+# 強制終止所選連接埠上的監聽器，然後啟動
+openclaw gateway --force
+```
+
+**步驟 2：驗證服務健康狀態**
+
+```bash
+openclaw gateway status
+openclaw status
+openclaw logs --follow
+```
+
+健康基準：`Runtime: running` 與 `RPC probe: ok`。
+
+**步驟 3：驗證頻道就緒狀態**
+
+```bash
+openclaw channels status --probe
+```
+
+> 設定檔重新載入會監視作用中的設定檔路徑（從 profile/state 預設值解析，或當 `OPENCLAW_CONFIG_PATH` 設定時使用該值）。預設模式為 `gateway.reload.mode="hybrid"`。
+
+## 執行模型
+
+- 一個常駐程序負責路由、控制平面和頻道連線
+- 單一多工連接埠用於 WebSocket 控制/RPC、HTTP API、Control UI 和 hooks
+- 預設繫結模式：`loopback`
+- 預設需要驗證（`gateway.auth.token` / `gateway.auth.password`，或環境變數）
+
+### 連接埠與繫結優先順序
+
+| 設定 | 解析順序 |
+|------|----------|
+| Gateway 連接埠 | `--port` → `OPENCLAW_GATEWAY_PORT` → `gateway.port` → `18789` |
+| 繫結模式 | CLI/override → `gateway.bind` → `loopback` |
+
+### 熱重載模式
+
+| 模式 | 行為 |
+|------|------|
+| `off` | 不重新載入設定 |
+| `hot` | 僅套用熱安全變更 |
+| `restart` | 需要重載的變更時重新啟動 |
+| `hybrid`（預設） | 安全時熱套用，需要時重新啟動 |
+
+## 操作指令集
+
+```bash
+openclaw gateway status
+openclaw gateway status --deep
+openclaw gateway status --json
+openclaw gateway install
+openclaw gateway restart
+openclaw gateway stop
+openclaw secrets reload
+openclaw logs --follow
+openclaw doctor
+```
+
+## 遠端存取
+
+**建議方式**：Tailscale/VPN。
+**備用方式**：SSH tunnel。
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+然後在本機將用戶端連線至 `ws://127.0.0.1:18789`。
+
+> 如果 Gateway 已設定驗證，用戶端即使透過 SSH tunnel 也必須傳送驗證資訊（`token`/`password`）。
+
+## 服務監管與生命週期
+
+### macOS (launchd)
+
+```bash
+openclaw gateway install
+openclaw gateway status
+openclaw gateway restart
+openclaw gateway stop
+```
+
+LaunchAgent 標籤為 `ai.openclaw.gateway`（預設）或 `ai.openclaw.<profile>`（具名 profile）。
+
+### Linux (systemd user)
+
+```bash
+openclaw gateway install
+systemctl --user enable --now openclaw-gateway[-<profile>].service
+openclaw gateway status
+```
+
+若要在登出後持續執行：
+
+```bash
+sudo loginctl enable-linger <user>
+```
+
+### Linux（系統服務）
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now openclaw-gateway[-<profile>].service
+```
+
+## 同一主機上的多個 Gateway
+
+大多數設定應只執行一個 Gateway。僅在需要嚴格隔離/冗餘時才使用多個。
+
+**每個實例的檢查清單**：
+
+- 唯一的 `gateway.port`
+- 唯一的 `OPENCLAW_CONFIG_PATH`
+- 唯一的 `OPENCLAW_STATE_DIR`
+- 唯一的 `agents.defaults.workspace`
+
+**範例**：
+
+```bash
+OPENCLAW_CONFIG_PATH=~/.openclaw/a.json OPENCLAW_STATE_DIR=~/.openclaw-a openclaw gateway --port 19001
+OPENCLAW_CONFIG_PATH=~/.openclaw/b.json OPENCLAW_STATE_DIR=~/.openclaw-b openclaw gateway --port 19002
+```
+
+### Dev Profile 快速路徑
+
+```bash
+openclaw --dev setup
+openclaw --dev gateway --allow-unconfigured
+openclaw --dev status
+```
+
+## 協定快速參考（操作者視角）
+
+- 第一個用戶端訊框必須是 `connect`
+- Gateway 回傳 `hello-ok` 快照，包含 presence、health、stateVersion、uptimeMs、limits/policy
+- 請求：`req(method, params)` → `res(ok/payload|error)`
+- 常見事件：`connect.challenge`、`agent`、`chat`、`presence`、`tick`、`health`、`heartbeat`、`shutdown`
+
+**Agent 執行為兩階段**：
+
+1. 立即的已接受確認（`status:"accepted"`）
+2. 最終完成回應，伴隨串流 agent 事件
+
+## 操作檢查
+
+### 存活檢查
+
+開啟 WebSocket 並傳送 `connect`。預期收到包含快照的 `hello-ok` 回應。
+
+### 就緒檢查
+
+```bash
+openclaw gateway status
+openclaw channels status --probe
+openclaw health
+```
+
+### 間隙恢復
+
+事件不會重播。當出現序列間隙時，在繼續之前重新整理狀態。
+
+## 常見失敗特徵
+
+| 特徵 | 可能問題 |
+|------|----------|
+| `refusing to bind gateway ... without auth` | 非 loopback 繫結時未設定 token/password |
+| `another gateway instance is already listening` / `EADDRINUSE` | 連接埠衝突 |
+| `Gateway start blocked: set gateway.mode=local` | 設定為 remote 模式 |
+| `unauthorized` during connect | 用戶端與 Gateway 間的驗證不匹配 |
+
+## 安全保證
+
+- Gateway 協定用戶端在無法使用時快速失敗（無隱式直接頻道回退）
+- 無效或非 connect 的第一個訊框會被拒絕並關閉
+- 優雅關閉會在 socket 關閉前發送 `shutdown` 事件

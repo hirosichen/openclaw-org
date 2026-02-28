@@ -1,0 +1,37 @@
+---
+title: "日誌記錄"
+description: "主控台輸出與檔案型 JSON 日誌的管理與設定"
+order: 9
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/logging"
+---
+
+## 概述
+
+OpenClaw 提供兩個日誌表面：終端機中可見的主控台輸出，以及由 Gateway logger 管理的檔案型 JSON 日誌。
+
+## 檔案型日誌
+
+系統在 `/tmp/openclaw/` 維護每日輪替的滾動日誌檔案。`~/.openclaw/openclaw.json` 中的設定選項透過 `logging.file` 和 `logging.level` 設定控制檔案路徑和詳細程度。
+
+Control UI 的 Logs 分頁透過 Gateway 追蹤這些檔案，CLI 透過 `openclaw logs --follow` 提供等效功能。
+
+## 詳細程度控制
+
+檔案和主控台日誌之間有一個重要區別：`--verbose` 旗標僅影響主控台詳細程度，不會提高檔案日誌等級。若要在持久日誌中擷取詳細資訊，請將 `logging.level` 設為 `debug` 或 `trace`。
+
+## 主控台輸出管理
+
+CLI 擷取標準主控台方法並寫入檔案，同時維持 stdout/stderr 輸出。三個獨立控制管理主控台行為：
+
+- `logging.consoleLevel`（預設為 `info`）
+- `logging.consoleStyle` 選項：`pretty`、`compact` 或 `json`
+- `logging.redactSensitive` 用於在工具摘要中遮蔽 token
+
+## WebSocket 協定日誌
+
+Gateway 區分一般模式（僅顯示錯誤和慢速呼叫，閾值 >=50ms）和詳細模式（顯示所有流量）。`--ws-log` 旗標提供樣式變化：`auto`、`compact` 或 `full`。
+
+## 主控台格式化功能
+
+輸出包含 TTY 感知格式化，具有子系統前綴、色彩編碼和結構化組織，以便在不同終端機環境中提供可讀性。
