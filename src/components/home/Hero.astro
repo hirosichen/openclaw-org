@@ -2,34 +2,46 @@
 import Button from '../ui/Button.astro';
 ---
 
-<section class="relative overflow-hidden py-20 md:py-28">
+<section class="relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28">
   <!-- Animated gradient background -->
   <div class="absolute inset-0 -z-10">
-    <div class="absolute inset-0 bg-gradient-to-br from-accent/10 via-base to-mauve/10"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl animate-pulse" style="animation-duration: 4s;"></div>
-    <div class="absolute top-1/4 right-1/4 w-[300px] h-[300px] bg-mauve/5 rounded-full blur-3xl animate-pulse" style="animation-duration: 6s; animation-delay: 1s;"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-accent/8 via-base to-mauve/8"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl animate-pulse" style="animation-duration: 4s;"></div>
+    <div class="absolute top-1/4 right-1/4 w-[250px] h-[250px] bg-mauve/5 rounded-full blur-3xl animate-pulse" style="animation-duration: 6s; animation-delay: 1s;"></div>
     <!-- Dot grid overlay -->
-    <div class="absolute inset-0 dot-grid opacity-30"></div>
+    <div class="absolute inset-0 dot-grid opacity-20"></div>
   </div>
 
   <div class="max-w-4xl mx-auto px-4 text-center">
-    <div class="text-6xl mb-6 animate-on-scroll" style="animation-delay: 0ms;">🦞</div>
-    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-on-scroll" style="animation-delay: 100ms;">
+    <!-- Version badge -->
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-surface-0/60 bg-surface-0/20 text-xs text-subtext-0 mb-8 animate-on-scroll" style="animation-delay: 0ms;">
+      <span class="w-1.5 h-1.5 rounded-full bg-green animate-pulse"></span>
+      開源專案 · MIT 授權
+    </div>
+
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-on-scroll" style="animation-delay: 80ms;">
       <span class="text-text">OpenClaw</span>
       <br />
       <span class="bg-gradient-to-r from-accent to-peach bg-clip-text text-transparent">AI 代理的跨平台聊天閘道器</span>
     </h1>
-    <p class="text-lg md:text-xl text-subtext-0 max-w-2xl mx-auto mb-10 leading-relaxed animate-on-scroll" style="animation-delay: 200ms;">
-      跨 WhatsApp、Telegram、Discord、iMessage 等聊天 App 的作業系統級 AI 代理閘道器。
-      傳送訊息，從口袋中取得代理回應。自架、開源、MIT 授權。
+    <p class="text-lg md:text-xl text-subtext-1 max-w-2xl mx-auto mb-10 leading-relaxed animate-on-scroll" style="animation-delay: 160ms;">
+      跨 WhatsApp、Telegram、Discord、iMessage 等聊天 App 的作業系統級 AI 代理閘道器。傳送訊息，從口袋中取得代理回應。
     </p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll" style="animation-delay: 300ms;">
+    <div class="flex flex-col sm:flex-row gap-4 justify-center animate-on-scroll" style="animation-delay: 240ms;">
       <Button href="/docs/start/getting-started" variant="primary" size="lg">
         開始使用 →
       </Button>
       <Button href="https://github.com/openclaw/openclaw" variant="secondary" size="lg">
         GitHub 原始碼
       </Button>
+    </div>
+
+    <!-- Tech stack tags -->
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-10 animate-on-scroll" style="animation-delay: 320ms;">
+      <span class="text-xs text-overlay-0 font-mono px-2.5 py-1 rounded border border-surface-0/40 bg-surface-0/10">Node 22+</span>
+      <span class="text-xs text-overlay-0 font-mono px-2.5 py-1 rounded border border-surface-0/40 bg-surface-0/10">自架部署</span>
+      <span class="text-xs text-overlay-0 font-mono px-2.5 py-1 rounded border border-surface-0/40 bg-surface-0/10">多頻道</span>
+      <span class="text-xs text-overlay-0 font-mono px-2.5 py-1 rounded border border-surface-0/40 bg-surface-0/10">多代理</span>
     </div>
   </div>
 

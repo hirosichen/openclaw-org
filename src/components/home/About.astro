@@ -1,32 +1,40 @@
 ---
 const points = [
   {
-    icon: '🏠',
     title: '自架部署',
     description: '在你自己的硬體上運行，你的規則。完全掌控你的 AI 代理。',
     color: 'text-green',
     glow: 'group-hover:shadow-green/10',
+    iconColor: 'stroke-green',
+    // Server icon
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
   },
   {
-    icon: '🌐',
     title: '多頻道',
     description: '一個 Gateway 同時服務 WhatsApp、Telegram、Discord、iMessage 等。',
     color: 'text-blue',
     glow: 'group-hover:shadow-blue/10',
+    iconColor: 'stroke-blue',
+    // Network hub icon
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v7"/><path d="M12 15v7"/><path d="m4.93 4.93 4.95 4.95"/><path d="m14.12 14.12 4.95 4.95"/><path d="M2 12h7"/><path d="M15 12h7"/><path d="m4.93 19.07 4.95-4.95"/><path d="m14.12 9.88 4.95-4.95"/></svg>`,
   },
   {
-    icon: '🤖',
     title: '代理原生',
     description: '為程式碼代理而生，支援工具使用、會話、記憶和多代理路由。',
     color: 'text-mauve',
     glow: 'group-hover:shadow-mauve/10',
+    iconColor: 'stroke-mauve',
+    // CPU/chip icon
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>`,
   },
   {
-    icon: '📖',
     title: '開放原始碼',
     description: 'MIT 授權，社群驅動。Node 22+、一組 API 金鑰，5 分鐘即可啟動。',
     color: 'text-peach',
     glow: 'group-hover:shadow-peach/10',
+    iconColor: 'stroke-peach',
+    // Code brackets icon
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
   },
 ];
 ---
@@ -40,7 +48,7 @@ const points = [
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
       {points.map((point) => (
         <div class:list={['group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl', point.glow]}>
-          <div class:list={['text-4xl mb-4 transition-transform duration-300 group-hover:scale-110']}>{point.icon}</div>
+          <div class:list={['mb-4 transition-transform duration-300 group-hover:scale-110', point.color]} set:html={point.svg} />
           <h3 class:list={['text-lg font-bold mb-2', point.color]}>{point.title}</h3>
           <p class="text-sm text-subtext-0 leading-relaxed">{point.description}</p>
         </div>

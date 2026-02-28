@@ -7,10 +7,34 @@ interface Props {
 const { type = 'info', title } = Astro.props;
 
 const config = {
-  info: { icon: 'ℹ️', bg: 'bg-blue/10', border: 'border-blue/30', titleColor: 'text-blue' },
-  tip: { icon: '💡', bg: 'bg-green/10', border: 'border-green/30', titleColor: 'text-green' },
-  warning: { icon: '⚠️', bg: 'bg-yellow/10', border: 'border-yellow/30', titleColor: 'text-yellow' },
-  danger: { icon: '🚨', bg: 'bg-accent/10', border: 'border-accent/30', titleColor: 'text-accent' },
+  info: {
+    bg: 'bg-blue/10',
+    border: 'border-blue/30',
+    titleColor: 'text-blue',
+    iconColor: 'text-blue',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+  },
+  tip: {
+    bg: 'bg-green/10',
+    border: 'border-green/30',
+    titleColor: 'text-green',
+    iconColor: 'text-green',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
+  },
+  warning: {
+    bg: 'bg-yellow/10',
+    border: 'border-yellow/30',
+    titleColor: 'text-yellow',
+    iconColor: 'text-yellow',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  },
+  danger: {
+    bg: 'bg-accent/10',
+    border: 'border-accent/30',
+    titleColor: 'text-accent',
+    iconColor: 'text-accent',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+  },
 };
 
 const c = config[type];
@@ -19,7 +43,7 @@ const c = config[type];
 <div class:list={['rounded-lg border-l-4 p-4 my-6', c.bg, c.border]}>
   {title && (
     <div class:list={['flex items-center gap-2 font-bold text-sm mb-2', c.titleColor]}>
-      <span>{c.icon}</span>
+      <span class={c.iconColor} set:html={c.svg} />
       <span>{title}</span>
     </div>
   )}

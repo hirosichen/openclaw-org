@@ -241,6 +241,16 @@ html.light .dot-grid {
   background: var(--color-accent-hover);
 }
 
+/* ── Prose blockquote: remove auto-generated quotes ── */
+.prose blockquote p::before,
+.prose blockquote p::after {
+  content: none !important;
+}
+.prose blockquote {
+  font-style: normal;
+  quotes: none;
+}
+
 /* ── TOC scroll spy ── */
 .toc-link.active {
   color: var(--color-accent) !important;
