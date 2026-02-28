@@ -4,9 +4,9 @@
 
 <div
   id="disclaimer-banner"
-  class="relative bg-accent/90 text-white text-center text-sm py-2 px-4 z-50"
+  class="relative bg-accent/90 text-white text-center text-sm py-2 px-10 sm:px-4 z-50"
 >
-  <p class="max-w-5xl mx-auto">
+  <p class="max-w-5xl mx-auto pr-4">
     ⚠️ 本網站為獨立社群專案，與 OpenClaw 官方無任何關聯。內容僅供參考。
     <a href="/about" class="underline underline-offset-2 hover:text-accent-light ml-1">
       了解更多
@@ -14,7 +14,7 @@
   </p>
   <button
     id="dismiss-disclaimer"
-    class="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-lg leading-none cursor-pointer"
+    class="absolute right-2 top-1/2 -translate-y-1/2 text-white/80 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors text-lg leading-none cursor-pointer"
     aria-label="關閉免責聲明"
   >
     ✕
@@ -23,6 +23,12 @@
 
 <script>
   document.getElementById('dismiss-disclaimer')?.addEventListener('click', () => {
-    document.getElementById('disclaimer-banner')?.remove();
+    const banner = document.getElementById('disclaimer-banner');
+    if (banner) {
+      banner.style.transition = 'transform 0.3s, opacity 0.3s';
+      banner.style.transform = 'translateY(-100%)';
+      banner.style.opacity = '0';
+      setTimeout(() => banner.remove(), 300);
+    }
   });
 </script>

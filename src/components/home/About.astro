@@ -1,38 +1,42 @@
 ---
-import Card from '../ui/Card.astro';
-
 const points = [
   {
     icon: '🏠',
     title: '本機運行',
     description: '所有資料留在你的裝置上。不經過第三方伺服器，你的隱私完全受到保護。',
+    color: 'text-green',
+    glow: 'group-hover:shadow-green/10',
   },
   {
     icon: '💬',
     title: '聊天整合',
     description: '透過 LINE、Telegram、WhatsApp 等聊天 App 與你的 AI 助理互動。',
+    color: 'text-blue',
+    glow: 'group-hover:shadow-blue/10',
   },
   {
     icon: '🔒',
     title: '隱私優先',
     description: '開源透明，你可以完全審查程式碼。沒有追蹤、沒有廣告、沒有資料收集。',
+    color: 'text-mauve',
+    glow: 'group-hover:shadow-mauve/10',
   },
 ];
 ---
 
-<section class="py-20 px-4">
+<section class="py-16 px-4">
   <div class="max-w-6xl mx-auto">
-    <h2 class="text-3xl font-bold text-center text-text mb-4">什麼是 OpenClaw？</h2>
-    <p class="text-center text-subtext-0 max-w-2xl mx-auto mb-12">
+    <h2 class="text-3xl font-bold text-center text-text mb-3 animate-on-scroll">什麼是 OpenClaw？</h2>
+    <p class="text-center text-subtext-0 max-w-2xl mx-auto mb-10 animate-on-scroll">
       OpenClaw 是一個在你的電腦上運行的個人 AI 助理平台，讓你透過熟悉的聊天 App 與 AI 互動。
     </p>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
       {points.map((point) => (
-        <Card>
-          <div class="text-3xl mb-3">{point.icon}</div>
-          <h3 class="text-lg font-bold text-text mb-2">{point.title}</h3>
+        <div class:list={['group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl', point.glow]}>
+          <div class:list={['text-4xl mb-4 transition-transform duration-300 group-hover:scale-110']}>{point.icon}</div>
+          <h3 class:list={['text-lg font-bold mb-2', point.color]}>{point.title}</h3>
           <p class="text-sm text-subtext-0 leading-relaxed">{point.description}</p>
-        </Card>
+        </div>
       ))}
     </div>
   </div>

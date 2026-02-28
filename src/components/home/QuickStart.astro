@@ -20,18 +20,20 @@ const steps = [
 ];
 ---
 
-<section class="py-20 px-4 bg-mantle/50">
+<section class="py-16 px-4 relative">
+  <div class="absolute inset-0 bg-mantle/50 -z-10"></div>
+
   <div class="max-w-3xl mx-auto">
-    <h2 class="text-3xl font-bold text-center text-text mb-4">快速開始</h2>
-    <p class="text-center text-subtext-0 mb-12">
+    <h2 class="text-3xl font-bold text-center text-text mb-3 animate-on-scroll">快速開始</h2>
+    <p class="text-center text-subtext-0 mb-10 animate-on-scroll">
       只需三個步驟，即可在你的電腦上啟動 AI 助理。
     </p>
 
-    <div class="space-y-6">
+    <div class="space-y-5 stagger-children">
       {steps.map((s) => (
-        <div class="glass rounded-xl p-6">
+        <div class="glass rounded-xl p-6 transition-all duration-300 hover:border-accent/30">
           <div class="flex items-center gap-4 mb-3">
-            <span class="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold">
+            <span class="flex-shrink-0 w-9 h-9 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-accent/20">
               {s.step}
             </span>
             <h3 class="text-lg font-bold text-text">{s.title}</h3>
@@ -41,7 +43,7 @@ const steps = [
       ))}
     </div>
 
-    <div class="text-center mt-10">
+    <div class="text-center mt-10 animate-on-scroll">
       <Button href="/docs/getting-started/installation" variant="primary" size="lg">
         查看完整安裝指南 →
       </Button>

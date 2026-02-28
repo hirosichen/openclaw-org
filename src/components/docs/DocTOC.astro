@@ -23,7 +23,7 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
             <a
               href={`#${h.slug}`}
               class:list={[
-                'block transition-colors hover:text-accent',
+                'toc-link block transition-colors hover:text-accent border-l-2 border-transparent -ml-[2px]',
                 h.depth === 2 ? 'pl-3 text-subtext-0' : 'pl-6 text-overlay-1',
               ]}
             >
