@@ -1,0 +1,57 @@
+---
+title: Discord 整合
+description: 設定 Discord Bot 連接 OpenClaw
+order: 5
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Discord Bot 整合
+
+將 OpenClaw 連接到 Discord，在伺服器或私訊中使用 AI 助理。
+
+## 設定步驟
+
+### 1. 建立 Discord Application
+
+1. 前往 [Discord Developer Portal](https://discord.com/developers/applications)
+2. 點選「New Application」建立應用程式
+3. 在「Bot」頁面建立 Bot
+4. 記下 **Bot Token**
+
+### 2. 邀請 Bot 到伺服器
+
+使用 OAuth2 URL Generator 生成邀請連結，並選擇所需權限。
+
+### 3. 設定 OpenClaw
+
+```bash
+openclaw channel enable discord
+openclaw channel config discord --bot-token YOUR_BOT_TOKEN
+```
+
+### 4. 測試
+
+```bash
+openclaw channel test discord
+```
+
+## Discord 特有功能
+
+- **Slash Commands** — `/ask` 快速提問
+- **Thread 支援** — 在討論串中對話
+- **Embed** — 豐富的嵌入式訊息
+- **多伺服器** — 同時服務多個伺服器
+
+## 設定範例
+
+```yaml
+channels:
+  discord:
+    enabled: true
+    bot_token: YOUR_BOT_TOKEN
+    features:
+      slash_commands: true
+      thread_support: true
+      embed_responses: true
+```

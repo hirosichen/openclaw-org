@@ -1,0 +1,74 @@
+---
+title: 遠端存取
+description: 設定從外部網路安全存取 OpenClaw
+order: 2
+section: gateway
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 遠端存取
+
+預設情況下，OpenClaw 只接受本機連線。如果你需要從外部網路存取（例如接收聊天頻道的 Webhook），需要設定遠端存取。
+
+## 使用 ngrok（開發環境）
+
+最簡單的方式是使用 ngrok 建立隧道：
+
+```bash
+# 安裝 ngrok
+brew install ngrok   # macOS
+# 或
+snap install ngrok   # Linux
+
+# 建立隧道
+ngrok http 3000
+```
+
+ngrok 會提供一個公開 URL（如 `https://abc123.ngrok.io`），將此 URL 設定為各頻道的 Webhook。
+
+## 使用反向代理（正式環境）
+
+### Nginx 設定範例
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name openclaw.yourdomain.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Caddy 設定範例
+
+```
+openclaw.yourdomain.com {
+    reverse_proxy localhost:3000
+}
+```
+
+Caddy 會自動處理 SSL 憑證。
+
+## 使用 OpenClaw 內建隧道
+
+```bash
+openclaw tunnel start
+```
+
+這會建立一個加密隧道，無需額外設定。
+
+## 安全注意事項
+
+- 務必使用 HTTPS
+- 設定身份驗證
+- 啟用速率限制
+- 限制允許的 IP 範圍

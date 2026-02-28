@@ -1,0 +1,67 @@
+---
+title: 常見問題
+description: OpenClaw 常見問題與解答
+order: 1
+section: help
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 一般問題
+
+### OpenClaw 是什麼？
+
+OpenClaw 是一個在你的電腦上運行的開源個人 AI 助理平台。它可以連接各種聊天 App（LINE、Telegram、WhatsApp 等），讓你透過熟悉的介面與 AI 互動。
+
+### OpenClaw 是免費的嗎？
+
+OpenClaw 本身是免費開源軟體。但使用雲端 AI 模型（如 OpenAI、Anthropic）需要支付相應的 API 費用。你也可以選擇使用免費的本地模型。
+
+### 我的資料安全嗎？
+
+是的。OpenClaw 在你的本機運行，所有資料（對話記錄、記憶、設定）都儲存在你的裝置上，不會上傳到任何第三方伺服器。
+
+### 支援哪些 AI 模型？
+
+OpenClaw 支援以下模型提供者：
+
+- OpenAI（GPT-4、GPT-3.5）
+- Anthropic（Claude）
+- Google（Gemini）
+- 本地模型（透過 Ollama、llama.cpp 等）
+
+## 安裝相關
+
+### 安裝失敗怎麼辦？
+
+1. 確認系統需求符合
+2. 嘗試使用套件管理器安裝
+3. 查看[疑難排解指南](/docs/help/troubleshooting)
+4. 前往 GitHub Issues 搜尋類似問題
+
+### 可以在樹莓派上運行嗎？
+
+可以。OpenClaw 支援 ARM64 架構，可以在 Raspberry Pi 4 或更新版本上運行。建議搭配本地 AI 模型以獲得最佳效能。
+
+## 使用相關
+
+### 如何更換 AI 模型？
+
+```bash
+openclaw config set model anthropic:claude-3-opus
+```
+
+### 如何重置所有設定？
+
+```bash
+openclaw config reset
+```
+
+### 可以同時使用多個聊天頻道嗎？
+
+可以。OpenClaw 支援同時啟用多個頻道，所有頻道共享相同的代理和記憶系統。
+
+## 關於本網站
+
+### 這個網站和 OpenClaw 官方有關係嗎？
+
+**沒有**。本網站是獨立社群專案，與 OpenClaw 官方無任何關聯。內容僅供參考，可能與官方最新版本有出入。詳見[完整免責聲明](/about)。

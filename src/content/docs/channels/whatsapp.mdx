@@ -1,0 +1,60 @@
+---
+title: WhatsApp 整合
+description: 設定 WhatsApp Business API 連接 OpenClaw
+order: 4
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## WhatsApp 整合
+
+透過 WhatsApp Business API 將 OpenClaw 連接到 WhatsApp。
+
+## 前置需求
+
+- Meta Business 帳號
+- WhatsApp Business API 存取權限
+- 已驗證的電話號碼
+
+## 設定步驟
+
+### 1. 設定 Meta Business
+
+1. 前往 [Meta for Developers](https://developers.facebook.com/)
+2. 建立應用程式並啟用 WhatsApp 產品
+3. 取得 **Access Token** 和 **Phone Number ID**
+
+### 2. 設定 OpenClaw
+
+```bash
+openclaw channel enable whatsapp
+openclaw channel config whatsapp \
+  --access-token YOUR_ACCESS_TOKEN \
+  --phone-number-id YOUR_PHONE_NUMBER_ID
+```
+
+### 3. 設定 Webhook
+
+在 Meta Developer Console 設定 Webhook URL，指向：
+
+```
+https://your-domain.com/webhook/whatsapp
+```
+
+### 4. 驗證
+
+```bash
+openclaw channel test whatsapp
+```
+
+## 設定範例
+
+```yaml
+channels:
+  whatsapp:
+    enabled: true
+    access_token: YOUR_TOKEN
+    phone_number_id: YOUR_PHONE_ID
+    webhook_path: /webhook/whatsapp
+    verify_token: YOUR_VERIFY_TOKEN
+```

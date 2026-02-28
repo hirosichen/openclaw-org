@@ -1,0 +1,62 @@
+---
+title: macOS 平台指南
+description: 在 macOS 上安裝和使用 OpenClaw 的完整指南
+order: 1
+section: platforms
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## macOS 安裝
+
+### 使用 Homebrew（推薦）
+
+```bash
+brew install openclaw
+```
+
+### 手動安裝
+
+```bash
+curl -fsSL https://get.openclaw.org | bash
+```
+
+## 系統需求
+
+- macOS 12 (Monterey) 或更新版本
+- Apple Silicon 或 Intel 處理器
+- 至少 4 GB RAM
+
+## macOS 特有設定
+
+### 背景執行
+
+使用 launchd 讓 OpenClaw 在背景執行：
+
+```bash
+openclaw service install
+openclaw service start
+```
+
+這會建立一個 LaunchAgent，在登入後自動啟動 OpenClaw。
+
+### 管理背景服務
+
+```bash
+# 檢查狀態
+openclaw service status
+
+# 停止服務
+openclaw service stop
+
+# 移除服務
+openclaw service uninstall
+```
+
+### Gatekeeper 注意事項
+
+首次執行時，macOS 可能會顯示「無法驗證開發者」的警告。前往「系統設定 → 隱私與安全性」允許執行。
+
+## 效能最佳化
+
+- Apple Silicon Mac 可以使用本地 AI 模型獲得更好的效能
+- 建議使用 SSD 儲存以加快記憶系統的讀寫速度

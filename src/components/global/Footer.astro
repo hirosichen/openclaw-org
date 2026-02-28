@@ -1,0 +1,43 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-surface-0 bg-mantle">
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Community -->
+      <div>
+        <h3 class="text-sm font-bold text-text mb-3">社群</h3>
+        <ul class="space-y-2 text-sm text-subtext-0">
+          <li><a href="https://github.com/nickthecook/openclaw" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">GitHub</a></li>
+          <li><a href="/docs/getting-started/installation" class="hover:text-accent transition-colors">快速入門</a></li>
+        </ul>
+      </div>
+      <!-- Resources -->
+      <div>
+        <h3 class="text-sm font-bold text-text mb-3">資源</h3>
+        <ul class="space-y-2 text-sm text-subtext-0">
+          <li><a href="/docs/getting-started/installation" class="hover:text-accent transition-colors">安裝指南</a></li>
+          <li><a href="/docs/concepts/architecture" class="hover:text-accent transition-colors">架構概覽</a></li>
+          <li><a href="/docs/channels/overview" class="hover:text-accent transition-colors">頻道整合</a></li>
+          <li><a href="/docs/help/faq" class="hover:text-accent transition-colors">常見問題</a></li>
+        </ul>
+      </div>
+      <!-- Legal -->
+      <div>
+        <h3 class="text-sm font-bold text-text mb-3">法律聲明</h3>
+        <p class="text-sm text-subtext-0 leading-relaxed mb-2">
+          本網站為獨立社群專案，與 OpenClaw 官方無任何關聯。所有商標均屬於其各自所有者。
+        </p>
+        <a href="/about" class="text-sm text-accent hover:text-accent-hover transition-colors">
+          完整免責聲明 →
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-surface-0 text-center text-xs text-overlay-0">
+      <p>© {year} OpenClaw 台灣社群。本站內容以 CC BY-SA 4.0 授權。</p>
+      <p class="mt-1">本網站與 OpenClaw 官方無關。</p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,64 @@
+---
+title: Slack 整合
+description: 設定 Slack App 連接 OpenClaw
+order: 7
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Slack App 整合
+
+將 OpenClaw 整合到 Slack 工作區，讓團隊成員都能使用 AI 助理。
+
+## 設定步驟
+
+### 1. 建立 Slack App
+
+1. 前往 [Slack API](https://api.slack.com/apps)
+2. 點選「Create New App」
+3. 選擇「From scratch」
+4. 設定 App 名稱和工作區
+
+### 2. 設定權限
+
+在 OAuth & Permissions 頁面新增以下 Scope：
+
+- `chat:write`
+- `app_mentions:read`
+- `im:history`
+- `im:read`
+- `im:write`
+
+### 3. 安裝到工作區
+
+點選「Install to Workspace」並授權。記下 **Bot User OAuth Token**。
+
+### 4. 設定 OpenClaw
+
+```bash
+openclaw channel enable slack
+openclaw channel config slack \
+  --bot-token xoxb-YOUR-TOKEN \
+  --signing-secret YOUR_SIGNING_SECRET
+```
+
+### 5. 設定 Event Subscriptions
+
+設定 Request URL 指向：
+
+```
+https://your-domain.com/webhook/slack
+```
+
+## 設定範例
+
+```yaml
+channels:
+  slack:
+    enabled: true
+    bot_token: xoxb-YOUR-TOKEN
+    signing_secret: YOUR_SECRET
+    features:
+      slash_commands: true
+      thread_replies: true
+```

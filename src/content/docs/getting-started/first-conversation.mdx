@@ -1,0 +1,68 @@
+---
+title: 第一次對話
+description: 與你的 AI 助理進行第一次互動
+order: 3
+section: getting-started
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 啟動 OpenClaw
+
+設定完成後，啟動 OpenClaw 服務：
+
+```bash
+openclaw start
+```
+
+你會看到類似以下的輸出：
+
+```
+🦞 OpenClaw 已啟動
+   模型：openai:gpt-4
+   狀態：就緒
+   介面：http://localhost:3000
+```
+
+## 使用 CLI 對話
+
+最簡單的方式是直接在終端機對話：
+
+```bash
+openclaw chat "你好，請自我介紹"
+```
+
+AI 助理會立即回應你的訊息。
+
+## 使用互動模式
+
+進入互動式對話模式：
+
+```bash
+openclaw chat --interactive
+```
+
+在互動模式中，你可以持續對話，AI 會記住上下文：
+
+```
+你：你好
+助理：你好！我是你的 AI 助理。有什麼我可以幫你的嗎？
+
+你：幫我寫一首關於程式設計的詩
+助理：好的，讓我為你寫一首...
+```
+
+輸入 `exit` 或按 `Ctrl+C` 退出互動模式。
+
+## 使用 Web 介面
+
+OpenClaw 也提供簡潔的 Web 介面。啟動服務後，打開瀏覽器訪問：
+
+```
+http://localhost:3000
+```
+
+Web 介面提供更豐富的互動體驗，包含歷史記錄和設定管理。
+
+## 下一步
+
+恭喜！你已經成功與 AI 助理對話了。接下來看看[還有哪些進階功能](/docs/getting-started/next-steps)可以探索。

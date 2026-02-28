@@ -1,0 +1,22 @@
+---
+import Button from '../ui/Button.astro';
+---
+
+<section class="py-20 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <div class="glass rounded-2xl p-10 md:p-14">
+      <h2 class="text-3xl font-bold text-text mb-4">加入台灣社群</h2>
+      <p class="text-subtext-0 mb-8 max-w-lg mx-auto leading-relaxed">
+        與其他台灣的 OpenClaw 使用者交流心得、分享設定、回報問題，一起打造更好的 AI 助理體驗。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button href="https://github.com/nickthecook/openclaw" variant="primary" size="lg">
+          GitHub 討論區
+        </Button>
+        <Button href="/docs/getting-started/installation" variant="secondary" size="lg">
+          開始使用
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>

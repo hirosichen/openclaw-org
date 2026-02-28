@@ -1,0 +1,69 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/global/Header.astro';
+import Footer from '../components/global/Footer.astro';
+import Disclaimer from '../components/global/Disclaimer.astro';
+import DocSidebar from '../components/docs/DocSidebar.astro';
+import DocBreadcrumb from '../components/docs/DocBreadcrumb.astro';
+import DocTOC from '../components/docs/DocTOC.astro';
+import DocPagination from '../components/docs/DocPagination.astro';
+import Callout from '../components/docs/Callout.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  headings: Heading[];
+  officialDoc?: string;
+}
+
+const { title, description, slug, headings, officialDoc } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <Disclaimer />
+  <Header />
+  <div class="flex-1 max-w-[90rem] mx-auto w-full flex">
+    <DocSidebar currentSlug={slug} />
+
+    <main class="flex-1 min-w-0 px-4 py-8 lg:px-8">
+      <DocBreadcrumb currentSlug={slug} title={title} />
+
+      {officialDoc && (
+        <Callout type="info" title="翻譯文件">
+          <p>
+            本頁為社群翻譯版本，可能與官方最新內容有出入。
+            <a href={officialDoc} target="_blank" rel="noopener noreferrer" class="text-blue hover:underline">
+              查看官方英文原文 →
+            </a>
+          </p>
+        </Callout>
+      )}
+
+      <article class="prose prose-invert max-w-none
+        prose-headings:text-text prose-headings:font-bold
+        prose-p:text-subtext-1 prose-p:leading-relaxed
+        prose-a:text-accent prose-a:no-underline hover:prose-a:underline
+        prose-strong:text-text
+        prose-code:text-peach
+        prose-li:text-subtext-1
+        prose-blockquote:border-accent prose-blockquote:text-subtext-0
+      ">
+        <h1 class="text-3xl mb-2">{title}</h1>
+        <p class="text-subtext-0 text-lg mt-0 mb-8">{description}</p>
+        <slot />
+      </article>
+
+      <DocPagination currentSlug={slug} />
+    </main>
+
+    <DocTOC headings={headings} />
+  </div>
+  <Footer />
+</BaseLayout>

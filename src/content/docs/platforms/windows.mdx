@@ -1,0 +1,69 @@
+---
+title: Windows 平台指南
+description: 在 Windows 上安裝和使用 OpenClaw 的完整指南
+order: 3
+section: platforms
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Windows 安裝
+
+### 使用 Scoop（推薦）
+
+```powershell
+scoop install openclaw
+```
+
+### 使用 winget
+
+```powershell
+winget install OpenClaw
+```
+
+### 手動安裝
+
+從 [GitHub Releases](https://github.com/nickthecook/openclaw/releases) 下載最新的 Windows 安裝程式。
+
+## 系統需求
+
+- Windows 10 版本 1903 或更新
+- x86_64 處理器
+- 至少 4 GB RAM
+
+## Windows 特有設定
+
+### 作為 Windows Service 執行
+
+```powershell
+# 安裝服務
+openclaw service install
+
+# 啟動服務
+openclaw service start
+```
+
+### 開機自動啟動
+
+```powershell
+# 新增到啟動程式
+openclaw service install --startup
+```
+
+### WSL 支援
+
+如果你使用 WSL (Windows Subsystem for Linux)，可以使用 Linux 安裝方式：
+
+```bash
+# 在 WSL 中
+curl -fsSL https://get.openclaw.org | bash
+```
+
+### Windows 防火牆
+
+首次啟動時，Windows 防火牆可能會詢問是否允許 OpenClaw 的網路存取。請選擇允許。
+
+手動設定：
+
+```powershell
+New-NetFirewallRule -DisplayName "OpenClaw" -Direction Inbound -Port 3000 -Protocol TCP -Action Allow
+```

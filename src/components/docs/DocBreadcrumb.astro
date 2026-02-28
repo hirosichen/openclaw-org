@@ -1,0 +1,31 @@
+---
+import { docsNavigation } from '../../data/navigation';
+
+interface Props {
+  currentSlug: string;
+  title: string;
+}
+
+const { currentSlug, title } = Astro.props;
+
+// Find the section for this slug
+const section = docsNavigation.find((s) =>
+  s.items.some((item) => item.slug === currentSlug)
+);
+---
+
+<nav class="text-sm text-subtext-0 mb-6" aria-label="麵包屑">
+  <ol class="flex items-center gap-1.5 flex-wrap">
+    <li>
+      <a href="/docs/getting-started/installation" class="hover:text-accent transition-colors">文件</a>
+    </li>
+    {section && (
+      <>
+        <li class="text-overlay-0">/</li>
+        <li class="text-subtext-1">{section.label}</li>
+      </>
+    )}
+    <li class="text-overlay-0">/</li>
+    <li class="text-text font-medium">{title}</li>
+  </ol>
+</nav>

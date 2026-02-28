@@ -1,0 +1,74 @@
+---
+import { docsNavigation } from '../../data/navigation';
+
+interface Props {
+  currentSlug: string;
+}
+
+const { currentSlug } = Astro.props;
+---
+
+<!-- Mobile sidebar toggle -->
+<button
+  id="sidebar-toggle"
+  class="lg:hidden fixed bottom-4 right-4 z-50 bg-accent text-white p-3 rounded-full shadow-lg cursor-pointer"
+  aria-label="切換側邊欄"
+>
+  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+</button>
+
+<!-- Sidebar overlay -->
+<div id="sidebar-overlay" class="hidden fixed inset-0 z-40 bg-black/50 lg:hidden"></div>
+
+<!-- Sidebar -->
+<aside
+  id="doc-sidebar"
+  class="fixed inset-y-0 left-0 z-40 w-72 bg-mantle border-r border-surface-0 overflow-y-auto transform -translate-x-full transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto pt-20 lg:pt-0"
+>
+  <nav class="p-4 space-y-6">
+    {docsNavigation.map((section) => (
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-overlay-0 mb-2 px-2">
+          {section.label}
+        </h4>
+        <ul class="space-y-0.5">
+          {section.items.map((item) => (
+            <li>
+              <a
+                href={`/docs/${item.slug}`}
+                class:list={[
+                  'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                  currentSlug === item.slug
+                    ? 'bg-accent/15 text-accent font-medium'
+                    : 'text-subtext-0 hover:text-text hover:bg-surface-0',
+                ]}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>
+
+<script>
+  const toggle = document.getElementById('sidebar-toggle');
+  const sidebar = document.getElementById('doc-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function openSidebar() {
+    sidebar?.classList.remove('-translate-x-full');
+    overlay?.classList.remove('hidden');
+  }
+  function closeSidebar() {
+    sidebar?.classList.add('-translate-x-full');
+    overlay?.classList.add('hidden');
+  }
+
+  toggle?.addEventListener('click', openSidebar);
+  overlay?.addEventListener('click', closeSidebar);
+</script>

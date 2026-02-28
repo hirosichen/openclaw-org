@@ -1,0 +1,96 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout title="關於" description="關於 OpenClaw 台灣社群及完整免責聲明">
+  <div class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="text-4xl font-bold text-text mb-8">關於 OpenClaw 台灣社群</h1>
+
+    <!-- Community intro -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text mb-4">社群介紹</h2>
+      <div class="prose prose-invert max-w-none prose-p:text-subtext-1 prose-a:text-accent">
+        <p>
+          OpenClaw 台灣社群是由台灣的 OpenClaw 使用者自發組成的社群，致力於將 OpenClaw
+          的文件和資源翻譯為繁體中文，降低台灣使用者的學習門檻。
+        </p>
+        <p>
+          我們的目標是幫助更多台灣人認識和使用 OpenClaw 這個開源 AI 助理平台，
+          並建立一個友善的交流社群。
+        </p>
+      </div>
+    </section>
+
+    <!-- Disclaimer Chinese -->
+    <section class="mb-12 glass rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-accent mb-4">⚠️ 免責聲明</h2>
+      <div class="space-y-4 text-sm text-subtext-1 leading-relaxed">
+        <p>
+          <strong class="text-text">本網站（www.openclaw.org.tw）為獨立社群專案，與 OpenClaw 官方團隊、組織或任何相關實體無任何關聯、從屬或背書關係。</strong>
+        </p>
+        <ul class="list-disc list-inside space-y-2">
+          <li>本站內容為社群志願者翻譯和編寫，可能包含錯誤或過時的資訊。</li>
+          <li>「OpenClaw」名稱和相關商標均屬於其各自所有者。本站使用這些名稱僅為描述和參考目的。</li>
+          <li>本站提供的所有資訊僅供參考，不構成任何形式的建議或保證。</li>
+          <li>使用者應以 OpenClaw 官方文件為準，本站不對因使用本站內容而導致的任何損失負責。</li>
+          <li>本站不收集使用者的個人資料，也不提供任何付費服務。</li>
+        </ul>
+        <p>
+          如需查閱官方文件，請造訪：
+          <a href="https://github.com/nickthecook/openclaw" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">
+            https://github.com/nickthecook/openclaw
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Disclaimer English -->
+    <section class="mb-12 glass rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-accent mb-4">⚠️ Disclaimer</h2>
+      <div class="space-y-4 text-sm text-subtext-1 leading-relaxed">
+        <p>
+          <strong class="text-text">This website (www.openclaw.org.tw) is an independent community project and is NOT affiliated with, endorsed by, or connected to the official OpenClaw team, organization, or any related entities in any way.</strong>
+        </p>
+        <ul class="list-disc list-inside space-y-2">
+          <li>Content on this site is translated and written by community volunteers and may contain errors or outdated information.</li>
+          <li>The "OpenClaw" name and related trademarks belong to their respective owners. Use of these names on this site is for descriptive and reference purposes only.</li>
+          <li>All information provided on this site is for reference only and does not constitute any form of advice or guarantee.</li>
+          <li>Users should refer to the official OpenClaw documentation as the authoritative source. This site is not responsible for any loss resulting from the use of its content.</li>
+          <li>This site does not collect personal data or offer any paid services.</li>
+        </ul>
+        <p>
+          For official documentation, please visit:
+          <a href="https://github.com/nickthecook/openclaw" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">
+            https://github.com/nickthecook/openclaw
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Contribution -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text mb-4">參與貢獻</h2>
+      <div class="prose prose-invert max-w-none prose-p:text-subtext-1 prose-a:text-accent">
+        <p>歡迎任何人參與本社群的建設和翻譯工作：</p>
+        <ul class="text-subtext-1">
+          <li>回報翻譯錯誤或過時內容</li>
+          <li>貢獻新的翻譯文件</li>
+          <li>改善網站功能和設計</li>
+          <li>分享使用心得和教學</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- License -->
+    <section>
+      <h2 class="text-2xl font-bold text-text mb-4">授權</h2>
+      <p class="text-sm text-subtext-1">
+        本站內容以
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">
+          CC BY-SA 4.0
+        </a>
+        授權釋出。網站原始碼以 MIT 授權釋出。
+      </p>
+    </section>
+  </div>
+</PageLayout>

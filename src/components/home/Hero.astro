@@ -1,0 +1,32 @@
+---
+import Button from '../ui/Button.astro';
+---
+
+<section class="relative overflow-hidden py-24 md:py-32">
+  <!-- Gradient background -->
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 bg-gradient-to-br from-accent/10 via-base to-mauve/10"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <div class="text-6xl mb-6">🦞</div>
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+      <span class="text-text">OpenClaw</span>
+      <br />
+      <span class="text-accent">你的本機 AI 助理平台</span>
+    </h1>
+    <p class="text-lg md:text-xl text-subtext-0 max-w-2xl mx-auto mb-10 leading-relaxed">
+      在自己的電腦上運行 AI 助理，連接你最愛的聊天 App。
+      隱私優先、完全開源、由社群驅動。
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button href="/docs/getting-started/installation" variant="primary" size="lg">
+        開始使用 →
+      </Button>
+      <Button href="https://github.com/nickthecook/openclaw" variant="secondary" size="lg">
+        GitHub 原始碼
+      </Button>
+    </div>
+  </div>
+</section>

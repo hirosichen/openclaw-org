@@ -1,0 +1,53 @@
+---
+title: Android 平台指南
+description: 在 Android 裝置上使用 OpenClaw 的指南
+order: 5
+section: platforms
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Android 上使用 OpenClaw
+
+OpenClaw 主要在你的電腦上運行，但你可以透過 Android 裝置上的聊天 App 與它互動。
+
+## 使用方式
+
+### 透過聊天 App
+
+最簡單的方式是透過 Android 上已安裝的聊天 App 與 OpenClaw 互動：
+
+1. **LINE** — 加入你的 OpenClaw Bot 好友
+2. **Telegram** — 搜尋你的 Bot 帳號
+3. **WhatsApp** — 加入 Bot 的電話號碼
+4. **Discord** — 加入設定好的伺服器
+
+### 透過 Web 介面
+
+用 Chrome 造訪 OpenClaw 的 Web 介面：
+
+```
+http://your-computer-ip:3000
+```
+
+你可以使用 Chrome 的「新增至主畫面」功能，獲得類似 App 的體驗。
+
+## 進階：在 Android 上執行
+
+使用 Termux 可以在 Android 上直接執行 OpenClaw：
+
+```bash
+# 安裝 Termux（從 F-Droid）
+# 在 Termux 中
+pkg update && pkg upgrade
+pkg install openclaw
+
+# 啟動
+openclaw start
+```
+
+## 注意事項
+
+- 在 Android 上執行需要持續保持 Termux 在前景
+- 電池最佳化可能會影響背景執行
+- 效能取決於裝置硬體規格
+- 建議使用電腦運行並透過聊天 App 互動

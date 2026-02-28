@@ -1,0 +1,35 @@
+---
+const channels = [
+  { name: 'LINE', icon: '💚', priority: true },
+  { name: 'Telegram', icon: '✈️', priority: false },
+  { name: 'WhatsApp', icon: '📱', priority: false },
+  { name: 'Discord', icon: '🎮', priority: false },
+  { name: 'Signal', icon: '🔵', priority: false },
+  { name: 'Slack', icon: '💼', priority: false },
+  { name: 'Messenger', icon: '💬', priority: false },
+  { name: 'WeChat', icon: '🟢', priority: false },
+];
+---
+
+<section class="py-20 px-4">
+  <div class="max-w-6xl mx-auto text-center">
+    <h2 class="text-3xl font-bold text-text mb-4">支援的聊天頻道</h2>
+    <p class="text-subtext-0 max-w-2xl mx-auto mb-12">
+      透過你已經在使用的聊天 App 與 AI 助理互動，無需額外安裝。
+    </p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+      {channels.map((ch) => (
+        <div class:list={[
+          'glass rounded-xl p-4 text-center transition-all duration-200',
+          ch.priority ? 'ring-2 ring-accent/40 hover:ring-accent' : 'hover:border-accent/30',
+        ]}>
+          <div class="text-3xl mb-2">{ch.icon}</div>
+          <div class="text-sm font-medium text-text">{ch.name}</div>
+          {ch.priority && (
+            <span class="inline-block mt-1 text-xs text-accent font-medium">推薦</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

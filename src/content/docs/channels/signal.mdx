@@ -1,0 +1,65 @@
+---
+title: Signal 整合
+description: 設定 Signal 連接 OpenClaw（實驗性）
+order: 6
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Signal 整合（實驗性）
+
+Signal 以其強大的端對端加密聞名，OpenClaw 透過 Signal CLI 提供實驗性的整合支援。
+
+## 前置需求
+
+- Signal 帳號（需要一個獨立的電話號碼）
+- [signal-cli](https://github.com/AsamK/signal-cli) 已安裝
+
+## 設定步驟
+
+### 1. 安裝 signal-cli
+
+```bash
+# macOS
+brew install signal-cli
+
+# Linux
+sudo apt install signal-cli
+```
+
+### 2. 註冊號碼
+
+```bash
+signal-cli -u +886XXXXXXXXX register
+signal-cli -u +886XXXXXXXXX verify CODE
+```
+
+### 3. 設定 OpenClaw
+
+```bash
+openclaw channel enable signal
+openclaw channel config signal --phone-number +886XXXXXXXXX
+```
+
+### 4. 啟動
+
+```bash
+openclaw channel test signal
+```
+
+## 注意事項
+
+- Signal 整合目前為實驗性功能
+- 需要一個專用電話號碼
+- 不支援所有 Signal 功能（如視訊通話）
+- 群組支援有限
+
+## 設定範例
+
+```yaml
+channels:
+  signal:
+    enabled: true
+    phone_number: "+886XXXXXXXXX"
+    signal_cli_path: /usr/local/bin/signal-cli
+```

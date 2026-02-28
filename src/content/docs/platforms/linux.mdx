@@ -1,0 +1,85 @@
+---
+title: Linux 平台指南
+description: 在 Linux 上安裝和使用 OpenClaw 的完整指南
+order: 2
+section: platforms
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Linux 安裝
+
+### 使用安裝腳本（推薦）
+
+```bash
+curl -fsSL https://get.openclaw.org | bash
+```
+
+### Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install openclaw
+```
+
+### Fedora / RHEL
+
+```bash
+sudo dnf install openclaw
+```
+
+### Arch Linux
+
+```bash
+yay -S openclaw
+```
+
+## 系統需求
+
+- Ubuntu 20.04+、Debian 11+、Fedora 36+、Arch Linux
+- x86_64 或 ARM64
+- 至少 4 GB RAM
+
+## Linux 特有設定
+
+### Systemd 服務
+
+```bash
+# 安裝 systemd 服務
+openclaw service install
+
+# 啟動
+sudo systemctl start openclaw
+sudo systemctl enable openclaw
+
+# 檢查狀態
+sudo systemctl status openclaw
+```
+
+### 服務設定檔
+
+```ini
+# /etc/systemd/system/openclaw.service
+[Unit]
+Description=OpenClaw AI Assistant
+After=network.target
+
+[Service]
+Type=simple
+User=openclaw
+ExecStart=/usr/bin/openclaw start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 防火牆設定
+
+```bash
+# UFW
+sudo ufw allow 3000/tcp
+
+# firewalld
+sudo firewall-cmd --add-port=3000/tcp --permanent
+sudo firewall-cmd --reload
+```

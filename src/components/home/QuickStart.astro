@@ -1,0 +1,50 @@
+---
+import Button from '../ui/Button.astro';
+
+const steps = [
+  {
+    step: '1',
+    title: '安裝 OpenClaw',
+    code: 'curl -fsSL https://get.openclaw.org | bash',
+  },
+  {
+    step: '2',
+    title: '設定 AI 模型',
+    code: 'openclaw config set model openai:gpt-4',
+  },
+  {
+    step: '3',
+    title: '啟動助理',
+    code: 'openclaw start',
+  },
+];
+---
+
+<section class="py-20 px-4 bg-mantle/50">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-3xl font-bold text-center text-text mb-4">快速開始</h2>
+    <p class="text-center text-subtext-0 mb-12">
+      只需三個步驟，即可在你的電腦上啟動 AI 助理。
+    </p>
+
+    <div class="space-y-6">
+      {steps.map((s) => (
+        <div class="glass rounded-xl p-6">
+          <div class="flex items-center gap-4 mb-3">
+            <span class="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold">
+              {s.step}
+            </span>
+            <h3 class="text-lg font-bold text-text">{s.title}</h3>
+          </div>
+          <pre class="bg-crust rounded-lg p-4 overflow-x-auto"><code class="text-sm font-mono text-green">{s.code}</code></pre>
+        </div>
+      ))}
+    </div>
+
+    <div class="text-center mt-10">
+      <Button href="/docs/getting-started/installation" variant="primary" size="lg">
+        查看完整安裝指南 →
+      </Button>
+    </div>
+  </div>
+</section>

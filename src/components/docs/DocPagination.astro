@@ -1,0 +1,41 @@
+---
+import { docsNavigation } from '../../data/navigation';
+
+interface Props {
+  currentSlug: string;
+}
+
+const { currentSlug } = Astro.props;
+
+// Flatten all items
+const allItems = docsNavigation.flatMap((s) => s.items);
+const currentIndex = allItems.findIndex((item) => item.slug === currentSlug);
+
+const prev = currentIndex > 0 ? allItems[currentIndex - 1] : null;
+const next = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
+---
+
+<nav class="flex justify-between items-stretch gap-4 mt-12 pt-6 border-t border-surface-0">
+  {prev ? (
+    <a
+      href={`/docs/${prev.slug}`}
+      class="group glass rounded-lg p-4 flex-1 hover:border-accent/30 transition-all"
+    >
+      <span class="text-xs text-overlay-0">← 上一篇</span>
+      <span class="block text-sm font-medium text-text group-hover:text-accent mt-1">{prev.label}</span>
+    </a>
+  ) : (
+    <div class="flex-1" />
+  )}
+  {next ? (
+    <a
+      href={`/docs/${next.slug}`}
+      class="group glass rounded-lg p-4 flex-1 text-right hover:border-accent/30 transition-all"
+    >
+      <span class="text-xs text-overlay-0">下一篇 →</span>
+      <span class="block text-sm font-medium text-text group-hover:text-accent mt-1">{next.label}</span>
+    </a>
+  ) : (
+    <div class="flex-1" />
+  )}
+</nav>

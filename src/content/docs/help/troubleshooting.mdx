@@ -1,0 +1,103 @@
+---
+title: 疑難排解
+description: 常見問題的診斷和解決方法
+order: 2
+section: help
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 診斷工具
+
+在排解問題之前，先收集診斷資訊：
+
+```bash
+# 系統狀態總覽
+openclaw status
+
+# 詳細日誌
+openclaw logs --level debug --follow
+
+# 設定檢查
+openclaw config validate
+
+# 版本資訊
+openclaw --version
+```
+
+## 安裝問題
+
+### 指令找不到 (command not found)
+
+**解決方案**：確認 OpenClaw 已加入 PATH：
+
+```bash
+# 檢查安裝位置
+which openclaw
+
+# 如果找不到，手動加入 PATH
+export PATH="$HOME/.openclaw/bin:$PATH"
+```
+
+將上述指令加入 `~/.bashrc` 或 `~/.zshrc` 以永久生效。
+
+### 權限問題
+
+```bash
+# 修復權限
+chmod +x $(which openclaw)
+```
+
+## 連線問題
+
+### AI 模型 API 連線失敗
+
+**症狀**：出現 `Connection refused` 或 `Timeout` 錯誤。
+
+**解決方案**：
+
+1. 檢查 API 金鑰是否正確
+2. 確認網路連線正常
+3. 檢查是否有防火牆或代理阻擋
+
+```bash
+# 測試 API 連線
+openclaw model test
+```
+
+### Webhook 無法接收訊息
+
+查看[閘道器疑難排解](/docs/gateway/troubleshooting)的相關章節。
+
+## 效能問題
+
+### 回應速度慢
+
+1. 嘗試使用更快的模型（如 GPT-3.5 代替 GPT-4）
+2. 減少記憶系統的 token 上限
+3. 檢查網路延遲
+
+```yaml
+# 調整效能設定
+model: openai:gpt-3.5-turbo
+memory:
+  short_term:
+    max_tokens: 2048
+```
+
+### 記憶體使用過高
+
+```bash
+# 檢查記憶體使用
+openclaw status --memory
+
+# 清除快取
+openclaw cache clear
+```
+
+## 仍需要幫助？
+
+如果以上方法都無法解決你的問題：
+
+1. 搜尋 [GitHub Issues](https://github.com/nickthecook/openclaw/issues)
+2. 建立新的 Issue 並附上診斷資訊
+3. 加入社群討論尋求協助

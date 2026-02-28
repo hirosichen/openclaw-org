@@ -1,0 +1,23 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/global/Header.astro';
+import Footer from '../components/global/Footer.astro';
+import Disclaimer from '../components/global/Disclaimer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} ogImage={ogImage}>
+  <Disclaimer />
+  <Header />
+  <main class="flex-1">
+    <slot />
+  </main>
+  <Footer />
+</BaseLayout>

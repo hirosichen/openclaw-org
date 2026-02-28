@@ -1,0 +1,22 @@
+---
+import Card from '../ui/Card.astro';
+import { features } from '../../data/features';
+---
+
+<section class="py-20 px-4 bg-mantle/50">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-3xl font-bold text-center text-text mb-4">核心功能</h2>
+    <p class="text-center text-subtext-0 max-w-2xl mx-auto mb-12">
+      OpenClaw 提供豐富的功能，讓你打造專屬的 AI 助理體驗。
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {features.map((feature) => (
+        <Card>
+          <div class="text-3xl mb-3">{feature.icon}</div>
+          <h3 class="text-lg font-bold text-text mb-2">{feature.title}</h3>
+          <p class="text-sm text-subtext-0 leading-relaxed">{feature.description}</p>
+        </Card>
+      ))}
+    </div>
+  </div>
+</section>

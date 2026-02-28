@@ -1,0 +1,86 @@
+---
+title: 閘道器安全
+description: 保護 OpenClaw 閘道器的安全設定
+order: 3
+section: gateway
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 安全設定
+
+保護你的 OpenClaw 閘道器免受未授權存取。
+
+## 身份驗證
+
+### API Token
+
+```yaml
+gateway:
+  auth:
+    enabled: true
+    token: your-secure-token-here
+```
+
+使用 Token 存取 API：
+
+```bash
+curl -H "Authorization: Bearer your-secure-token-here" \
+  http://localhost:3000/api/status
+```
+
+### Webhook 驗證
+
+每個頻道都有自己的驗證機制，OpenClaw 會自動驗證來自頻道的請求：
+
+- **LINE** — 使用 Channel Secret 驗證簽章
+- **Telegram** — 使用 Secret Token 驗證
+- **Slack** — 使用 Signing Secret 驗證
+
+## 速率限制
+
+```yaml
+gateway:
+  rate_limit:
+    enabled: true
+    window: 60        # 秒
+    max_requests: 100 # 每個窗口的最大請求數
+```
+
+## IP 白名單
+
+```yaml
+gateway:
+  ip_whitelist:
+    enabled: true
+    addresses:
+      - 127.0.0.1
+      - 10.0.0.0/8
+```
+
+## CORS 設定
+
+```yaml
+gateway:
+  cors:
+    enabled: true
+    origins:
+      - https://yourdomain.com
+    methods:
+      - GET
+      - POST
+    headers:
+      - Content-Type
+      - Authorization
+```
+
+## SSL/TLS
+
+建議在正式環境中使用 SSL/TLS。可以透過反向代理（Nginx/Caddy）處理，或使用 OpenClaw 內建功能：
+
+```yaml
+gateway:
+  ssl:
+    enabled: true
+    cert: /path/to/cert.pem
+    key: /path/to/key.pem
+```

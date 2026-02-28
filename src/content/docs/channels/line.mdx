@@ -1,0 +1,79 @@
+---
+title: LINE 整合
+description: 設定 LINE 聊天頻道連接 OpenClaw
+order: 2
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## LINE 頻道整合
+
+LINE 是台灣最普及的通訊軟體，OpenClaw 提供完整的 LINE 整合支援。
+
+## 前置需求
+
+- LINE 帳號
+- LINE Developers 帳號
+- OpenClaw 已安裝並設定完成
+
+## 設定步驟
+
+### 1. 建立 LINE Messaging API Channel
+
+1. 前往 [LINE Developers Console](https://developers.line.biz/)
+2. 建立一個新的 Provider（如果還沒有）
+3. 建立一個新的 Messaging API Channel
+4. 記下 **Channel Secret** 和 **Channel Access Token**
+
+### 2. 設定 OpenClaw
+
+```bash
+# 啟用 LINE 頻道
+openclaw channel enable line
+
+# 設定 LINE 認證
+openclaw channel config line \
+  --channel-secret YOUR_CHANNEL_SECRET \
+  --channel-access-token YOUR_ACCESS_TOKEN
+```
+
+### 3. 設定 Webhook
+
+在 LINE Developers Console 中設定 Webhook URL：
+
+```
+https://your-domain.com/webhook/line
+```
+
+如果使用本機開發，可以使用 ngrok：
+
+```bash
+ngrok http 3000
+```
+
+### 4. 驗證連線
+
+```bash
+openclaw channel test line
+```
+
+## LINE 特有功能
+
+- **Rich Menu** — 自訂底部選單
+- **Flex Message** — 豐富的卡片式訊息
+- **Quick Reply** — 快速回覆按鈕
+- **圖片訊息** — 支援圖片收發
+
+## 設定範例
+
+```yaml
+channels:
+  line:
+    enabled: true
+    channel_secret: YOUR_SECRET
+    channel_access_token: YOUR_TOKEN
+    webhook_path: /webhook/line
+    features:
+      rich_menu: true
+      quick_reply: true
+```

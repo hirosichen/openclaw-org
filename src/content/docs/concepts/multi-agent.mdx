@@ -1,0 +1,68 @@
+---
+title: 多代理協作
+description: 了解如何使用多個代理協同工作
+order: 4
+section: concepts
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 多代理系統
+
+OpenClaw 支援多個代理之間的協作，讓不同專長的代理共同完成複雜任務。
+
+## 協作模式
+
+### 委派模式
+
+主代理將子任務委派給專門的代理：
+
+```yaml
+# ~/.openclaw/agents/manager.yaml
+name: 專案經理
+delegates:
+  - coder    # 程式開發
+  - writer   # 文件撰寫
+  - analyst  # 資料分析
+```
+
+### 管線模式
+
+代理依序處理，前一個代理的輸出作為下一個的輸入：
+
+```yaml
+pipeline:
+  - agent: researcher   # 資料收集
+  - agent: analyst      # 分析
+  - agent: writer       # 報告撰寫
+```
+
+### 討論模式
+
+多個代理參與討論，從不同角度分析問題：
+
+```yaml
+discussion:
+  agents:
+    - optimist
+    - critic
+    - moderator
+  rounds: 3
+```
+
+## 設定多代理
+
+```bash
+# 啟動多代理模式
+openclaw chat --multi-agent manager
+
+# 監控代理活動
+openclaw agent monitor
+```
+
+## 使用場景
+
+| 場景 | 代理組合 | 模式 |
+|------|----------|------|
+| 程式碼審查 | coder + reviewer | 委派 |
+| 研究報告 | researcher + writer | 管線 |
+| 決策分析 | optimist + critic | 討論 |

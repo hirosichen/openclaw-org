@@ -1,0 +1,65 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'OpenClaw 台灣社群 — 在本機運行的個人 AI 助理平台，支援多種聊天 App 整合',
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+import '../styles/global.css';
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = title === '首頁' ? 'OpenClaw 台灣社群' : `${title} | OpenClaw 台灣社群`;
+---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="OpenClaw 台灣社群" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Dark mode script (prevent FOUC) -->
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light');
+        } else if (theme === 'dark') {
+          document.documentElement.classList.remove('light');
+        }
+        // Default: dark (no class needed)
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <slot />
+  </body>
+</html>

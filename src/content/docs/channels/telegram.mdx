@@ -1,0 +1,63 @@
+---
+title: Telegram 整合
+description: 設定 Telegram Bot 連接 OpenClaw
+order: 3
+section: channels
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## Telegram Bot 整合
+
+Telegram 提供功能豐富的 Bot API，是 OpenClaw 最完整的頻道整合之一。
+
+## 設定步驟
+
+### 1. 建立 Telegram Bot
+
+1. 在 Telegram 中搜尋 `@BotFather`
+2. 發送 `/newbot` 指令
+3. 依照指示設定 Bot 名稱
+4. 記下 **Bot Token**
+
+### 2. 設定 OpenClaw
+
+```bash
+openclaw channel enable telegram
+openclaw channel config telegram --bot-token YOUR_BOT_TOKEN
+```
+
+### 3. 設定 Webhook
+
+```bash
+# OpenClaw 會自動設定 Webhook
+openclaw channel setup telegram
+```
+
+### 4. 測試
+
+```bash
+openclaw channel test telegram
+```
+
+在 Telegram 中搜尋你的 Bot 並發送訊息即可開始使用。
+
+## Telegram 特有功能
+
+- **Inline Mode** — 在任何對話中呼叫 Bot
+- **Inline Keyboard** — 互動式按鈕
+- **群組支援** — 在群組中使用 Bot
+- **檔案傳送** — 支援各種檔案格式
+- **Markdown** — 支援格式化訊息
+
+## 設定範例
+
+```yaml
+channels:
+  telegram:
+    enabled: true
+    bot_token: YOUR_BOT_TOKEN
+    features:
+      inline_mode: true
+      group_support: true
+      markdown: true
+```

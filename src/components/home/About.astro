@@ -1,0 +1,39 @@
+---
+import Card from '../ui/Card.astro';
+
+const points = [
+  {
+    icon: '🏠',
+    title: '本機運行',
+    description: '所有資料留在你的裝置上。不經過第三方伺服器，你的隱私完全受到保護。',
+  },
+  {
+    icon: '💬',
+    title: '聊天整合',
+    description: '透過 LINE、Telegram、WhatsApp 等聊天 App 與你的 AI 助理互動。',
+  },
+  {
+    icon: '🔒',
+    title: '隱私優先',
+    description: '開源透明，你可以完全審查程式碼。沒有追蹤、沒有廣告、沒有資料收集。',
+  },
+];
+---
+
+<section class="py-20 px-4">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-3xl font-bold text-center text-text mb-4">什麼是 OpenClaw？</h2>
+    <p class="text-center text-subtext-0 max-w-2xl mx-auto mb-12">
+      OpenClaw 是一個在你的電腦上運行的個人 AI 助理平台，讓你透過熟悉的聊天 App 與 AI 互動。
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {points.map((point) => (
+        <Card>
+          <div class="text-3xl mb-3">{point.icon}</div>
+          <h3 class="text-lg font-bold text-text mb-2">{point.title}</h3>
+          <p class="text-sm text-subtext-0 leading-relaxed">{point.description}</p>
+        </Card>
+      ))}
+    </div>
+  </div>
+</section>

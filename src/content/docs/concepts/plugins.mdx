@@ -1,0 +1,80 @@
+---
+title: 外掛系統
+description: 使用外掛擴充 OpenClaw 的功能
+order: 6
+section: concepts
+officialDoc: https://github.com/nickthecook/openclaw
+---
+
+## 外掛概覽
+
+OpenClaw 的外掛系統讓你可以擴充 AI 助理的能力，新增自訂工具和功能。
+
+## 安裝外掛
+
+```bash
+# 從官方倉庫安裝
+openclaw plugin install web-search
+
+# 從 URL 安裝
+openclaw plugin install https://example.com/my-plugin.tar.gz
+
+# 列出已安裝的外掛
+openclaw plugin list
+```
+
+## 內建外掛
+
+| 外掛 | 功能 |
+|------|------|
+| `web-search` | 網路搜尋 |
+| `calculator` | 數學計算 |
+| `weather` | 天氣查詢 |
+| `calendar` | 行事曆管理 |
+| `file-manager` | 檔案操作 |
+
+## 建立自訂外掛
+
+外掛使用簡單的 YAML 定義：
+
+```yaml
+# my-plugin/plugin.yaml
+name: my-tool
+version: 1.0.0
+description: 我的自訂工具
+
+tools:
+  - name: greet
+    description: 打招呼
+    parameters:
+      - name: name
+        type: string
+        required: true
+    handler: handlers/greet.js
+```
+
+處理函式：
+
+```javascript
+// my-plugin/handlers/greet.js
+export default function greet({ name }) {
+  return `你好，${name}！很高興認識你。`;
+}
+```
+
+## 外掛安全
+
+外掛執行在受限的沙箱環境中：
+
+- 預設無檔案系統存取
+- 網路存取需明確授權
+- 不能存取其他外掛的資料
+
+```yaml
+# 設定外掛權限
+plugins:
+  web-search:
+    permissions:
+      network: true
+      file_system: false
+```
