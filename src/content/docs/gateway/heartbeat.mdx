@@ -1,0 +1,343 @@
+---
+title: "心跳"
+description: "設定定期代理輪次以主動回報需要注意的事項"
+order: 9
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/heartbeat"
+---
+
+> **提示：** 心跳 vs 排程工作？請參閱 [Cron vs Heartbeat](/docs/automation/cron-vs-heartbeat) 以了解何時使用哪個。
+
+心跳在主要工作階段中執行**定期代理輪次**，讓模型能主動回報需要注意的事項，而不會不斷打擾你。
+
+疑難排解：[/automation/troubleshooting](/docs/automation/troubleshooting)
+
+## 快速開始（入門）
+
+1. 保持心跳啟用（預設為 `30m`，Anthropic OAuth/setup-token 為 `1h`）或設定自己的頻率。
+2. 在代理工作區建立一個小型的 `HEARTBEAT.md` 檢查清單（選用但建議）。
+3. 決定心跳訊息應送往何處（`target: "none"` 是預設值；設定 `target: "last"` 路由到最後聯絡人）。
+4. 選用：啟用心跳推理過程傳遞以提高透明度。
+5. 選用：將心跳限制在活躍時段（本地時間）。
+
+範例設定：
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // 明確傳遞到最後聯絡人（預設為 "none"）
+        directPolicy: "allow", // 預設：允許直接/私訊目標；設定 "block" 以抑制
+        // activeHours: { start: "08:00", end: "24:00" },
+        // includeReasoning: true, // 選用：也傳送獨立的 Reasoning: 訊息
+      },
+    },
+  },
+}
+```
+
+## 預設值
+
+- 間隔：`30m`（偵測到 Anthropic OAuth/setup-token 驗證模式時為 `1h`）。透過 `agents.defaults.heartbeat.every` 或每個代理的 `agents.list[].heartbeat.every` 設定；使用 `0m` 停用。
+- 提示內容（可透過 `agents.defaults.heartbeat.prompt` 設定）：
+  `Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.`
+- 心跳提示以**原文**作為使用者訊息發送。系統提示包含「Heartbeat」區段，且執行會在內部標記。
+- 活躍時段（`heartbeat.activeHours`）在設定的時區中檢查。在時段外，心跳會被跳過，直到下一個在時段內的排程點。
+
+## 心跳提示的用途
+
+預設提示刻意保持廣泛：
+
+- **背景任務**：「考慮未完成的任務」促使代理檢視待辦事項（收件匣、行事曆、提醒、佇列中的工作），並提出任何緊急事項。
+- **人類簽到**：「在白天時偶爾關心一下你的人類」促使偶爾發送輕量的「有什麼需要嗎？」訊息，但透過使用你設定的本地時區（參見[時區](/docs/concepts/timezone)）來避免夜間打擾。
+
+如果你想讓心跳執行特定任務（例如「檢查 Gmail PubSub 統計」或「驗證 gateway 健康狀態」），請將 `agents.defaults.heartbeat.prompt`（或 `agents.list[].heartbeat.prompt`）設定為自訂內容（原文發送）。
+
+## 回應約定
+
+- 如果無事需要注意，回覆 **`HEARTBEAT_OK`**。
+- 在心跳執行期間，當 `HEARTBEAT_OK` 出現在回覆的**開頭或結尾**時，OpenClaw 會將其視為確認。該標記會被移除，如果剩餘內容 **不超過 `ackMaxChars`**（預設：300），回覆會被丟棄。
+- 如果 `HEARTBEAT_OK` 出現在回覆的**中間**，則不會被特殊處理。
+- 對於警報，**不要**包含 `HEARTBEAT_OK`；只回傳警報文字。
+
+在心跳之外，訊息開頭/結尾的多餘 `HEARTBEAT_OK` 會被移除並記錄；只包含 `HEARTBEAT_OK` 的訊息會被丟棄。
+
+## 設定
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m", // 預設：30m（0m 停用）
+        model: "anthropic/claude-opus-4-6",
+        includeReasoning: false, // 預設：false（可用時傳遞獨立的 Reasoning: 訊息）
+        target: "last", // 預設：none | 選項：last | none | <channel id>（核心或外掛，例如 "bluebubbles"）
+        to: "+15551234567", // 選用的頻道特定覆寫
+        accountId: "ops-bot", // 選用的多帳號頻道 id
+        prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        ackMaxChars: 300, // HEARTBEAT_OK 後允許的最大字元數
+      },
+    },
+  },
+}
+```
+
+### 作用範圍與優先順序
+
+- `agents.defaults.heartbeat` 設定全域心跳行為。
+- `agents.list[].heartbeat` 覆蓋合併；如果任何代理有 `heartbeat` 區塊，**只有那些代理**會執行心跳。
+- `channels.defaults.heartbeat` 設定所有頻道的可見性預設值。
+- `channels.<channel>.heartbeat` 覆寫頻道預設值。
+- `channels.<channel>.accounts.<id>.heartbeat`（多帳號頻道）覆寫每個頻道的設定。
+
+### 每個代理的心跳
+
+如果任何 `agents.list[]` 條目包含 `heartbeat` 區塊，**只有那些代理**會執行心跳。每個代理的區塊會覆蓋合併到 `agents.defaults.heartbeat` 之上（因此你可以設定一次共用預設值，再按代理覆寫）。
+
+範例：兩個代理，只有第二個代理執行心跳。
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // 明確傳遞到最後聯絡人（預設為 "none"）
+      },
+    },
+    list: [
+      { id: "main", default: true },
+      {
+        id: "ops",
+        heartbeat: {
+          every: "1h",
+          target: "whatsapp",
+          to: "+15551234567",
+          prompt: "Read HEARTBEAT.md if it exists (workspace context). Follow it strictly. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        },
+      },
+    ],
+  },
+}
+```
+
+### 活躍時段範例
+
+將心跳限制在特定時區的工作時間：
+
+```json5
+{
+  agents: {
+    defaults: {
+      heartbeat: {
+        every: "30m",
+        target: "last", // 明確傳遞到最後聯絡人（預設為 "none"）
+        activeHours: {
+          start: "09:00",
+          end: "22:00",
+          timezone: "America/New_York", // 選用；若設定了 userTimezone 則使用，否則使用主機時區
+        },
+      },
+    },
+  },
+}
+```
+
+在此時段之外（東部時間上午 9 點前或晚上 10 點後），心跳會被跳過。下一個在時段內的排程點將正常執行。
+
+### 全天候設定
+
+如果你想讓心跳全天執行，使用以下模式之一：
+
+- 完全省略 `activeHours`（無時段限制；這是預設行為）。
+- 設定全天時段：`activeHours: { start: "00:00", end: "24:00" }`。
+
+不要將 `start` 和 `end` 設為相同時間（例如 `08:00` 到 `08:00`）。這會被視為零寬度時段，因此心跳總是會被跳過。
+
+### 多帳號範例
+
+使用 `accountId` 在多帳號頻道（如 Telegram）上指定特定帳號：
+
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "ops",
+        heartbeat: {
+          every: "1h",
+          target: "telegram",
+          to: "12345678:topic:42", // 選用：路由到特定主題/執行緒
+          accountId: "ops-bot",
+        },
+      },
+    ],
+  },
+  channels: {
+    telegram: {
+      accounts: {
+        "ops-bot": { botToken: "YOUR_TELEGRAM_BOT_TOKEN" },
+      },
+    },
+  },
+}
+```
+
+### 欄位說明
+
+- `every`：心跳間隔（時間長度字串；預設單位 = 分鐘）。
+- `model`：選用的心跳執行模型覆寫（`provider/model`）。
+- `includeReasoning`：啟用時，也傳遞獨立的 `Reasoning:` 訊息（與 `/reasoning on` 格式相同）。
+- `session`：選用的心跳執行工作階段金鑰。
+  - `main`（預設）：代理主要工作階段。
+  - 明確的工作階段金鑰（從 `openclaw sessions --json` 或 [sessions CLI](/docs/cli/sessions) 複製）。
+  - 工作階段金鑰格式：參見[工作階段](/docs/concepts/session)和[群組](/docs/channels/groups)。
+- `target`：
+  - `last`：傳遞到最後使用的外部頻道。
+  - 明確頻道：`whatsapp` / `telegram` / `discord` / `googlechat` / `slack` / `msteams` / `signal` / `imessage`。
+  - `none`（預設）：執行心跳但**不**對外傳遞。
+- `directPolicy`：控制直接/私訊傳遞行為：
+  - `allow`（預設）：允許直接/私訊心跳傳遞。
+  - `block`：抑制直接/私訊傳遞（`reason=dm-blocked`）。
+- `to`：選用的收件人覆寫（頻道特定 id，例如 WhatsApp 的 E.164 或 Telegram 聊天 id）。對於 Telegram 主題/執行緒，使用 `<chatId>:topic:<messageThreadId>`。
+- `accountId`：選用的多帳號頻道帳號 id。當 `target: "last"` 時，帳號 id 套用到已解析的最後頻道（若支援帳號）；否則會被忽略。如果帳號 id 與已解析頻道的設定帳號不符，傳遞會被跳過。
+- `prompt`：覆寫預設提示內容（不合併）。
+- `ackMaxChars`：`HEARTBEAT_OK` 後在傳遞前允許的最大字元數。
+- `suppressToolErrorWarnings`：設為 true 時，在心跳執行期間抑制工具錯誤警告。
+- `activeHours`：將心跳執行限制在時段內。物件包含 `start`（HH:MM，含；使用 `00:00` 表示一天開始）、`end`（HH:MM，不含；允許 `24:00` 表示一天結束），以及選用的 `timezone`。
+  - 省略或 `"user"`：若設定了 `agents.defaults.userTimezone` 則使用，否則退回到主機系統時區。
+  - `"local"`：始終使用主機系統時區。
+  - 任何 IANA 識別碼（例如 `America/New_York`）：直接使用；若無效，退回到上述 `"user"` 行為。
+  - `start` 和 `end` 不得相等以維持有效時段；相等的值會被視為零寬度（始終在時段外）。
+  - 在活躍時段之外，心跳會被跳過，直到下一個在時段內的排程點。
+
+## 傳遞行為
+
+- 心跳預設在代理的主要工作階段中執行（`agent:<id>:<mainKey>`），或在 `session.scope = "global"` 時為 `global`。設定 `session` 可覆寫到特定頻道工作階段（Discord/WhatsApp 等）。
+- `session` 僅影響執行上下文；傳遞由 `target` 和 `to` 控制。
+- 若要傳遞到特定頻道/收件人，設定 `target` + `to`。使用 `target: "last"` 時，傳遞使用該工作階段的最後外部頻道。
+- 心跳傳遞預設允許直接/私訊目標。設定 `directPolicy: "block"` 可抑制直接目標發送，同時仍執行心跳輪次。
+- 如果主佇列忙碌，心跳會被跳過並稍後重試。
+- 如果 `target` 解析不到外部目的地，執行仍會發生但不會發送外部訊息。
+- 僅心跳的回覆**不會**保持工作階段活躍；最後的 `updatedAt` 會被恢復，因此閒置過期行為保持正常。
+
+## 可見性控制
+
+預設情況下，`HEARTBEAT_OK` 確認會被抑制，而警報內容會被傳遞。你可以按頻道或按帳號調整：
+
+```yaml
+channels:
+  defaults:
+    heartbeat:
+      showOk: false # 隱藏 HEARTBEAT_OK（預設）
+      showAlerts: true # 顯示警報訊息（預設）
+      useIndicator: true # 發出指示器事件（預設）
+  telegram:
+    heartbeat:
+      showOk: true # 在 Telegram 上顯示 OK 確認
+  whatsapp:
+    accounts:
+      work:
+        heartbeat:
+          showAlerts: false # 對此帳號抑制警報傳遞
+```
+
+優先順序：每帳號 → 每頻道 → 頻道預設值 → 內建預設值。
+
+### 每個旗標的作用
+
+- `showOk`：當模型回傳僅 OK 的回覆時，發送 `HEARTBEAT_OK` 確認。
+- `showAlerts`：當模型回傳非 OK 的回覆時，發送警報內容。
+- `useIndicator`：為 UI 狀態介面發出指示器事件。
+
+如果**三者皆為** false，OpenClaw 會完全跳過心跳執行（不呼叫模型）。
+
+### 每頻道 vs 每帳號範例
+
+```yaml
+channels:
+  defaults:
+    heartbeat:
+      showOk: false
+      showAlerts: true
+      useIndicator: true
+  slack:
+    heartbeat:
+      showOk: true # 所有 Slack 帳號
+    accounts:
+      ops:
+        heartbeat:
+          showAlerts: false # 僅對 ops 帳號抑制警報
+  telegram:
+    heartbeat:
+      showOk: true
+```
+
+### 常見模式
+
+| 目標 | 設定 |
+| --- | --- |
+| 預設行為（靜默 OK，警報開啟） | *（無需設定）* |
+| 完全靜默（無訊息、無指示器） | `channels.defaults.heartbeat: { showOk: false, showAlerts: false, useIndicator: false }` |
+| 僅指示器（無訊息） | `channels.defaults.heartbeat: { showOk: false, showAlerts: false, useIndicator: true }` |
+| 僅在一個頻道顯示 OK | `channels.telegram.heartbeat: { showOk: true }` |
+
+## HEARTBEAT.md（選用）
+
+如果工作區中存在 `HEARTBEAT.md` 檔案，預設提示會告訴代理去讀取它。可以將它視為你的「心跳檢查清單」：小型、穩定，且適合每 30 分鐘包含一次。
+
+如果 `HEARTBEAT.md` 存在但實際上是空的（只有空白行和 markdown 標題如 `# Heading`），OpenClaw 會跳過心跳執行以節省 API 呼叫。如果檔案不存在，心跳仍會執行，由模型決定要做什麼。
+
+保持精簡（簡短的檢查清單或提醒）以避免提示膨脹。
+
+範例 `HEARTBEAT.md`：
+
+```md
+# Heartbeat checklist
+
+- Quick scan: anything urgent in inboxes?
+- If it's daytime, do a lightweight check-in if nothing else is pending.
+- If a task is blocked, write down _what is missing_ and ask Peter next time.
+```
+
+### 代理可以更新 HEARTBEAT.md 嗎？
+
+可以 — 如果你要求的話。
+
+`HEARTBEAT.md` 只是代理工作區中的一般檔案，所以你可以在一般聊天中告訴代理，例如：
+
+- 「更新 `HEARTBEAT.md` 以加入每日行事曆檢查。」
+- 「重寫 `HEARTBEAT.md` 使其更精簡，專注於收件匣追蹤。」
+
+如果你想讓這自動發生，你也可以在心跳提示中包含一行明確指示，例如：「如果檢查清單過時了，請更新 HEARTBEAT.md 為更好的版本。」
+
+安全提示：不要將密鑰（API key、電話號碼、私有 token）放入 `HEARTBEAT.md` — 它會成為提示上下文的一部分。
+
+## 手動喚醒（隨需）
+
+你可以將系統事件加入佇列並觸發立即心跳：
+
+```bash
+openclaw system event --text "Check for urgent follow-ups" --mode now
+```
+
+如果多個代理設定了 `heartbeat`，手動喚醒會立即執行每個代理的心跳。
+
+使用 `--mode next-heartbeat` 等待下一個排程點。
+
+## 推理傳遞（選用）
+
+預設情況下，心跳只傳遞最終的「回答」內容。
+
+如果你想要透明度，請啟用：
+
+- `agents.defaults.heartbeat.includeReasoning: true`
+
+啟用後，心跳也會傳遞一則前綴為 `Reasoning:` 的獨立訊息（與 `/reasoning on` 格式相同）。當代理管理多個工作階段/codex，而你想了解它為何決定通知你時，這很有用 — 但也可能洩露比你想要的更多內部細節。建議在群組聊天中保持關閉。
+
+## 成本考量
+
+心跳執行完整的代理輪次。較短的間隔會消耗更多 token。保持 `HEARTBEAT.md` 精簡，並考慮使用較便宜的 `model` 或 `target: "none"`（如果你只想要內部狀態更新）。

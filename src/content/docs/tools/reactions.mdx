@@ -1,0 +1,53 @@
+---
+title: "反應"
+description: "跨多個通訊平台的反應工具，建立共享語義以實現 emoji 反應的一致處理。"
+order: 10
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/reactions"
+---
+
+跨訊息平台的反應工具，提供共享語義以一致地實作 emoji 反應。
+
+## 共享反應語義
+
+### 核心參數
+
+* **`emoji`**（必填）：新增反應時指定反應符號
+* **`emoji=""`**（選填）：在支援的平台上移除反應
+* **`remove: true`**（選填）：移除指定的 emoji 反應
+
+## 各平台行為
+
+### Discord / Slack
+
+* 空 `emoji` 移除所有機器人反應
+* `remove: true` 僅移除該指定的 emoji
+
+### Google Chat
+
+* 空 `emoji` 移除所有應用程式反應
+* `remove: true` 僅移除該指定的 emoji
+
+### Telegram
+
+* 空 `emoji` 移除機器人反應
+* `remove: true` 也會移除反應，但需要非空的 `emoji` 以通過驗證
+
+### WhatsApp
+
+* 空 `emoji` 移除機器人反應
+* `remove: true` 對應到空 emoji 功能（仍需要 `emoji` 為非空）
+
+### Signal
+
+* 當 `channels.signal.reactionNotifications` 設定啟用時，收到的反應通知會觸發系統事件
+
+## 摘要表
+
+| 平台 | 空 `emoji` | `remove: true` |
+|------|-----------|----------------|
+| Discord / Slack | 移除所有機器人反應 | 僅移除該 emoji |
+| Google Chat | 移除所有應用程式反應 | 僅移除該 emoji |
+| Telegram | 移除機器人反應 | 移除反應（需非空 `emoji`） |
+| WhatsApp | 移除機器人反應 | 對應到空 emoji（需非空 `emoji`） |
+| Signal | — | —（透過事件通知） |

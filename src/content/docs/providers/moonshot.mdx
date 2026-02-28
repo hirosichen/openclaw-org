@@ -1,0 +1,80 @@
+---
+title: "Moonshot AI (Kimi)"
+description: "在 OpenClaw 中設定 Moonshot AI 和 Kimi Coding 供應商，支援 Kimi K2 系列模型。"
+order: 9
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/moonshot"
+---
+
+Moonshot 透過 OpenAI 相容端點提供 Kimi API。本文件涵蓋標準 Moonshot API 和獨立的 Kimi Coding 服務的設定。
+
+> **提示：** Moonshot 和 Kimi Coding 是**獨立的供應商**。金鑰不可互換，端點不同，模型參考也不同。Moonshot 使用 `moonshot/...` 前綴，Kimi Coding 使用 `kimi-coding/...` 前綴。
+
+## 可用的 Kimi K2 模型
+
+| 模型 | 說明 |
+| --- | --- |
+| `kimi-k2.5` | 標準版 |
+| `kimi-k2-0905-preview` | 預覽版 |
+| `kimi-k2-turbo-preview` | Turbo 預覽版 |
+| `kimi-k2-thinking` | 支援推理 |
+| `kimi-k2-thinking-turbo` | 支援推理（Turbo） |
+
+所有模型規格：
+
+- **上下文視窗：** 256,000 tokens
+- **最大輸出：** 8,192 tokens
+- **輸入類型：** 純文字
+
+## 設定
+
+### Moonshot API
+
+```bash
+openclaw onboard --auth-choice moonshot-api-key
+```
+
+#### 設定片段
+
+```json5
+{
+  env: { MOONSHOT_API_KEY: "sk-..." },
+  agents: {
+    defaults: {
+      model: { primary: "moonshot/kimi-k2.5" },
+    },
+  },
+}
+```
+
+### Kimi Coding
+
+```bash
+openclaw onboard --auth-choice kimi-code-api-key
+```
+
+#### 設定片段
+
+```json5
+{
+  env: { KIMI_CODE_API_KEY: "sk-..." },
+  agents: {
+    defaults: {
+      model: { primary: "kimi-coding/k2p5" },
+    },
+  },
+}
+```
+
+## 端點
+
+| 供應商 | 國際端點 | 中國端點 |
+| --- | --- | --- |
+| Moonshot | `https://api.moonshot.ai/v1` | `https://api.moonshot.cn/v1` |
+| Kimi Coding | `https://api.moonshot.ai/v1` | `https://api.moonshot.cn/v1` |
+
+## 注意事項
+
+- 模型參考必須使用正確的前綴（`moonshot/...` 或 `kimi-coding/...`）
+- 可根據需要覆寫定價和上下文中繼資料
+- 目前所有模型的費用列為零

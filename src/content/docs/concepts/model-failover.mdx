@@ -1,0 +1,51 @@
+---
+title: "模型容錯切換"
+description: "OpenClaw 的兩階段故障處理系統，包括驗證設定檔輪替、工作階段固定、錯誤處理及模型後備機制。"
+order: 16
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/model-failover"
+---
+
+## 概覽
+
+OpenClaw 實作了兩階段故障處理系統：首先在供應商內部輪替驗證設定檔，然後透過 `agents.defaults.model.fallbacks` 設定回退至替代模型。
+
+## 驗證儲存
+
+憑證儲存在 `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` 中，支援 API 金鑰和 OAuth token。設定中的 `auth.profiles` / `auth.order` 僅為**元資料與路由資訊**（不含機密資料）。
+
+## 設定檔選擇
+
+當同一供應商存在多個設定檔時，OpenClaw 按以下優先順序選擇：
+
+1. 已設定的明確規則（若有）
+2. Agent 設定中定義的設定檔
+3. 驗證檔案中儲存的設定檔
+
+在無明確排序的情況下，系統採用輪替選擇，優先使用 OAuth 憑證而非 API 金鑰，並在每個類別中優先使用最久未使用的設定檔。
+
+## 工作階段固定
+
+OpenClaw 不會在每次請求時輪替，而是**在每個工作階段固定選定的驗證設定檔**，以維持供應商快取效率。此偏好會持續到：
+
+- 工作階段重置
+- 執行 Compaction
+- 設定檔進入冷卻狀態
+
+使用者指定的設定檔覆寫會鎖定直到工作階段結束。
+
+## 錯誤處理
+
+**速率限制與驗證錯誤**觸發指數退避冷卻期：
+
+- 1 分鐘 → 5 分鐘 → 25 分鐘 → 上限 1 小時
+
+**帳務失敗**接收較長的退避期：
+
+- 起始 **5 小時**，每次帳務失敗翻倍，上限 **24 小時**
+
+## 模型後備
+
+當供應商的所有設定檔都已耗盡時，系統會推進到 `agents.defaults.model.fallbacks` 中設定的後備鏈中的下一個模型。驗證失敗和速率限制是主要觸發條件。
+
+> **提示：** 相關設定記載於 Gateway 設定和[模型](/docs/concepts/models)概念頁面中。

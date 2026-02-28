@@ -1,0 +1,93 @@
+---
+title: "ClawHub"
+description: "OpenClaw 的公開技能登錄庫，提供探索、安裝及發布可重複使用的技能套件。"
+order: 11
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/clawhub"
+---
+
+ClawHub 是 **OpenClaw 的公開技能登錄庫**，讓使用者能夠探索、安裝及發布可重複使用的技能套件。所有技能皆為公開存取且完全免費。
+
+## 什麼是技能
+
+技能是一個**版本化的檔案套件**，包含一個 `SKILL.md` 檔案、選用的支援檔案，以及用於教導 OpenClaw 特定能力的中繼資料（標籤、摘要、需求）。
+
+## 運作方式
+
+1. 使用者發布包含 `SKILL.md` 及支援素材的技能套件
+2. ClawHub 建立索引並追蹤版本
+3. 其他使用者可以搜尋並安裝這些技能到他們的 OpenClaw 代理中
+
+## 主要功能
+
+* 由嵌入向量驅動的語義搜尋（非僅限關鍵字）
+* 語義化版本控制與變更日誌追蹤
+* 星號評分與社群評論
+* 具有檢舉功能的審核系統
+
+## 安裝 CLI
+
+```bash
+npm i -g clawhub
+```
+
+或使用 pnpm：
+
+```bash
+pnpm add -g clawhub
+```
+
+## CLI 命令
+
+### 認證
+
+* `clawhub login`（瀏覽器或 token 方式）
+* `clawhub logout`
+* `clawhub whoami`
+
+### 探索與管理
+
+* `clawhub search "query"` — 搜尋技能
+* `clawhub install <slug>` — 安裝技能
+* `clawhub update <slug>` 或 `clawhub update --all` — 更新技能
+* `clawhub list` — 列出已安裝的技能
+
+### 發布
+
+* `clawhub publish <path>` — 發布技能
+* `clawhub sync` — 掃描並發布多個技能
+* `clawhub delete <slug> --yes` — 刪除技能
+
+## 與 OpenClaw 的整合
+
+已安裝的技能儲存在 `./skills` 目錄中，工作區技能在代理工作階段中具有優先權。安裝記錄追蹤於 `.clawhub/lock.json`。
+
+> **提示：** 工作區技能的優先順序高於受管理/本地技能和內建技能。參閱[技能](/docs/tools/skills)了解完整的載入順序。
+
+## 安全性與審核
+
+ClawHub 採用低摩擦但具保護性的方式來平衡可存取性與濫用防護：
+
+* **帳號年齡要求**：GitHub 帳號必須至少一週以上才能發布
+* **檢舉系統**：收到超過 3 個不重複檢舉的技能會自動隱藏
+* **審核員監督**：審核員可以管理可見性、刪除內容或封禁使用者
+* **檢舉限制**：每位使用者最多 20 個有效檢舉，以防止濫用
+
+## 進階功能
+
+### 同步
+
+`clawhub sync` 命令允許批次發布和更新多個技能。本地內容會透過雜湊驗證與登錄庫版本進行比較，只在有變更時才覆寫。
+
+### 遙測
+
+執行 `sync`（已認證時）會傳送最小的安裝快照。可透過環境變數停用：
+
+```bash
+export CLAWHUB_DISABLE_TELEMETRY=1
+```
+
+### 儲存
+
+* 已安裝的技能記錄在 `.clawhub/lock.json`
+* Token 儲存在 CLI 設定中（可透過 `CLAWHUB_CONFIG_PATH` 覆寫）

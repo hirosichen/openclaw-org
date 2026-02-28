@@ -1,0 +1,47 @@
+---
+title: "Agent 工作區"
+description: "OpenClaw Agent 工作區的核心概念，包括工作區目錄結構、標準檔案、安全注意事項及 Git 備份建議。"
+order: 4
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/agent-workspace"
+---
+
+## 概覽
+
+工作區是 Agent 的主要工作目錄與記憶儲存位置，與設定目錄（`~/.openclaw/`）分開。工作區是 Agent 的家目錄，也是檔案工具和工作區上下文使用的唯一工作目錄。
+
+## 位置與設定
+
+- 標準路徑：`~/.openclaw/workspace`
+- 可透過 `openclaw.json` 設定自訂路徑
+- 支援設定檔專屬的變體（例如 `workspace-<profile>`）
+
+> **重要：** 工作區是**預設的 cwd**，而非硬性沙箱。工具會根據工作區解析相對路徑，但除非啟用沙箱功能，否則絕對路徑仍可存取主機上的其他位置。
+
+## 標準工作區檔案
+
+以下為工作區中的關鍵檔案：
+
+- **AGENTS.md**：每次工作階段啟動時載入的操作指令
+- **SOUL.md**：人設與邊界資訊
+- **USER.md**：使用者身份與偏好設定
+- **IDENTITY.md**：Agent 名稱與特徵
+- **TOOLS.md**：本地工具指南與慣例
+- **memory/YYYY-MM-DD.md**：每日記憶日誌
+- **MEMORY.md**：長期策劃記憶
+
+選用檔案包括 HEARTBEAT.md、BOOT.md 等，用於特殊功能。
+
+## 不應儲存的內容
+
+設定檔、憑證、工作階段逐字稿及 API 金鑰應保留在 `~/.openclaw/` 下，絕不應提交至版本控制系統。
+
+## Git 備份建議
+
+建議將工作區視為私人記憶，並透過私有 Git 儲存庫進行備份。使用 `.gitignore` 檔案排除機密與敏感資料。
+
+## 遷移與設定
+
+`openclaw setup` 命令會使用引導檔案初始化新工作區。工作區可透過複製儲存庫並更新設定路徑的方式在不同機器之間遷移。
+
+建議維持單一活躍工作區，以避免狀態衝突。

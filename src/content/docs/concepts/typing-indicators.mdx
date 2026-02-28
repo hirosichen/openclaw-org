@@ -1,0 +1,53 @@
+---
+title: "輸入指示器"
+description: "OpenClaw 的輸入指示器功能，控制聊天中 Agent 執行時的打字狀態顯示。"
+order: 22
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/typing-indicators"
+---
+
+## 概覽
+
+輸入指示器在執行活躍時於聊天中顯示。兩個設定控制此功能：`agents.defaults.typingMode` 決定**何時**顯示打字狀態，`typingIntervalSeconds` 設定**重新整理頻率**。
+
+## 預設行為（未設定時）
+
+當 `typingMode` 未設定時，OpenClaw 遵循舊有模式：
+
+- **直接聊天**：模型迴圈開始時立即開始打字
+- **群組聊天中的提及**：立即觸發打字
+- **群組聊天中無提及**：等待訊息文字串流開始
+- **心跳執行**：完全停用打字
+
+## 可用模式
+
+系統提供四種設定選項：
+
+- **`never`**：完全停用輸入指示器
+- **`instant`**：模型迴圈開始時立即啟動，即使是靜默回應
+- **`thinking`**：需要 `reasoningLevel: "stream"`，在第一個推理增量時觸發
+- **`message`**：在實際文字內容到達時啟動（排除靜默 token）
+
+模式從最晚到最早啟動的順序為：`never` → `message` → `thinking` → `instant`
+
+## 設定
+
+Agent 層級設定：
+
+```json5
+{
+  agent: {
+    typingMode: "thinking",
+    typingIntervalSeconds: 6,
+  },
+}
+```
+
+支援工作階段層級的模式和重新整理頻率覆寫。
+
+## 重要注意事項
+
+- 僅靜默的回應不會觸發 `message` 模式
+- `thinking` 模式需要啟用推理串流；若無推理增量發出，打字不會啟動
+- 心跳執行永遠不會顯示輸入指示器，無論設定為何
+- 間隔設定控制的是重新整理頻率，而非啟動時間，預設為 6 秒

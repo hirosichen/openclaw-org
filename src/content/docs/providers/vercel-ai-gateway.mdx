@@ -1,0 +1,55 @@
+---
+title: "Vercel AI Gateway"
+description: "透過 Vercel AI Gateway 在 OpenClaw 中存取數百個模型，使用單一端點和 Anthropic Messages 相容 API。"
+order: 8
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/vercel-ai-gateway"
+---
+
+[Vercel AI Gateway](https://vercel.com/ai-gateway) 提供統一 API，透過單一端點存取數百個模型。
+
+- **供應商：** `vercel-ai-gateway`
+- **驗證：** `AI_GATEWAY_API_KEY`
+- **API：** Anthropic Messages 相容
+
+## 快速開始
+
+1. 設定 API 金鑰（建議：為閘道儲存金鑰）：
+
+```bash
+openclaw onboard --auth-choice ai-gateway-api-key
+```
+
+2. 設定預設模型：
+
+```json5
+{
+  agents: {
+    defaults: {
+      model: { primary: "vercel-ai-gateway/anthropic/claude-opus-4.6" },
+    },
+  },
+}
+```
+
+## 非互動式範例
+
+```bash
+openclaw onboard --non-interactive \
+  --mode local \
+  --auth-choice ai-gateway-api-key \
+  --ai-gateway-api-key "$AI_GATEWAY_API_KEY"
+```
+
+## 環境注意事項
+
+如果閘道以守護程式（launchd/systemd）方式執行，請確保 `AI_GATEWAY_API_KEY` 對該程序可用（例如，在 `~/.openclaw/.env` 或透過 `env.shellEnv` 設定）。
+
+## 模型 ID 簡寫
+
+OpenClaw 接受 Vercel Claude 簡寫模型參考，並在執行時自動標準化：
+
+| 簡寫 | 標準化結果 |
+| --- | --- |
+| `vercel-ai-gateway/claude-opus-4.6` | `vercel-ai-gateway/anthropic/claude-opus-4.6` |
+| `vercel-ai-gateway/opus-4.6` | `vercel-ai-gateway/anthropic/claude-opus-4-6` |

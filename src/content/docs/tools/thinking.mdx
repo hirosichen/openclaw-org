@@ -1,0 +1,86 @@
+---
+title: "思考層級"
+description: "透過 /think 指令系統控制推理深度，從關閉到超高，並管理工作階段中的詳細程度和推理可見性。"
+order: 9
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/thinking"
+---
+
+`/think` 指令系統用於控制 Claude 代理的推理深度，提供從 `off` 到 `xhigh` 的多個選項。
+
+## 指令語法
+
+支援三種格式：
+
+* `/t <level>`
+* `/think:<level>`
+* `/thinking <level>`
+
+範例：`/think:medium`、`/t high`、`/thinking off`
+
+## 可用層級
+
+| 層級 | 別名 | 說明 |
+|------|------|------|
+| `off` | — | 停用思考 |
+| `minimal` | `think` | 基本思考 |
+| `low` | `think hard` | 標準推理 |
+| `medium` | `think harder` | 增強推理 |
+| `high` | `ultrathink`（最大預算） | 最密集推理 |
+| `xhigh` | `ultrathink+` | 僅限 GPT-5.2 + Codex 模型 |
+
+**變體對應：** `x-high`、`x_high`、`extra-high`、`extra high`、`extra_high` 對應到 `xhigh`；`highest`、`max` 對應到 `high`。
+
+> **提示：** Z.AI（`zai/*`）僅支援二元思考（`on`/`off`）；非 `off` 值會對應到 `low`。
+
+## 解析優先順序
+
+指令依照以下優先順序解析：
+
+1. **訊息內聯指令**：直接附加在訊息中的指令
+2. **工作階段覆寫**：透過指令設定的工作階段預設值
+3. **全域設定預設值**：`agents.defaults.thinkingDefault`
+4. **後備**：推理模型為 `low`，其他模型為 `off`
+
+## 工作階段管理
+
+* 傳送**僅含指令的訊息**（允許空白字元）以設定工作階段預設值
+* 收到確認：`"Thinking level set to [level]."` 或 `"Thinking disabled."`
+* 無效指令會被拒絕並附帶提示；狀態不變
+* 傳送 `/think`（不帶引數）以顯示目前層級
+* 透過 `/think:off` 或工作階段閒置重設來清除
+
+## Verbose 指令
+
+`/verbose` 指令管理工具呼叫的可見性：
+
+* **`off`**（預設）：不顯示工具呼叫詳情
+* **`on`**（minimal）：工具呼叫顯示為帶有 `<emoji> <tool-name>: <arg>` 格式的個別中繼資料訊息
+* **`full`**：包含工具輸出（截斷）於個別訊息泡中
+
+* 僅含指令的訊息切換工作階段 verbose 狀態
+* 內聯使用僅影響該則訊息
+* `/verbose`（不帶引數）顯示目前層級
+* 失敗詳情在一般模式下隱藏，啟用 verbose 時可見
+
+## 推理指令
+
+`/reasoning` 切換思考區塊是否顯示：
+
+* **`on`**：以獨立訊息顯示，前綴為 `"Reasoning:"`
+* **`off`**：隱藏思考區塊
+* **`stream`**（僅限 Telegram）：將推理串流至草稿泡，然後傳送不含推理的最終回答
+
+別名：`/reason`
+
+## 網頁聊天 UI 整合
+
+* 思考選擇器在頁面載入時反映儲存的工作階段層級
+* 選擇一個層級僅套用於下一則訊息（`thinkingOnce`）
+* 傳送後選擇器還原為儲存的工作階段層級
+* 若要變更持續性預設值，請傳送 `/think:<level>` 指令
+
+## 心跳
+
+* 心跳訊息使用設定的提示（文件中提供預設值）
+* 心跳推理包含由 `agents.list[].heartbeat.includeReasoning` 設定旗標控制

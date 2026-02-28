@@ -1,0 +1,88 @@
+---
+title: "MiniMax"
+description: "在 OpenClaw 中設定 MiniMax M2.1 模型，支援 OAuth 驗證、API 金鑰和本地部署。"
+order: 10
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/minimax"
+---
+
+MiniMax **M2.1**（2025 年 12 月 23 日發布）是一個專注於編碼的 AI 模型，強調多語言編碼和網頁/應用程式開發，並在複合指令處理方面有所改進。
+
+## M2.1 的主要改進
+
+- 支援多種程式語言，包括 Rust、Java、Go 和 C++
+- 增強的網頁和行動應用程式開發能力
+- 更好地處理複雜的多部分指令
+- 更高效的 token 使用和更快的回應循環
+- 改進與 AI 編碼工具和框架的相容性
+
+## 技術規格
+
+- **上下文視窗：** 200,000 tokens
+- **最大輸出：** 8,192 tokens
+- **基礎 URL：** `https://api.minimax.io/anthropic`（Anthropic 相容 API）
+
+> **提示：** 模型 ID 區分大小寫，例如 `minimax/MiniMax-M2.1`。
+
+## 設定選項
+
+### 選項 A：OAuth（推薦）
+
+透過 MiniMax 入口進行驗證，無需 API 金鑰，可選擇全球或中國端點。
+
+```bash
+openclaw onboard
+# 選擇：MiniMax OAuth
+```
+
+### 選項 B：API 金鑰
+
+透過 CLI 直接設定：
+
+```bash
+openclaw configure
+```
+
+#### 設定片段
+
+```json5
+{
+  env: { MINIMAX_API_KEY: "..." },
+  agents: {
+    defaults: {
+      model: { primary: "minimax/MiniMax-M2.1" },
+    },
+  },
+}
+```
+
+### 選項 C：故障轉移策略
+
+將 MiniMax M2.1 作為 Claude Opus 4.6 的備用選項，僅在主要模型不可用時啟用：
+
+```json5
+{
+  agents: {
+    defaults: {
+      model: {
+        primary: "anthropic/claude-opus-4-6",
+        fallback: "minimax/MiniMax-M2.1",
+      },
+    },
+  },
+}
+```
+
+### 選項 D：本地部署
+
+透過 LM Studio 在本地硬體上執行 M2.1 模型推論。
+
+## Lightning 變體
+
+Lightning 變體在可用時自動路由請求，但在流量高峰期間會回退至標準 M2.1 — 這是一種非使用者明確控制的負載平衡機制。
+
+## 注意事項
+
+- 模型參考使用 `minimax/<model>` 格式
+- 基礎 URL 應優先指向 Anthropic 相容端點
+- 如需互動式設定協助，可執行 `openclaw configure`

@@ -1,0 +1,62 @@
+---
+title: "工作階段"
+description: "OpenClaw 的工作階段管理系統，包括 DM 範圍、安全 DM 模式、工作階段生命週期、維護策略及檢視除錯。"
+order: 11
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/session"
+---
+
+## 概覽
+
+OpenClaw 透過 Gateway 式系統處理工作階段管理，每個 Agent 的一個直接聊天工作階段作為主要上下文。直接訊息合併為 `agent:<agentId>:<mainKey>`（預設為 `main`），而群組/頻道聊天擁有各自的金鑰。
+
+## DM 範圍設定
+
+`dmScope` 設定控制直接訊息的分組方式：
+
+- **`main`**（預設）：所有 DM 共享主要工作階段以保持連續性
+- **`per-peer`**：依發送者跨頻道隔離
+- **`per-channel-peer`**：依頻道與發送者隔離
+- **`per-account-channel-peer`**：依帳號、頻道與發送者隔離
+
+## 安全注意事項
+
+對於多使用者設定，OpenClaw 建議啟用安全 DM 模式。若未適當隔離，所有使用者將共享相同的對話上下文，可能導致使用者之間的私人資訊洩漏。將 `dmScope` 設定為 `per-channel-peer` 可防止不同訊息發送者之間的非預期上下文共享。
+
+```json5
+// ~/.openclaw/openclaw.json
+{
+  session: {
+    dmScope: "per-channel-peer",
+  },
+}
+```
+
+## 工作階段儲存與維護
+
+工作階段儲存在 Gateway 主機上的 `~/.openclaw/agents/<agentId>/sessions/`，並具備自動維護功能：
+
+- 清除超過 30 天的舊項目（預設）
+- 總項目上限為 500 個（預設）
+- 逐字稿檔案在 10MB 時輪替（預設）
+- 透過 `maxDiskBytes` 支援硬碟空間預算
+
+維護在寫入時執行，也可透過 `openclaw sessions cleanup` 手動觸發。
+
+## 工作階段生命週期
+
+工作階段根據可設定的策略重置：
+
+- **每日重置**：預設為 Gateway 本地時間凌晨 4:00
+- **閒置重置**：選用，透過 `idleMinutes` 設定滑動視窗
+- **手動重置**：透過 `/new` 或 `/reset` 命令
+- 支援依類型和依頻道的覆寫
+
+## 檢視與除錯
+
+使用者可透過以下方式監控工作階段：
+
+- `openclaw status`：顯示最近的工作階段
+- `openclaw sessions --json`：完整工作階段傾印
+- `/status` 聊天命令：顯示上下文使用量與工作階段詳情
+- 直接檢閱 JSONL 逐字稿以取得完整對話歷史

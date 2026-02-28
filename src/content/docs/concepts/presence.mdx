@@ -1,0 +1,53 @@
+---
+title: "Presence（在線狀態）"
+description: "OpenClaw 的 Presence 系統，提供 Gateway 本身及連接客戶端的輕量級最佳努力視圖。"
+order: 21
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/presence"
+---
+
+## 概覽
+
+OpenClaw 的 Presence 系統提供 Gateway 本身及連接到 Gateway 的客戶端的輕量級、最佳努力視圖。此功能主要支援 macOS 應用程式的 Instances 分頁和操作者可見性。
+
+## Presence 欄位
+
+系統追蹤多個資料點，包括：
+
+- 實例 ID
+- 主機名稱
+- IP 位址
+- 客戶端版本
+- 硬體詳情
+- 操作模式
+- 更新時間戳
+
+## 資料來源
+
+Presence 資訊來自四個主要生產者：
+
+1. **Gateway 自身項目**：啟動時的自我註冊
+2. **WebSocket 客戶端連線**：客戶端連接時產生
+3. **系統事件信標**：來自客戶端的定期信標（macOS 應用程式使用）
+4. **Node 連線**：具有 node 角色的連線
+
+## 去重策略
+
+架構依賴穩定的 `instanceId` 值來防止重複項目。項目以 presence key 為鍵值索引，最佳的 key 是能在重啟後存續的穩定 `instanceId`。若無一致的識別碼，可能出現重複項目。
+
+## 資源管理
+
+系統強制執行以下限制：
+
+- 超過 5 分鐘的項目會被移除
+- 最大容量為 200 個項目
+- 超過容量時自動移除最舊的項目
+
+## 特殊情況
+
+- **CLI 命令**：CLI 通常用於短暫的一次性命令。為避免在 Instances 清單中產生雜訊，`client.mode === "cli"` 不會轉換為 Presence 項目。
+- **迴環 IP 位址**：來自 SSH 通道的迴環 IP 位址會被忽略，以防止覆寫客戶端回報的 IP 資訊。
+
+## 疑難排解
+
+操作者可呼叫 `system-presence` 方法檢查原始資料。除錯重複項目時，應驗證跨握手和定期更新的穩定實例識別碼。

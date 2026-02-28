@@ -1,0 +1,64 @@
+---
+title: "Compaction（上下文壓縮）"
+description: "OpenClaw 的 Compaction 機制，透過摘要較舊的對話歷史來管理上下文視窗，保持在 token 限制內。"
+order: 13
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/compaction"
+---
+
+## 概覽
+
+每個模型都有**上下文視窗**（可見的最大 token 數）。長時間的聊天會累積訊息和工具結果；當視窗空間不足時，OpenClaw 會**壓縮**較舊的歷史以保持在限制內。
+
+## 什麼是 Compaction
+
+Compaction 會將**較舊的對話**摘要為一個精簡的摘要項目，並保留最近的訊息不變。摘要會儲存在工作階段歷史中，因此後續請求會使用：
+
+- Compaction 摘要
+- 壓縮點之後的近期訊息
+
+Compaction 會**持久化**到工作階段的 JSONL 歷史中。
+
+## 設定
+
+在 `openclaw.json` 中使用 `agents.defaults.compaction` 設定來配置 Compaction 行為（模式、目標 token 數等）。
+
+Compaction 摘要預設會保留不透明識別碼（`identifierPolicy: "strict"`）。可透過 `identifierPolicy: "off"` 覆寫此設定，或使用 `identifierPolicy: "custom"` 搭配 `identifierInstructions` 提供自訂文字。
+
+## 自動 Compaction（預設開啟）
+
+當工作階段接近或超過模型的上下文視窗時，OpenClaw 會觸發自動 Compaction，並可能使用壓縮後的上下文重試原始請求。
+
+在詳細模式下會顯示相關狀態更新，`/status` 會顯示 Compaction 次數。
+
+在 Compaction 之前，OpenClaw 可以執行一個**靜默記憶刷新**回合，將持久筆記儲存到磁碟。詳見 [記憶](/docs/concepts/memory) 的說明與設定。
+
+## 手動 Compaction
+
+使用 `/compact`（可選擇附帶指令）來強制執行 Compaction：
+
+```
+/compact Focus on decisions and open questions
+```
+
+## 上下文視窗來源
+
+上下文視窗大小因模型而異。OpenClaw 使用來自已設定供應商目錄的模型定義來決定限制。
+
+## Compaction 與修剪的差異
+
+- **Compaction**：摘要並**持久化**至 JSONL。
+- **工作階段修剪**：僅在每次請求時於**記憶體中**修剪舊的**工具結果**。
+
+詳見 [工作階段修剪](/docs/concepts/session-pruning)。
+
+## OpenAI 伺服器端 Compaction
+
+OpenClaw 也支援 OpenAI Responses 伺服器端 Compaction 提示，適用於相容的 OpenAI 直接模型。這與本地 OpenClaw Compaction 分開運作，可同時並行。
+
+- 本地 Compaction：OpenClaw 摘要並持久化至工作階段 JSONL。
+- 伺服器端 Compaction：當啟用 `store` + `context_management` 時，OpenAI 在供應商端壓縮上下文。
+
+## 提示
+
+> **提示：** 當工作階段感覺過時或上下文臃腫時，使用 `/compact`。大型工具輸出已經被截斷；修剪可進一步減少工具結果的累積。若需要全新開始，`/new` 或 `/reset` 會啟動新的工作階段。

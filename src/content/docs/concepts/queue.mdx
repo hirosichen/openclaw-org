@@ -1,0 +1,60 @@
+---
+title: "命令佇列"
+description: "OpenClaw 的命令佇列系統，透過序列化、通道感知的 FIFO 佇列管理入站自動回覆執行。"
+order: 20
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/queue"
+---
+
+## 概覽
+
+命令佇列系統透過一個序列化的、通道感知的 FIFO 佇列管理入站自動回覆執行，防止多個 Agent 執行碰撞，同時在不同工作階段之間維持安全的平行處理。
+
+## 核心目的
+
+系統將所有頻道的入站自動回覆執行序列化，透過一個小型行程內佇列防止多個 Agent 執行碰撞。佇列使用可設定的並行上限排空每個通道（未設定的通道預設為 1；main 預設為 4，subagent 預設為 8）。
+
+## 佇列模式
+
+系統支援多種訊息處理策略：
+
+- **`steer`**：立即將訊息注入當前執行中（取消待處理的工具呼叫）
+- **`followup`**：排入佇列，等待當前執行完成後執行
+- **`collect`**：將排入佇列的訊息合併為單一後續回合（預設行為）
+- **`steer-backlog`**：立即導向，同時保留訊息供後續使用
+- **`interrupt`**：中止當前執行並處理最新訊息
+
+## 設定選項
+
+佇列行為可透過設定參數自訂：
+
+```json5
+{
+  messages: {
+    queue: {
+      mode: "collect",
+      debounceMs: 1000,
+      cap: 20,
+      drop: "summarize",
+    },
+  },
+}
+```
+
+- `debounceMs`：延遲後續執行，以防止快速連續的訊息
+- `cap`：每個工作階段的最大排隊訊息數（預設：20）
+- `drop`：溢出處理方式（`old`、`new` 或 `summarize`）
+
+## 工作階段控制
+
+使用者可透過傳送 `/queue <mode>` 命令覆寫每個工作階段的佇列行為：
+
+```
+/queue collect debounce:2s cap:25 drop:summarize
+```
+
+> **提示：** 系統會在開始後續回合前等待靜止狀態，防止快速連發的後續動作。
+
+## 技術範圍
+
+佇列適用於所有入站頻道的自動回覆 Agent 執行，包括 WhatsApp、Telegram、Slack、Discord 等。無外部相依性，完全以 TypeScript 實作。

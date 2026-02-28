@@ -1,0 +1,70 @@
+---
+title: "提升模式"
+description: "控制沙箱代理在閘道主機上的執行行為，支援選用的核准處理與多層存取控制。"
+order: 12
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/elevated"
+---
+
+提升模式（`/elevated` 指令）控制沙箱代理的執行行為，允許它們在閘道主機上執行命令，並支援選用的核准處理。
+
+## 指令語法
+
+* `/elevated on` — 在閘道主機上執行，維持 exec 核准
+* `/elevated ask` — 等同於 `/elevated on`
+* `/elevated full` — 在閘道主機上執行，自動核准執行
+* `/elevated off` — 停用提升模式
+* `/elev on|off|ask|full` — 縮寫形式
+* `/elevated` 或 `/elevated:` — 顯示目前層級
+
+> **提示：** 提升模式**僅在代理處於沙箱環境時**改變行為。未沙箱化的代理已經在主機上執行。
+
+## 解析順序
+
+指令依照以下優先順序解析：
+
+1. **內聯指令**：訊息層級的覆寫
+2. **工作階段覆寫**：透過僅含指令的訊息設定
+3. **全域預設設定**：`agents.defaults.elevatedDefault`
+
+## 設定工作階段預設值
+
+傳送僅含指令的訊息以設定工作階段狀態。系統會回覆確認訊息。授權檢查在狀態修改前進行。透過 `/elevated`（不帶引數）顯示目前層級。
+
+## 存取控制
+
+提升模式使用多層授權系統：
+
+### 全域功能開關
+
+* `tools.elevated.enabled` — 功能旗標（啟用/停用）
+* `tools.elevated` — 全域基線閘道
+
+### 傳送者允許清單
+
+* `tools.elevated.allowFrom` — 依提供者分類的傳送者允許清單（Discord、WhatsApp 等）
+
+允許清單條目支援以下前綴進行身分匹配：
+
+* `name:<value>` — 匹配 SenderName
+* `username:<value>` — 匹配 SenderUsername
+* `tag:<value>` — 匹配 SenderTag
+* `id:` / `from:` / `e164:` — 明確身分目標定位
+
+無前綴的條目匹配傳送者身分。
+
+> **提示：** 對於 Discord，若 `tools.elevated.allowFrom.discord` 未設定，則會使用 `channels.discord.allowFrom` 清單作為後備，除非有明確覆寫。
+
+### 每個代理限制
+
+* `agents.list[].tools.elevated` — 可進一步限制存取
+* `agents.list[].tools.elevated.allowFrom` — 每個代理的允許清單
+
+全域和每個代理的閘道都必須允許存取。
+
+## 重要注意事項
+
+* 工具政策仍然管控整體 `exec` 可用性
+* 提升模式與 `/exec` 命令是分開的
+* 群組聊天中的提升指令僅在提及代理時適用
+* `security=full` 僅在 elevated 解析為 `full` 時才強制執行

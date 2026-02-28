@@ -1,0 +1,108 @@
+---
+title: "LLM Task 外掛"
+description: "執行 JSON 格式的 LLM 任務並回傳結構化輸出，可選擇性地依 JSON Schema 驗證結果。"
+order: 8
+section: "tools"
+officialDoc: "https://docs.openclaw.ai/tools/llm-task"
+---
+
+`llm-task` 是一個**選用外掛工具**，執行僅限 JSON 的 LLM 任務並回傳結構化輸出（可選擇性地依 JSON Schema 驗證）。
+
+這對於像 Lobster 這樣的工作流引擎特別理想：你可以新增單一 LLM 步驟，而無需為每個工作流撰寫自訂 OpenClaw 程式碼。
+
+## 啟用外掛
+
+1. 啟用外掛：
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "llm-task": { "enabled": true }
+    }
+  }
+}
+```
+
+2. 將工具加入允許清單（它以 `optional: true` 註冊）：
+
+```json
+{
+  "agents": {
+    "list": [
+      {
+        "id": "main",
+        "tools": { "allow": ["llm-task"] }
+      }
+    ]
+  }
+}
+```
+
+## 設定（選用）
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "llm-task": {
+        "enabled": true,
+        "config": {
+          "defaultProvider": "openai-codex",
+          "defaultModel": "gpt-5.2",
+          "defaultAuthProfileId": "main",
+          "allowedModels": ["openai-codex/gpt-5.3-codex"],
+          "maxTokens": 800,
+          "timeoutMs": 30000
+        }
+      }
+    }
+  }
+}
+```
+
+`allowedModels` 是 `provider/model` 字串的允許清單。若有設定，任何不在清單中的請求都會被拒絕。
+
+## 工具參數
+
+* `prompt`（字串，必填）
+* `input`（任意型別，選填）
+* `schema`（物件，選填 JSON Schema）
+* `provider`（字串，選填）
+* `model`（字串，選填）
+* `authProfileId`（字串，選填）
+* `temperature`（數字，選填）
+* `maxTokens`（數字，選填）
+* `timeoutMs`（數字，選填）
+
+## 輸出
+
+回傳 `details.json`，包含解析後的 JSON（若提供了 `schema` 則會進行驗證）。
+
+## 範例：Lobster 工作流步驟
+
+```lobster
+openclaw.invoke --tool llm-task --action json --args-json '{
+  "prompt": "Given the input email, return intent and draft.",
+  "input": {
+    "subject": "Hello",
+    "body": "Can you help?"
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "intent": { "type": "string" },
+      "draft": { "type": "string" }
+    },
+    "required": ["intent", "draft"],
+    "additionalProperties": false
+  }
+}'
+```
+
+## 安全注意事項
+
+* 此工具**僅限 JSON**，會指示模型只輸出 JSON（不含程式碼區塊、不含評論）。
+* 此次執行不會對模型暴露任何工具。
+* 除非透過 `schema` 驗證，否則應將輸出視為不可信。
+* 在任何有副作用的步驟（傳送、發布、執行）之前，請加入核准步驟。

@@ -1,0 +1,48 @@
+---
+title: "千帆（Qianfan）"
+description: "在 OpenClaw 中設定百度千帆 MaaS 平台，透過統一 API 存取多種模型。"
+order: 12
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/qianfan"
+---
+
+千帆（Qianfan）是百度的 MaaS 平台，提供**統一 API**，透過單一端點和 API 金鑰路由請求至多種模型。它與 OpenAI 相容，因此大多數 OpenAI SDK 只需切換基礎 URL 即可使用。
+
+## 前置條件
+
+1. 擁有千帆 API 存取權的百度雲帳號
+2. 來自千帆控制台的 API 金鑰
+3. 系統上已安裝 OpenClaw
+
+## 取得 API 金鑰
+
+1. 前往 [千帆控制台](https://console.bce.baidu.com/qianfan/ais/console/apiKey)
+2. 建立新應用程式或選擇現有的
+3. 產生 API 金鑰（格式：`bce-v3/ALTAK-...`）
+4. 複製 API 金鑰以用於 OpenClaw
+
+## CLI 設定
+
+```bash
+openclaw onboard --auth-choice qianfan-api-key
+```
+
+## 設定片段
+
+```json5
+{
+  env: { QIANFAN_API_KEY: "bce-v3/ALTAK-..." },
+  agents: {
+    defaults: {
+      model: { primary: "qianfan/ernie-4.5-8k" },
+    },
+  },
+}
+```
+
+## 相關文件
+
+- [閘道設定](/docs/gateway/configuration)
+- [模型供應商](/docs/concepts/model-providers)
+- [代理設定](/docs/concepts/agent)
+- [千帆 API 官方文件](https://cloud.baidu.com/doc/qianfan-api/s/3m7of64lb)

@@ -1,0 +1,94 @@
+---
+title: "背景執行與程序工具"
+description: "透過 exec 和 process 工具管理 shell 指令與背景工作階段"
+order: 7
+section: "gateway"
+officialDoc: "https://docs.openclaw.ai/gateway/background-process"
+---
+
+OpenClaw 透過 `exec` 工具執行 shell 指令，並將長時間執行的任務保存在記憶體中。`process` 工具負責管理這些背景工作階段。
+
+## exec 工具
+
+主要參數：
+
+- `command`（必要）
+- `yieldMs`（預設 10000）：經過此延遲後自動轉為背景執行
+- `background`（布林值）：立即轉為背景執行
+- `timeout`（秒，預設 1800）：超過此時間後終止程序
+- `elevated`（布林值）：若已啟用/允許提權模式，則在主機上執行
+- 需要真正的 TTY？設定 `pty: true`。
+- `workdir`、`env`
+
+行為：
+
+- 前景執行直接回傳輸出。
+- 當轉為背景（明確指定或超時），工具會回傳 `status: "running"` + `sessionId` 以及一小段尾端輸出。
+- 輸出會保留在記憶體中，直到工作階段被輪詢或清除。
+- 如果 `process` 工具被禁用，`exec` 會同步執行並忽略 `yieldMs`/`background`。
+
+## 子程序橋接
+
+當在 exec/process 工具之外產生長時間執行的子程序時（例如 CLI 重新啟動或 gateway 輔助程式），請附加子程序橋接輔助工具，以便轉發終止訊號並在退出/錯誤時分離監聽器。這可以避免在 systemd 上產生孤立程序，並在各平台上保持一致的關閉行為。
+
+環境變數覆寫：
+
+- `PI_BASH_YIELD_MS`：預設 yield 時間（毫秒）
+- `PI_BASH_MAX_OUTPUT_CHARS`：記憶體中輸出上限（字元數）
+- `OPENCLAW_BASH_PENDING_MAX_OUTPUT_CHARS`：每個串流的待處理 stdout/stderr 上限（字元數）
+- `PI_BASH_JOB_TTL_MS`：已完成工作階段的 TTL（毫秒，範圍限制為 1 分鐘至 3 小時）
+
+設定（建議方式）：
+
+- `tools.exec.backgroundMs`（預設 10000）
+- `tools.exec.timeoutSec`（預設 1800）
+- `tools.exec.cleanupMs`（預設 1800000）
+- `tools.exec.notifyOnExit`（預設 true）：當背景 exec 退出時，將系統事件加入佇列並請求 heartbeat。
+- `tools.exec.notifyOnExitEmptySuccess`（預設 false）：設為 true 時，也會為成功但無輸出的背景執行加入完成事件。
+
+## process 工具
+
+動作：
+
+- `list`：列出執行中和已完成的工作階段
+- `poll`：取得工作階段的新輸出（同時回報退出狀態）
+- `log`：讀取彙總輸出（支援 `offset` + `limit`）
+- `write`：傳送 stdin（`data`，選用 `eof`）
+- `kill`：終止背景工作階段
+- `clear`：從記憶體中移除已完成的工作階段
+- `remove`：若執行中則終止，否則若已完成則清除
+
+注意事項：
+
+- 只有背景工作階段會被列出/保留在記憶體中。
+- 工作階段在程序重新啟動時會遺失（無磁碟持久化）。
+- 工作階段日誌只有在執行 `process poll/log` 且工具結果被記錄時，才會儲存到聊天歷史中。
+- `process` 的作用範圍限於每個代理；它只能看到該代理啟動的工作階段。
+- `process list` 包含衍生的 `name`（指令動詞 + 目標）以便快速瀏覽。
+- `process log` 使用基於行的 `offset`/`limit`。
+- 當 `offset` 和 `limit` 都省略時，回傳最後 200 行並包含分頁提示。
+- 當提供 `offset` 但省略 `limit` 時，從 `offset` 回傳到結尾（不限制為 200 行）。
+
+## 範例
+
+執行長時間任務並稍後輪詢：
+
+```json
+{ "tool": "exec", "command": "sleep 5 && echo done", "yieldMs": 1000 }
+```
+
+```json
+{ "tool": "process", "action": "poll", "sessionId": "<id>" }
+```
+
+立即在背景啟動：
+
+```json
+{ "tool": "exec", "command": "npm run build", "background": true }
+```
+
+傳送 stdin：
+
+```json
+{ "tool": "process", "action": "write", "sessionId": "<id>", "data": "y\n" }
+```

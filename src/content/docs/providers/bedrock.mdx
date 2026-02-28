@@ -1,0 +1,88 @@
+---
+title: "Amazon Bedrock"
+description: "在 OpenClaw 中設定 Amazon Bedrock 模型，使用 AWS 憑證進行驗證，支援自動模型探索。"
+order: 5
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/bedrock"
+---
+
+OpenClaw 透過 pi-ai 的 Bedrock Converse 串流供應商整合 Amazon Bedrock 模型。與基於 API 金鑰的服務不同，驗證依賴 **AWS 憑證**（環境變數、共用設定或執行個體角色）。
+
+## 供應商概覽
+
+- **供應商名稱：** `amazon-bedrock`
+- **API：** Bedrock Converse Stream
+- **驗證：** AWS 憑證（環境變數、共用設定檔或執行個體角色）
+- **區域：** 透過 `AWS_REGION` 或 `AWS_DEFAULT_REGION` 設定
+
+## 自動模型探索
+
+當 AWS 憑證存在時，OpenClaw 可以自動辨識支援串流和文字輸出的 Bedrock 模型。探索機制會快取結果，預設重新整理間隔為 1 小時。
+
+`models.bedrockDiscovery` 設定選項：
+
+| 選項 | 說明 |
+| --- | --- |
+| `enabled` | 有 AWS 憑證時預設為 `true` |
+| `region` | 回退至環境變數，預設為 `us-east-1` |
+| `providerFilter` | 依 Bedrock 供應商名稱過濾，例如 `"anthropic"`、`"amazon"` |
+| `refreshInterval` | 快取持續秒數（`0` 停用快取） |
+| `defaultContextWindow` | 探索到的模型的回退上下文視窗 |
+| `defaultMaxTokens` | 探索到的模型的回退最大 token 數 |
+
+## 驗證設定
+
+在閘道主機上公開 AWS 憑證。憑證來源優先順序如下：
+
+1. `AWS_BEARER_TOKEN_BEDROCK`
+2. `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`
+3. `AWS_PROFILE`
+4. 預設 AWS SDK 鏈
+
+### 設定片段
+
+```json5
+{
+  env: {
+    AWS_ACCESS_KEY_ID: "AKIA...",
+    AWS_SECRET_ACCESS_KEY: "...",
+    AWS_REGION: "us-east-1",
+  },
+  providers: {
+    "amazon-bedrock": {
+      models: {
+        "amazon-bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0": {
+          name: "Claude 3.5 Sonnet (Bedrock)",
+          contextWindow: 200000,
+          maxTokens: 8192,
+        },
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "amazon-bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0" },
+    },
+  },
+}
+```
+
+## EC2 執行個體角色
+
+在附有 IAM 角色的 EC2 執行個體上部署時，系統透過執行個體中繼資料服務（IMDS）進行驗證。
+
+> **提示：** 設定 `AWS_PROFILE=default` 作為變通方法，以通知 OpenClaw 有可用的憑證，即使實際驗證是透過 IMDS 進行的。
+
+### 必要的 IAM 權限
+
+```
+bedrock:InvokeModel
+bedrock:InvokeModelWithResponseStream
+bedrock:ListFoundationModels
+```
+
+## 注意事項
+
+- 你必須在 AWS 帳號和區域中**啟用模型存取權**。
+- 推理支援取決於特定模型的功能。
+- Bedrock 上的 Anthropic Claude 模型接受 `cacheRetention` 透傳，詳情請參閱 [Anthropic 供應商文件](/docs/providers/anthropic)。

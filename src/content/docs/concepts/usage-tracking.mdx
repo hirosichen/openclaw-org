@@ -1,0 +1,48 @@
+---
+title: "用量追蹤"
+description: "OpenClaw 的用量追蹤功能，直接從官方端點擷取供應商用量與配額資訊。"
+order: 23
+section: "concepts"
+officialDoc: "https://docs.openclaw.ai/concepts/usage-tracking"
+---
+
+## 概覽
+
+此功能直接從官方端點擷取供應商用量與配額資訊，呈現實際供應商回報的指標，而非估算值。
+
+## 顯示位置
+
+用量資訊顯示於多個位置：
+
+### 聊天介面
+
+- **`/status` 命令**：顯示格式化卡片，包含工作階段 token 計數和預估成本（僅限 API 金鑰驗證）。當可用時顯示目前模型供應商用量。
+- **`/usage` 命令**：提供多種模式：
+  - `off`：停用
+  - `tokens`：每次回應的頁尾含 token 資料
+  - `full`：完整指標
+  - OAuth 憑證僅顯示 token 資料
+- **`/usage cost`**：顯示從 OpenClaw 工作階段記錄計算的本地費用摘要。
+
+### 命令列
+
+- **`openclaw status --usage`**：產生完整的按供應商分類用量明細。
+- **`openclaw channels list`**：在供應商設定旁包含用量快照（使用 `--no-usage` 排除）。
+
+### macOS 選單列
+
+當支援時，在 Context 選單中顯示「Usage」區段。
+
+## 支援的供應商與驗證方式
+
+| 供應商 | 驗證方式 |
+|--------|----------|
+| Anthropic (Claude) | auth profiles 中的 OAuth token |
+| GitHub Copilot | auth profiles 中的 OAuth token |
+| Gemini | auth profiles 中的 OAuth token |
+| Antigravity | auth profiles 中的 OAuth token |
+| OpenAI Codex | OAuth，可選帳號 ID 整合 |
+| MiniMax | API 金鑰（`MINIMAX_CODE_PLAN_KEY` 或 `MINIMAX_API_KEY`），在 5 小時 coding plan 視窗內運作 |
+| z.ai | 來自環境變數、設定檔或驗證儲存的 API 金鑰 |
+
+> **提示：** 若無匹配的 OAuth/API 憑證，用量資訊會被隱藏。

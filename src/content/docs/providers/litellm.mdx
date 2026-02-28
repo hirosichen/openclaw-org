@@ -1,0 +1,125 @@
+---
+title: "LiteLLM"
+description: "透過 LiteLLM 開源閘道整合 OpenClaw，統一存取 100 多個模型供應商，支援成本管理和自動故障轉移。"
+order: 6
+section: "providers"
+officialDoc: "https://docs.openclaw.ai/providers/litellm"
+---
+
+[LiteLLM](https://github.com/BerriAI/litellm) 是一個開源 LLM 閘道，提供統一 API 存取 100 多個模型供應商。透過 LiteLLM，OpenClaw 可以集中管理成本、在不同後端之間切換，並維持靈活的供應商路由。
+
+## 為何使用 LiteLLM
+
+- **統一成本可見性** — 跨模型集中追蹤費用
+- **無縫切換** — 在 Claude、GPT-4、Gemini 及其他後端之間切換，無需重新設定 OpenClaw
+- **限額虛擬金鑰** — 使用預算上限的虛擬 API 金鑰控制支出
+- **請求日誌記錄** — 完整的請求/回應記錄
+- **自動故障轉移** — 主要供應商停機時自動切換
+
+## 快速開始
+
+### 選項 A：引導流程
+
+```bash
+openclaw onboard
+# 選擇：LiteLLM
+```
+
+### 選項 B：手動設定
+
+1. 安裝 LiteLLM proxy：
+
+```bash
+pip install litellm[proxy]
+```
+
+2. 啟動 proxy：
+
+```bash
+litellm --model gpt-4
+```
+
+3. 設定 API 金鑰：
+
+```bash
+export LITELLM_API_KEY="sk-..."
+```
+
+## 設定
+
+### 環境變數
+
+```bash
+export LITELLM_API_KEY="sk-..."
+```
+
+### 設定片段
+
+```json5
+{
+  env: { LITELLM_API_KEY: "sk-..." },
+  agents: {
+    defaults: {
+      model: { primary: "litellm/gpt-4" },
+    },
+  },
+}
+```
+
+### 進階模型設定
+
+```json5
+{
+  env: { LITELLM_API_KEY: "sk-..." },
+  providers: {
+    litellm: {
+      models: {
+        "litellm/gpt-4": {
+          name: "GPT-4 (via LiteLLM)",
+          contextWindow: 128000,
+          maxTokens: 4096,
+          capabilities: { reasoning: false, multimodal: true },
+        },
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "litellm/gpt-4" },
+    },
+  },
+}
+```
+
+## 成本管理
+
+透過虛擬金鑰設定每月預算限制：
+
+```bash
+curl -X POST 'http://localhost:4000/key/generate' \
+  -H 'Authorization: Bearer sk-...' \
+  -H 'Content-Type: application/json' \
+  -d '{"max_budget": 50, "budget_duration": "monthly"}'
+```
+
+這會建立一個每月上限為 $50 的專用金鑰，防止費用失控。
+
+## 監控
+
+使用 LiteLLM 的 API 端點檢查金鑰資訊和支出記錄：
+
+```bash
+# 查看金鑰資訊
+curl -X GET 'http://localhost:4000/key/info' \
+  -H 'Authorization: Bearer sk-...'
+
+# 查看支出記錄
+curl -X GET 'http://localhost:4000/spend/logs' \
+  -H 'Authorization: Bearer sk-...'
+```
+
+## 注意事項
+
+- OpenClaw 透過 `http://localhost:4000` 的 OpenAI 相容端點與 LiteLLM 通訊
+- 所有 OpenClaw 功能都能透過 LiteLLM 運作，無任何限制
+- 如需更多詳情，請參閱 [LiteLLM 官方文件](https://docs.litellm.ai/)
