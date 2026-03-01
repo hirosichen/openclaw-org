@@ -3,18 +3,39 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'OpenClaw 台灣社群 — 在本機運行的個人 AI 助理平台，支援多種聊天 App 整合',
   ogImage = '/og-default.png',
+  noindex = false,
 } = Astro.props;
 
 import '../styles/global.css';
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const fullTitle = title === '首頁' ? 'OpenClaw 台灣社群' : `${title} | OpenClaw 台灣社群`;
+
+// JSON-LD: WebSite schema (enables sitelinks search box in Google)
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'OpenClaw 台灣社群',
+  url: Astro.site?.toString(),
+  description: 'OpenClaw 台灣社群 — 在本機運行的個人 AI 助理平台，支援多種聊天 App 整合',
+  inLanguage: 'zh-TW',
+};
+
+// JSON-LD: Organization schema
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'OpenClaw 台灣社群',
+  url: Astro.site?.toString(),
+  logo: new URL('/favicon.svg', Astro.site).toString(),
+};
 ---
 
 <!doctype html>
@@ -26,7 +47,16 @@ const fullTitle = title === '首頁' ? 'OpenClaw 台灣社群' : `${title} | Ope
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="theme-color" content="#1e1e2e" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#eff1f5" media="(prefers-color-scheme: light)" />
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="zh-TW" href={canonicalURL} />
+    <link rel="alternate" hreflang="x-default" href={canonicalURL} />
+
+    <!-- Resource Hints -->
+    <link rel="dns-prefetch" href="https://us.i.posthog.com" />
+    <link rel="preconnect" href="https://us.i.posthog.com" crossorigin />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -45,6 +75,10 @@ const fullTitle = title === '首頁' ? 'OpenClaw 台灣社群' : `${title} | Ope
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
 
     <!-- Dark mode script (prevent FOUC) -->
     <script is:inline>

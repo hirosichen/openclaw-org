@@ -24,9 +24,64 @@ interface Props {
 }
 
 const { title, description, slug, headings, officialDoc } = Astro.props;
+
+// Find section label for breadcrumb
+import { docsNavigation } from '../data/navigation';
+const section = docsNavigation.find((s) =>
+  s.items.some((item) => item.slug === slug)
+);
+
+// JSON-LD: BreadcrumbList schema
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: '首頁',
+      item: Astro.site?.toString(),
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: '文件',
+      item: new URL('/docs/start/getting-started', Astro.site).toString(),
+    },
+    ...(section ? [{
+      '@type': 'ListItem',
+      position: 3,
+      name: section.label,
+    }] : []),
+    {
+      '@type': 'ListItem',
+      position: section ? 4 : 3,
+      name: title,
+      item: new URL(`/docs/${slug}`, Astro.site).toString(),
+    },
+  ],
+};
+
+// JSON-LD: TechArticle schema for documentation pages
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: title,
+  description: description,
+  url: new URL(`/docs/${slug}`, Astro.site).toString(),
+  inLanguage: 'zh-TW',
+  publisher: {
+    '@type': 'Organization',
+    name: 'OpenClaw 台灣社群',
+    url: Astro.site?.toString(),
+  },
+  ...(officialDoc ? { isBasedOn: officialDoc } : {}),
+};
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   <Disclaimer />
   <Header />
   <div class="flex-1 max-w-[90rem] mx-auto w-full flex">
