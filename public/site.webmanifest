@@ -1,0 +1,27 @@
+{
+  "name": "OpenClaw 台灣社群",
+  "short_name": "OpenClaw TW",
+  "description": "在本機運行的個人 AI 助理平台，支援多種聊天 App 整合",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1e2e",
+  "theme_color": "#e64553",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ interface Props {
   description?: string;
   ogImage?: string;
   noindex?: boolean;
+  ogType?: 'website' | 'article';
 }
 
 const {
@@ -11,6 +12,7 @@ const {
   description = 'OpenClaw 台灣社群 — 在本機運行的個人 AI 助理平台，支援多種聊天 App 整合',
   ogImage = '/og-default.png',
   noindex = false,
+  ogType = 'website',
 } = Astro.props;
 
 import '../styles/global.css';
@@ -39,7 +41,7 @@ const organizationSchema = {
 ---
 
 <!doctype html>
-<html lang="zh-TW">
+<html lang="zh-TW" dir="ltr" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -54,16 +56,22 @@ const organizationSchema = {
     <link rel="alternate" hreflang="zh-TW" href={canonicalURL} />
     <link rel="alternate" hreflang="x-default" href={canonicalURL} />
 
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
     <!-- Resource Hints -->
     <link rel="dns-prefetch" href="https://us.i.posthog.com" />
     <link rel="preconnect" href="https://us.i.posthog.com" crossorigin />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${fullTitle} - OpenClaw 台灣社群`} />
     <meta property="og:locale" content="zh_TW" />
     <meta property="og:site_name" content="OpenClaw 台灣社群" />
 
@@ -72,9 +80,12 @@ const organizationSchema = {
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+    <meta name="twitter:image:alt" content={`${fullTitle} - OpenClaw 台灣社群`} />
 
-    <!-- Favicon -->
+    <!-- Favicon & Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
