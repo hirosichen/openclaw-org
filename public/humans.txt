@@ -1,0 +1,20 @@
+/* TEAM */
+Name: OpenClaw Taiwan Community
+Site: https://www.openclaw.org.tw
+GitHub: https://github.com/openclaw/openclaw
+Location: Taiwan
+
+/* SITE */
+Language: zh-TW
+Framework: Astro 5
+CSS: Tailwind CSS 4
+Content: MDX
+Theme: Catppuccin Mocha
+Standards: HTML5, CSS3, ES2022
+Components: Astro Components
+Analytics: PostHog
+
+/* THANKS */
+Astro - https://astro.build
+Tailwind CSS - https://tailwindcss.com
+Catppuccin - https://catppuccin.com

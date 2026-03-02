@@ -48,6 +48,20 @@ const organizationSchema = {
     'https://github.com/openclaw/openclaw',
   ],
 };
+
+// JSON-LD: SiteNavigationElement schema
+const siteBase = Astro.site?.toString().replace(/\/$/, '') || '';
+const navigationSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'SiteNavigationElement', name: '首頁', url: `${siteBase}/` },
+    { '@type': 'SiteNavigationElement', name: '開始使用', url: `${siteBase}/docs/start/getting-started` },
+    { '@type': 'SiteNavigationElement', name: '安裝', url: `${siteBase}/docs/install/install` },
+    { '@type': 'SiteNavigationElement', name: '頻道', url: `${siteBase}/docs/channels/channels` },
+    { '@type': 'SiteNavigationElement', name: '文件', url: `${siteBase}/docs/concepts/architecture` },
+    { '@type': 'SiteNavigationElement', name: '關於', url: `${siteBase}/about` },
+  ],
+};
 ---
 
 <!doctype html>
@@ -66,8 +80,15 @@ const organizationSchema = {
     <link rel="alternate" hreflang="zh-TW" href={canonicalURL} />
     <link rel="alternate" hreflang="x-default" href={canonicalURL} />
 
-    <!-- Sitemap -->
+    <!-- Sitemap & RSS -->
     <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="OpenClaw 台灣社群" href="/feed.xml" />
+
+    <!-- LLM content discovery (llmstxt.org) -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site info" />
+
+    <!-- Humans & Security -->
+    <link rel="author" type="text/plain" href="/humans.txt" />
 
     <!-- Resource Hints -->
     <link rel="dns-prefetch" href="https://us.i.posthog.com" />
@@ -100,6 +121,7 @@ const organizationSchema = {
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
     <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(navigationSchema)} />
 
     <!-- Dark mode script (prevent FOUC) -->
     <script is:inline>

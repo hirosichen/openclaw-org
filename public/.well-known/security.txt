@@ -1,0 +1,8 @@
+# OpenClaw Taiwan Community Security Policy
+# https://securitytxt.org/ (RFC 9116)
+
+Contact: https://github.com/openclaw/openclaw/security/advisories
+Expires: 2027-03-02T00:00:00.000Z
+Preferred-Languages: zh-TW, en
+Canonical: https://www.openclaw.org.tw/.well-known/security.txt
+Policy: https://github.com/openclaw/openclaw/security/policy
