@@ -4,6 +4,7 @@ const points = [
     title: '自架部署',
     description: '在你自己的硬體上運行，你的規則。完全掌控你的 AI 代理。',
     color: 'text-green',
+    bg: 'bg-green/10',
     glow: 'group-hover:shadow-green/10',
     iconColor: 'stroke-green',
     // Server icon
@@ -13,6 +14,7 @@ const points = [
     title: '多頻道',
     description: '一個 Gateway 同時服務 WhatsApp、Telegram、Discord、iMessage 等。',
     color: 'text-blue',
+    bg: 'bg-blue/10',
     glow: 'group-hover:shadow-blue/10',
     iconColor: 'stroke-blue',
     // Network hub icon
@@ -22,6 +24,7 @@ const points = [
     title: '代理原生',
     description: '為程式碼代理而生，支援工具使用、會話、記憶和多代理路由。',
     color: 'text-mauve',
+    bg: 'bg-mauve/10',
     glow: 'group-hover:shadow-mauve/10',
     iconColor: 'stroke-mauve',
     // CPU/chip icon
@@ -31,6 +34,7 @@ const points = [
     title: '開放原始碼',
     description: 'MIT 授權，社群驅動。Node 22+、一組 API 金鑰，5 分鐘即可啟動。',
     color: 'text-peach',
+    bg: 'bg-peach/10',
     glow: 'group-hover:shadow-peach/10',
     iconColor: 'stroke-peach',
     // Code brackets icon
@@ -48,7 +52,9 @@ const points = [
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
       {points.map((point) => (
         <div class:list={['group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-1 hover:border-accent/30', point.glow]}>
-          <div class:list={['mb-4 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-lg', point.color]} set:html={point.svg} />
+          <div class:list={['w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg', point.bg]}>
+            <div class:list={[point.color]} set:html={point.svg} />
+          </div>
           <h3 class:list={['text-lg font-bold mb-2', point.color]}>{point.title}</h3>
           <p class="text-sm text-subtext-0 leading-relaxed">{point.description}</p>
         </div>

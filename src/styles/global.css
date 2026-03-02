@@ -220,6 +220,21 @@ html.light :focus-visible {
   animation: float 3s ease-in-out infinite;
 }
 
+/* ── CTA animated gradient border ── */
+@keyframes border-rotate {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+.cta-border-glow {
+  background: conic-gradient(from var(--border-angle, 0deg), var(--color-accent), var(--color-mauve), var(--color-peach), var(--color-accent));
+  animation: border-rotate 8s linear infinite;
+}
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 /* ── Hero gradient text sweep ── */
 @keyframes gradient-sweep {
   0% { background-position: 0% 50%; }

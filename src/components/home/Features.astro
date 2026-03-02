@@ -2,6 +2,7 @@
 import { features } from '../../data/features';
 
 const colors = ['text-green', 'text-blue', 'text-peach', 'text-yellow', 'text-mauve', 'text-teal'];
+const bgColors = ['bg-green/10', 'bg-blue/10', 'bg-peach/10', 'bg-yellow/10', 'bg-mauve/10', 'bg-teal/10'];
 
 const iconSvgs: Record<string, string> = {
   gateway: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
@@ -26,7 +27,9 @@ const iconSvgs: Record<string, string> = {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
       {features.map((feature, i) => (
         <div class="group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-1 hover:border-accent/30">
-          <div class:list={['mb-4 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-lg', colors[i % colors.length]]} set:html={iconSvgs[feature.iconName]} />
+          <div class:list={['w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg', bgColors[i % bgColors.length]]}>
+            <div class:list={[colors[i % colors.length]]} set:html={iconSvgs[feature.iconName]} />
+          </div>
           <h3 class:list={['text-lg font-bold mb-2', colors[i % colors.length]]}>{feature.title}</h3>
           <p class="text-sm text-subtext-0 leading-relaxed">{feature.description}</p>
         </div>
