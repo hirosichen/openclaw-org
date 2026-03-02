@@ -699,6 +699,32 @@ html.light .prose pre::after {
   }
 }
 
+/* ── Mobile: scrollbar hide utility ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Mobile: sidebar swipe indicator ── */
+@media (max-width: 1023px) {
+  #doc-sidebar::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    right: 0.375rem;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 2rem;
+    background: var(--color-overlay-0);
+    border-radius: 2px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
 /* ── Mobile: footer link touch targets ── */
 @media (max-width: 640px) {
   footer li {
@@ -709,6 +735,15 @@ html.light .prose pre::after {
     display: inline-flex;
     align-items: center;
   }
+}
+
+/* ── Mobile: TOC details light mode ── */
+html.light #mobile-toc {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(188, 192, 204, 0.7);
+}
+html.light #mobile-toc summary:hover {
+  color: var(--color-light-text);
 }
 
 /* ── Mobile: prose readable line length ── */
