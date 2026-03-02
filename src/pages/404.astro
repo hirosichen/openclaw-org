@@ -5,11 +5,11 @@ import Button from '../components/ui/Button.astro';
 
 <PageLayout title="找不到頁面" description="頁面不存在" noindex>
   <div class="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-    <div class="mb-8 text-accent animate-float">
-      <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    <div class="mb-6 md:mb-8 text-accent animate-float">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 md:w-24 md:h-24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
     </div>
-    <h1 class="text-6xl font-bold text-text mb-4 tracking-tight">404</h1>
-    <p class="text-xl text-subtext-0 mb-8">
+    <h1 class="text-5xl md:text-6xl font-bold text-text mb-3 md:mb-4 tracking-tight">404</h1>
+    <p class="text-lg md:text-xl text-subtext-0 mb-6 md:mb-8 px-4">
       哎呀！這個頁面好像被龍蝦夾走了。
     </p>
     <div class="flex flex-col sm:flex-row gap-4 mb-12">
@@ -31,7 +31,7 @@ import Button from '../components/ui/Button.astro';
           { label: '架構概覽', href: '/docs/concepts/architecture', desc: '了解系統設計' },
           { label: '常見問題', href: '/docs/help/faq', desc: '找到答案' },
         ].map((item) => (
-          <a href={item.href} class="group glass rounded-lg px-4 py-3 flex items-center justify-between transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-lg">
+          <a href={item.href} class="group glass rounded-lg px-4 py-3 flex items-center justify-between transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]">
             <div class="text-left">
               <span class="text-sm font-medium text-text group-hover:text-accent transition-colors">{item.label}</span>
               <span class="block text-xs text-overlay-0">{item.desc}</span>

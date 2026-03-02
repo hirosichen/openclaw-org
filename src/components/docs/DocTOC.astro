@@ -40,6 +40,14 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
       ))}
     </ul>
   </details>
+  <script>
+    const mobileToc = document.getElementById('mobile-toc');
+    mobileToc?.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileToc.removeAttribute('open');
+      });
+    });
+  </script>
 )}
 
 {filteredHeadings.length > 0 && !mobile && (

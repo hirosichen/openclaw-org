@@ -85,6 +85,7 @@ html.theme-transition *::after {
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  overscroll-behavior-y: none;
 }
 
 /* ── Scrollbar ── */
@@ -795,11 +796,55 @@ header {
   }
 }
 
+/* ── Mobile: 404 page sizing ── */
+@media (max-width: 640px) {
+  .min-h-\[60vh\] {
+    min-height: 50vh;
+  }
+}
+
+/* ── Mobile: disclaimer banner ── */
+@media (max-width: 640px) {
+  #disclaimer-banner {
+    font-size: 0.8125rem;
+    padding-left: 0.75rem;
+    padding-right: 2.5rem;
+    text-align: left;
+  }
+  #dismiss-disclaimer {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+/* ── Mobile: sidebar momentum scroll ── */
+#doc-sidebar {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Mobile: landscape mode adjustments ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  header nav {
+    height: 3rem;
+  }
+  html {
+    scroll-padding-top: 3.5rem;
+  }
+  #reading-progress {
+    height: 2px !important;
+  }
+}
+
 /* ── Mobile: reduced glass blur for performance ── */
 @media (max-width: 640px) {
   .glass {
     backdrop-filter: blur(8px);
   }
+}
+
+/* ── Mobile: eliminate 300ms tap delay on interactive elements ── */
+a, button, [role="button"], input, select, textarea, summary {
+  touch-action: manipulation;
 }
 
 /* ── Mobile: stagger animation faster ── */
