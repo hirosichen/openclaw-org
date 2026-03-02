@@ -98,6 +98,9 @@ html.light ::-webkit-scrollbar-track {
 html.light ::-webkit-scrollbar-thumb {
   background: var(--color-light-border);
 }
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #b8bdd0;
+}
 
 /* ── Selection ── */
 ::selection {
@@ -112,9 +115,10 @@ html.light ::-webkit-scrollbar-thumb {
   border: 1px solid rgba(69, 71, 90, 0.4);
 }
 html.light .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(220, 224, 232, 0.6);
+  border: 1px solid rgba(188, 192, 204, 0.7);
+  color: var(--color-light-text);
 }
 
 /* ── Code blocks in prose ── */
@@ -230,6 +234,15 @@ html.light .dot-grid {
   color: var(--color-green);
   opacity: 1;
 }
+html.light .copy-btn {
+  background: #e6e9ef;
+  border-color: var(--color-light-border);
+  color: var(--color-light-subtext);
+}
+html.light .copy-btn:hover {
+  background: var(--color-light-border);
+  color: var(--color-light-text);
+}
 
 /* ── Scroll to top ── */
 #scroll-top {
@@ -266,6 +279,12 @@ html.light .dot-grid {
 #scroll-top:active {
   transform: scale(0.95);
 }
+html.light #scroll-top {
+  box-shadow: 0 4px 12px rgba(230, 69, 83, 0.2);
+}
+html.light #scroll-top:hover {
+  box-shadow: 0 6px 20px rgba(230, 69, 83, 0.3);
+}
 
 /* ── Prose blockquote: remove auto-generated quotes ── */
 .prose blockquote p::before,
@@ -275,9 +294,16 @@ html.light .dot-grid {
 .prose blockquote {
   font-style: normal;
   quotes: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .prose blockquote:hover {
+  border-color: var(--color-accent);
+}
+html.light .prose blockquote {
+  background: rgba(220, 224, 232, 0.3);
+  border-color: var(--color-light-border);
+}
+html.light .prose blockquote:hover {
   border-color: var(--color-accent);
 }
 
@@ -292,12 +318,29 @@ html.light .dot-grid {
   font-weight: 600;
 }
 html.light .prose thead {
-  background: var(--color-light-border);
+  background: #e6e9ef;
+}
+html.light .prose tr {
+  border-color: var(--color-light-border);
+}
+html.light .prose td {
+  color: var(--color-light-text);
 }
 
 /* ── Prose link transition ── */
 .prose a {
   transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+html.light .prose a {
+  color: var(--color-accent);
+}
+html.light .prose a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* ── Prose h2 border light mode ── */
+html.light .prose h2 {
+  border-color: var(--color-light-border);
 }
 
 /* ── TOC scroll spy ── */
@@ -305,6 +348,66 @@ html.light .prose thead {
   color: var(--color-accent) !important;
   border-left-color: var(--color-accent);
   background: rgba(230, 69, 83, 0.08);
+}
+html.light .toc-link.active {
+  background: rgba(230, 69, 83, 0.1);
+}
+html.light .toc-link:hover {
+  background: rgba(220, 224, 232, 0.5);
+}
+
+/* ── Sidebar overlay fade animation ── */
+#sidebar-overlay {
+  transition: opacity 0.3s ease;
+}
+#sidebar-overlay.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+#sidebar-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Light mode sidebar ── */
+html.light #doc-sidebar {
+  background: var(--color-light-surface);
+  border-color: var(--color-light-border);
+}
+html.light .sidebar-section-heading {
+  color: var(--color-light-subtext);
+}
+
+/* ── Light mode: disclaimer banner ── */
+html.light #disclaimer-banner {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--color-light-border);
+  color: var(--color-light-subtext);
+}
+
+/* ── Light mode: footer ── */
+html.light footer {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--color-light-border);
+  color: var(--color-light-text);
+}
+html.light footer h3 {
+  color: var(--color-light-text);
+}
+html.light footer p,
+html.light footer li,
+html.light footer a:not(.text-accent) {
+  color: var(--color-light-subtext);
+}
+
+/* ── Light mode: header ── */
+html.light header.glass {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--color-light-border);
+}
+html.light #mobile-menu {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--color-light-border);
 }
 
 /* ── Performance: layout containment for doc sidebar ── */

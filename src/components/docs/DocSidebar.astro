@@ -11,7 +11,7 @@ const { currentSlug } = Astro.props;
 <!-- Mobile sidebar toggle -->
 <button
   id="sidebar-toggle"
-  class="lg:hidden fixed bottom-4 right-4 z-50 bg-accent text-white p-3 rounded-full shadow-lg cursor-pointer"
+  class="lg:hidden fixed bottom-4 right-4 z-50 bg-accent text-white p-3.5 rounded-full shadow-lg shadow-accent/30 cursor-pointer min-w-[48px] min-h-[48px] flex items-center justify-center transition-all duration-200 hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/40 hover:-translate-y-0.5 active:scale-95"
   aria-label="切換側邊欄"
 >
   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -20,7 +20,7 @@ const { currentSlug } = Astro.props;
 </button>
 
 <!-- Sidebar overlay -->
-<div id="sidebar-overlay" class="hidden fixed inset-0 z-40 bg-black/50 lg:hidden"></div>
+<div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black/50 lg:hidden is-hidden"></div>
 
 <!-- Sidebar -->
 <aside
@@ -30,7 +30,7 @@ const { currentSlug } = Astro.props;
   <nav class="p-4 space-y-6">
     {docsNavigation.map((section) => (
       <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-overlay-0 mb-2 px-2">
+        <h4 class="sidebar-section-heading text-xs font-bold uppercase tracking-wider text-overlay-0 mb-2 px-2">
           {section.label}
         </h4>
         <ul class="space-y-0.5">
@@ -39,7 +39,7 @@ const { currentSlug } = Astro.props;
               <a
                 href={`/docs/${item.slug}`}
                 class:list={[
-                  'block px-3 py-1.5 text-sm rounded-md transition-all duration-200',
+                  'block px-3 py-2 text-sm rounded-md transition-all duration-200 min-h-[40px] flex items-center',
                   currentSlug === item.slug
                     ? 'bg-accent/15 text-accent font-medium border-l-2 border-accent'
                     : 'text-subtext-0 hover:text-text hover:bg-surface-0/80 hover:translate-x-0.5 border-l-2 border-transparent',
@@ -62,11 +62,15 @@ const { currentSlug } = Astro.props;
 
   function openSidebar() {
     sidebar?.classList.remove('-translate-x-full');
-    overlay?.classList.remove('hidden');
+    overlay?.classList.remove('is-hidden');
+    overlay?.classList.add('is-visible');
+    document.body.style.overflow = 'hidden';
   }
   function closeSidebar() {
     sidebar?.classList.add('-translate-x-full');
-    overlay?.classList.add('hidden');
+    overlay?.classList.remove('is-visible');
+    overlay?.classList.add('is-hidden');
+    document.body.style.overflow = '';
   }
 
   toggle?.addEventListener('click', openSidebar);
