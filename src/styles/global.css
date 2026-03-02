@@ -1191,6 +1191,62 @@ html.light .prose tbody tr:nth-child(even) {
   }
 }
 
+/* ── Mobile: OLED-friendly darker backgrounds ── */
+@media (max-width: 640px) and (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --color-base: #161622;
+    --color-mantle: #121220;
+    --color-crust: #0c0c16;
+  }
+}
+
+/* ── Mobile: sticky header shadow separator ── */
+@media (max-width: 640px) {
+  header.glass {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+html.light header.glass {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Mobile: mobile menu slide-down animation ── */
+@media (max-width: 767px) {
+  #mobile-menu {
+    transform-origin: top;
+  }
+  #mobile-menu.opacity-0 {
+    transform: scaleY(0.95);
+  }
+  #mobile-menu.opacity-100 {
+    transform: scaleY(1);
+  }
+}
+
+/* ── Mobile: subtle noise texture on hero ── */
+@media (max-width: 640px) {
+  section:first-of-type::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* ── Mobile: footer bottom border accent line ── */
+@media (max-width: 640px) {
+  footer::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--color-accent), transparent);
+    opacity: 0.3;
+  }
+}
+
 /* ── Performance: reduce motion for users who prefer it ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll {
