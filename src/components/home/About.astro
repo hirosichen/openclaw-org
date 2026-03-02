@@ -51,7 +51,7 @@ const points = [
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
       {points.map((point) => (
-        <div class:list={['group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-1 hover:border-accent/30', point.glow]}>
+        <div class:list={['group glass rounded-xl p-5 sm:p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-1 hover:border-accent/30 active:scale-[0.98]', point.glow]}>
           <div class:list={['w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg', point.bg]}>
             <div class:list={[point.color]} set:html={point.svg} />
           </div>

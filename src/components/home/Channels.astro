@@ -49,7 +49,7 @@ const channels = [
     <p class="text-subtext-0 max-w-2xl mx-auto mb-10 animate-on-scroll">
       透過你已經在使用的聊天 App 與 AI 助理互動，無需額外安裝。
     </p>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto stagger-children">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto stagger-children">
       {channels.map((ch) => {
         const Tag = ch.slug ? 'a' : 'div';
         const href = ch.slug ? `/docs/channels/${ch.slug}` : undefined;
@@ -57,7 +57,7 @@ const channels = [
           <Tag
             href={href}
             class:list={[
-              'group glass rounded-xl p-5 text-center transition-all duration-300 hover:scale-[1.04] hover:-translate-y-1 block',
+              'group glass rounded-xl p-4 sm:p-5 text-center transition-all duration-300 hover:scale-[1.04] hover:-translate-y-1 block active:scale-[0.97]',
               ch.priority
                 ? 'ring-2 ring-accent/40 hover:ring-accent hover:shadow-xl hover:shadow-accent/15'
                 : 'hover:border-accent/30 hover:shadow-lg',

@@ -52,10 +52,10 @@ const { currentSlug } = Astro.props;
               <a
                 href={`/docs/${item.slug}`}
                 class:list={[
-                  'block px-3 py-2 text-sm rounded-md transition-all duration-200 min-h-[40px] flex items-center',
+                  'block px-3 py-2 text-sm rounded-md transition-all duration-200 min-h-[40px] flex items-center active:scale-[0.98]',
                   currentSlug === item.slug
                     ? 'bg-accent/15 text-accent font-medium border-l-2 border-accent'
-                    : 'text-subtext-0 hover:text-text hover:bg-surface-0/80 hover:translate-x-0.5 border-l-2 border-transparent',
+                    : 'text-subtext-0 hover:text-text hover:bg-surface-0/80 hover:translate-x-0.5 border-l-2 border-transparent active:bg-surface-0/60',
                 ]}
               >
                 {item.label}

@@ -75,8 +75,8 @@ const currentPath = Astro.url.pathname;
           <a
             href={item.href}
             class:list={[
-              'block py-3 px-3 text-sm font-medium transition-all duration-200 rounded-lg min-h-[44px] flex items-center',
-              isActive ? 'text-accent bg-accent/10' : 'text-subtext-1 hover:text-text hover:bg-surface-0/60',
+              'block py-3 px-3 text-sm font-medium transition-all duration-200 rounded-lg min-h-[44px] flex items-center active:scale-[0.98]',
+              isActive ? 'text-accent bg-accent/10' : 'text-subtext-1 hover:text-text hover:bg-surface-0/60 active:bg-surface-0/40',
             ]}
             {...(isActive ? { 'aria-current': 'page' } : {})}
           >

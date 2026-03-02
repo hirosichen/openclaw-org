@@ -54,6 +54,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeSpeed;
+  -webkit-tap-highlight-color: rgba(230, 69, 83, 0.15);
 }
 
 /* Use optimizeLegibility only for headings where it matters */
@@ -604,6 +605,99 @@ html.light .bg-yellow\/10 { background: rgba(223, 142, 29, 0.08); }
 html.light .border-yellow\/30 { border-color: rgba(223, 142, 29, 0.25); }
 html.light .bg-accent\/10 { background: rgba(230, 69, 83, 0.08); }
 html.light .border-accent\/30 { border-color: rgba(230, 69, 83, 0.25); }
+
+/* ── Mobile: safe area insets for notched devices ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  #scroll-top {
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+  #sidebar-toggle {
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+  footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── Mobile: copy button always visible on touch devices ── */
+@media (hover: none) and (pointer: coarse) {
+  .copy-btn {
+    opacity: 0.7;
+  }
+  .copy-btn.copied {
+    opacity: 1;
+  }
+}
+
+/* ── Mobile: code block horizontal scroll hint ── */
+@media (max-width: 640px) {
+  .prose pre {
+    position: relative;
+  }
+  .prose pre::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 2rem;
+    background: linear-gradient(to right, transparent, var(--color-crust));
+    border-radius: 0 0.5rem 0.5rem 0;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+  }
+  .prose pre:hover::after,
+  .prose pre:active::after {
+    opacity: 0;
+  }
+  .prose pre[data-lang]::before {
+    right: 0.5rem;
+    font-size: 0.6rem;
+  }
+}
+html.light .prose pre::after {
+  background: linear-gradient(to right, transparent, #e6e9ef);
+}
+
+/* ── Mobile: table responsive scroll wrapper ── */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+}
+@media (max-width: 640px) {
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  .prose table th,
+  .prose table td {
+    min-width: 8rem;
+  }
+}
+
+/* ── Mobile: scroll-to-top avoids sidebar toggle on docs pages ── */
+@media (max-width: 1023px) {
+  body:has(#sidebar-toggle) #scroll-top {
+    right: 4.5rem;
+  }
+}
+
+/* ── Mobile: pagination touch targets ── */
+@media (max-width: 640px) {
+  .doc-pagination a {
+    padding: 1rem;
+    min-height: 3.5rem;
+  }
+}
 
 /* ── Performance: layout containment for doc sidebar ── */
 #doc-sidebar {
