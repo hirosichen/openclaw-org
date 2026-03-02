@@ -15,9 +15,12 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 
 {filteredHeadings.length > 0 && (
   <div class="hidden xl:block w-56 shrink-0">
-    <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
-      <h4 class="text-xs font-bold uppercase tracking-wider text-overlay-0 mb-3">目錄</h4>
-      <ul class="space-y-1 text-sm border-l border-surface-0">
+    <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto scroll-smooth toc-scrollbar">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-overlay-0">目錄</h4>
+        <span class="text-[10px] text-overlay-0 tabular-nums">{filteredHeadings.filter(h => h.depth === 2).length} 節</span>
+      </div>
+      <ul class="space-y-0.5 text-sm border-l border-surface-0">
         {filteredHeadings.map((h) => (
           <li>
             <a

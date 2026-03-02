@@ -12,13 +12,34 @@ import Button from '../components/ui/Button.astro';
     <p class="text-xl text-subtext-0 mb-8">
       哎呀！這個頁面好像被龍蝦夾走了。
     </p>
-    <div class="flex gap-4">
+    <div class="flex flex-col sm:flex-row gap-4 mb-12">
       <Button href="/" variant="primary" size="lg">
         回到首頁
       </Button>
       <Button href="/docs/start/getting-started" variant="secondary" size="lg">
         瀏覽文件
       </Button>
+    </div>
+
+    <!-- Popular pages -->
+    <div class="w-full max-w-md">
+      <p class="text-sm text-overlay-0 mb-4">或許你在找：</p>
+      <div class="grid grid-cols-1 gap-2">
+        {[
+          { label: '快速入門', href: '/docs/start/getting-started', desc: '5 分鐘完成安裝' },
+          { label: '頻道整合', href: '/docs/channels/channels', desc: '連接聊天 App' },
+          { label: '架構概覽', href: '/docs/concepts/architecture', desc: '了解系統設計' },
+          { label: '常見問題', href: '/docs/help/faq', desc: '找到答案' },
+        ].map((item) => (
+          <a href={item.href} class="group glass rounded-lg px-4 py-3 flex items-center justify-between transition-all duration-200 hover:border-accent/40 hover:-translate-y-0.5 hover:shadow-lg">
+            <div class="text-left">
+              <span class="text-sm font-medium text-text group-hover:text-accent transition-colors">{item.label}</span>
+              <span class="block text-xs text-overlay-0">{item.desc}</span>
+            </div>
+            <svg class="w-4 h-4 text-overlay-0 group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        ))}
+      </div>
     </div>
   </div>
 </PageLayout>

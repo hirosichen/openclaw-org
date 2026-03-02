@@ -426,6 +426,18 @@ html.light .toc-link:hover {
   background: rgba(220, 224, 232, 0.5);
 }
 
+/* ── TOC thin scrollbar ── */
+.toc-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+.toc-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-surface-1);
+  border-radius: 3px;
+}
+.toc-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-2);
+}
+
 /* ── Reading progress bar ── */
 #reading-progress {
   background: linear-gradient(90deg, var(--color-accent), var(--color-peach));
