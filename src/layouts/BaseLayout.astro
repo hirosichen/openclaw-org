@@ -212,6 +212,18 @@ const navigationSchema = {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
+      // Scroll position restoration for back/forward navigation
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+        const savedPos = sessionStorage.getItem('scrollPos_' + location.pathname);
+        if (savedPos && performance.navigation?.type === 2) {
+          requestAnimationFrame(() => window.scrollTo(0, parseInt(savedPos)));
+        }
+        window.addEventListener('beforeunload', () => {
+          sessionStorage.setItem('scrollPos_' + location.pathname, String(window.scrollY));
+        });
+      }
+
       // Defer non-critical UI enhancements for faster TTI
       const deferInit = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : (cb: () => void) => setTimeout(cb, 200);
 
