@@ -185,6 +185,8 @@ const howToSchema = isGettingStarted ? {
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
   {howToSchema && <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />}
+  <!-- Reading progress bar -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-[3px] bg-accent z-50 transition-none" style="width: 0%;"></div>
   <Disclaimer />
   <Header />
   <div class="flex-1 max-w-[90rem] mx-auto w-full flex">
@@ -232,4 +234,14 @@ const howToSchema = isGettingStarted ? {
     <DocTOC headings={headings} />
   </div>
   <Footer />
+  <script>
+    const progressBar = document.getElementById('reading-progress');
+    if (progressBar) {
+      window.addEventListener('scroll', () => {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+        progressBar.style.width = `${Math.min(scrolled, 100)}%`;
+      }, { passive: true });
+    }
+  </script>
 </BaseLayout>

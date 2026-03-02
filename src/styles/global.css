@@ -75,6 +75,7 @@ html.light {
 /* ── Smooth scroll ── */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 /* ── Scrollbar ── */
@@ -150,9 +151,32 @@ html.light .glass {
 .prose pre {
   border-radius: 0.5rem;
   border: 1px solid var(--color-surface-0);
+  position: relative;
+}
+.prose pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0;
+  right: 3rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.65rem;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-overlay-0);
+  background: var(--color-surface-0);
+  border-radius: 0 0 0.25rem 0.25rem;
+  border: 1px solid var(--color-surface-1);
+  border-top: none;
 }
 html.light .prose pre {
   border-color: var(--color-light-border);
+  background: #e6e9ef;
+}
+html.light .prose pre[data-lang]::before {
+  background: var(--color-light-border);
+  border-color: #b8bdd0;
+  color: var(--color-light-subtext);
 }
 
 .prose code:not(pre code) {
@@ -366,6 +390,24 @@ html.light .prose a:hover {
   color: var(--color-accent-hover);
 }
 
+/* ── Prose heading anchor links ── */
+.prose h2[id],
+.prose h3[id],
+.prose h4[id] {
+  position: relative;
+  cursor: pointer;
+}
+.prose h2[id]:hover::after,
+.prose h3[id]:hover::after,
+.prose h4[id]:hover::after {
+  content: '#';
+  position: absolute;
+  margin-left: 0.5rem;
+  color: var(--color-accent);
+  opacity: 0.5;
+  font-weight: 400;
+}
+
 /* ── Prose h2 border light mode ── */
 html.light .prose h2 {
   border-color: var(--color-light-border);
@@ -382,6 +424,15 @@ html.light .toc-link.active {
 }
 html.light .toc-link:hover {
   background: rgba(220, 224, 232, 0.5);
+}
+
+/* ── Reading progress bar ── */
+#reading-progress {
+  background: linear-gradient(90deg, var(--color-accent), var(--color-peach));
+  box-shadow: 0 0 8px rgba(230, 69, 83, 0.4);
+}
+html.light #reading-progress {
+  box-shadow: 0 0 6px rgba(230, 69, 83, 0.25);
 }
 
 /* ── Sidebar overlay fade animation ── */

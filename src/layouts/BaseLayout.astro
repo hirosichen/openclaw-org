@@ -191,6 +191,19 @@ const navigationSchema = {
       // Defer non-critical UI enhancements for faster TTI
       const deferInit = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : (cb: () => void) => setTimeout(cb, 200);
 
+      // Language labels on code blocks (deferred)
+      deferInit(() => {
+        document.querySelectorAll('.prose pre code[class*="language-"]').forEach((code) => {
+          const match = code.className.match(/language-(\w+)/);
+          if (match) {
+            const pre = code.closest('pre');
+            if (pre && !pre.dataset.lang) {
+              pre.dataset.lang = match[1];
+            }
+          }
+        });
+      });
+
       // Copy buttons on all <pre> blocks (deferred)
       deferInit(() => {
         document.querySelectorAll('.prose pre, pre').forEach((pre) => {
