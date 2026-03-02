@@ -1133,6 +1133,64 @@ html.light .prose tbody tr:nth-child(even) {
   }
 }
 
+/* ── Mobile: CJK word-break optimization ── */
+@media (max-width: 640px) {
+  .prose {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .prose p, .prose li {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+}
+
+/* ── Mobile: callout icon sizing for touch ── */
+@media (max-width: 640px) {
+  .group.rounded-lg.border-l-4 svg {
+    width: 20px;
+    height: 20px;
+  }
+  .group.rounded-lg.border-l-4 {
+    border-left-width: 3px;
+  }
+}
+
+/* ── Mobile: section heading accent dot ── */
+@media (max-width: 640px) {
+  .section-heading::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    box-shadow: 0 0 6px rgba(230, 69, 83, 0.4);
+  }
+}
+
+/* ── Mobile: feature card icon container ── */
+@media (max-width: 640px) {
+  .group .w-12.h-12 {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .group .w-12.h-12 svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* ── Mobile: prose definition-like sections ── */
+@media (max-width: 640px) {
+  .prose h3 + p,
+  .prose h4 + p {
+    margin-top: 0.25rem;
+  }
+}
+
 /* ── Performance: reduce motion for users who prefer it ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll {
