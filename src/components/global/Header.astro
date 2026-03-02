@@ -128,4 +128,16 @@ const currentPath = Astro.url.pathname;
       btn?.focus();
     }
   });
+
+  // Swipe up to close mobile menu
+  let menuTouchStartY = 0;
+  menu?.addEventListener('touchstart', (e) => {
+    menuTouchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  menu?.addEventListener('touchend', (e) => {
+    const dy = e.changedTouches[0].clientY - menuTouchStartY;
+    if (dy < -50 && menu?.classList.contains('max-h-96')) {
+      closeMenu();
+    }
+  }, { passive: true });
 </script>

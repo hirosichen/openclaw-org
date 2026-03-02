@@ -99,4 +99,19 @@ const { currentSlug } = Astro.props;
       closeSidebar();
     }
   });
+
+  // Swipe left to close sidebar (touch gesture)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  sidebar?.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  sidebar?.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    if (dx < -60 && dy < 80 && !sidebar.classList.contains('-translate-x-full')) {
+      closeSidebar();
+    }
+  }, { passive: true });
 </script>

@@ -699,6 +699,35 @@ html.light .prose pre::after {
   }
 }
 
+/* ── Mobile: footer link touch targets ── */
+@media (max-width: 640px) {
+  footer li {
+    padding: 0.125rem 0;
+  }
+  footer a {
+    min-height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ── Mobile: prose readable line length ── */
+@media (max-width: 640px) {
+  .prose {
+    font-size: 0.9375rem;
+    line-height: 1.85;
+  }
+  .prose h1 {
+    font-size: 1.625rem;
+  }
+  .prose h2 {
+    font-size: 1.3rem;
+  }
+  .prose h3 {
+    font-size: 1.125rem;
+  }
+}
+
 /* ── Performance: layout containment for doc sidebar ── */
 #doc-sidebar {
   will-change: transform;
