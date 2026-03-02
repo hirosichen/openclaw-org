@@ -761,6 +761,57 @@ html.light #mobile-toc summary:hover {
   .prose h3 {
     font-size: 1.125rem;
   }
+  .prose code:not(pre code) {
+    word-break: break-all;
+  }
+}
+
+/* ── Mobile: auto-hide header on scroll ── */
+header.header-hidden {
+  transform: translateY(-100%);
+}
+header {
+  transition: transform 0.3s ease;
+}
+
+/* ── Mobile: thicker reading progress bar ── */
+@media (max-width: 640px) {
+  #reading-progress {
+    height: 4px !important;
+  }
+}
+
+/* ── Mobile: tighter homepage section spacing ── */
+@media (max-width: 640px) {
+  .py-16 {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .mb-10 {
+    margin-bottom: 2rem;
+  }
+  .section-heading {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Mobile: reduced glass blur for performance ── */
+@media (max-width: 640px) {
+  .glass {
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* ── Mobile: stagger animation faster ── */
+@media (max-width: 640px) {
+  .stagger-children.is-visible > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children.is-visible > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children.is-visible > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children.is-visible > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children.is-visible > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children.is-visible > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger-children.is-visible > *:nth-child(7) { animation-delay: 300ms; }
+  .stagger-children.is-visible > *:nth-child(8) { animation-delay: 350ms; }
 }
 
 /* ── Performance: layout containment for doc sidebar ── */

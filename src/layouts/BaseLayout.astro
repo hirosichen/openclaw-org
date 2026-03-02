@@ -181,8 +181,25 @@ const navigationSchema = {
 
       // Scroll to top (lightweight, keep synchronous)
       const scrollBtn = document.getElementById('scroll-top');
+      // Auto-hide header on scroll (mobile UX pattern)
+      const header = document.querySelector('header');
+      let lastScrollY = window.scrollY;
+      let ticking = false;
       window.addEventListener('scroll', () => {
         scrollBtn?.classList.toggle('visible', window.scrollY > 400);
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY && currentScrollY > 80) {
+              header?.classList.add('header-hidden');
+            } else {
+              header?.classList.remove('header-hidden');
+            }
+            lastScrollY = currentScrollY;
+            ticking = false;
+          });
+          ticking = true;
+        }
       }, { passive: true });
       scrollBtn?.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
