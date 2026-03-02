@@ -77,11 +77,69 @@ const articleSchema = {
   },
   ...(officialDoc ? { isBasedOn: officialDoc } : {}),
 };
+
+// JSON-LD: FAQPage schema (only for FAQ page)
+const isFaqPage = slug === 'help/faq';
+const faqSchema = isFaqPage ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 的系統需求是什麼？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '需要 Node.js >= 22，可在 Raspberry Pi 上執行（個人使用最低 512MB-1GB RAM）。可透過 npm 或安裝腳本安裝，入門設定通常需要 5-15 分鐘。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 支援哪些聊天平台？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'OpenClaw 支援 20+ 聊天頻道，包括 WhatsApp、Telegram、Discord、iMessage、LINE、Signal、Slack、Matrix、Mattermost、Microsoft Teams、Google Chat、飛書、IRC、Nostr、Twitch 等。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 的資料存儲在哪裡？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '狀態存放在 ~/.openclaw（設定、憑證、工作階段），Agent 工作空間預設為 ~/.openclaw/workspace，記憶持久化在 markdown 檔案中。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw Gateway 的預設設定是什麼？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '預設連接埠為 18789，預設啟用 token 驗證（即使在 localhost 上），非 loopback 繫結需要設定驗證，支援熱重載大多數設定變更。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 支援多 Agent 嗎？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '是的，單一 Gateway 可託管多個 agent，每個 agent 維護獨立的工作空間和工作階段歷史，可實現每個 agent 的專業化工作流程。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '最佳部署方式是什麼？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '筆電/桌機適合主動使用，VPS 適合全天候可靠性，Mac mini 作為常駐主機搭配 node 周邊裝置，Windows 使用者建議使用 WSL2。',
+      },
+    },
+  ],
+} : null;
 ---
 
 <BaseLayout title={title} description={description} ogType="article">
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
   <Disclaimer />
   <Header />
   <div class="flex-1 max-w-[90rem] mx-auto w-full flex">

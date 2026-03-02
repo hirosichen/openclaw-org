@@ -4,3 +4,6 @@ Disallow: /404
 
 Sitemap: https://www.openclaw.org.tw/sitemap-index.xml
 Sitemap: https://www.openclaw.org.tw/sitemap.xml
+
+# LLM-readable content
+# See https://llmstxt.org for specification

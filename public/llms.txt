@@ -1,0 +1,30 @@
+# OpenClaw 台灣社群
+
+> OpenClaw 是一個開源的自架式 AI 代理閘道器，將 WhatsApp、Telegram、Discord、iMessage、LINE、Signal、Slack 等聊天 App 連接到 AI 代理。MIT 授權，Node.js 22+ 運行。
+
+本網站 (www.openclaw.org.tw) 為台灣社群翻譯的繁體中文文件站。
+
+## 文件結構
+
+- [快速入門](https://www.openclaw.org.tw/docs/start/getting-started): 從零開始到首次對話的設定指南
+- [安裝指南](https://www.openclaw.org.tw/docs/install/install): 各種安裝方式 (Docker, Nix, Podman, Ansible)
+- [頻道整合](https://www.openclaw.org.tw/docs/channels/channels): 支援的聊天 App 整合方式
+- [架構概念](https://www.openclaw.org.tw/docs/concepts/architecture): 系統架構、代理迴圈、會話管理
+- [工具](https://www.openclaw.org.tw/docs/tools/tools): 瀏覽器、外掛、斜線命令等工具
+- [模型提供者](https://www.openclaw.org.tw/docs/providers/providers): 支援 Anthropic、OpenAI、Mistral 等
+- [平台](https://www.openclaw.org.tw/docs/platforms/platforms): macOS、Linux、Windows、iOS、Android
+- [閘道器設定](https://www.openclaw.org.tw/docs/gateway/gateway): Gateway 設定、安全、遠端存取
+- [常見問題](https://www.openclaw.org.tw/docs/help/faq): 安裝、設定、部署相關 FAQ
+
+## 核心功能
+
+- 多頻道閘道器：單一 Gateway 連接 WhatsApp、Telegram、Discord、iMessage 等
+- 多代理路由：每個代理獨立的工作區和會話歷史
+- 媒體支援：傳送和接收圖片、音訊和文件
+- Web 控制介面：瀏覽器儀表板管理聊天和設定
+- 外掛系統：擴展頻道和功能支援
+- 行動節點：iOS 和 Android 裝置配對
+
+## 詳細文件
+
+完整文件請參閱: [llms-full.txt](https://www.openclaw.org.tw/llms-full.txt)

@@ -6,9 +6,36 @@ import Features from '../components/home/Features.astro';
 import Channels from '../components/home/Channels.astro';
 import QuickStart from '../components/home/QuickStart.astro';
 import CommunityCTA from '../components/home/CommunityCTA.astro';
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'OpenClaw',
+  description: '開源的自架式 AI 代理閘道器，將 WhatsApp、Telegram、Discord、iMessage 等聊天 App 連接到 AI 代理。',
+  url: 'https://github.com/openclaw/openclaw',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows (WSL2), iOS, Android',
+  license: 'https://opensource.org/licenses/MIT',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    '多頻道閘道器 (WhatsApp, Telegram, Discord, iMessage, LINE, Signal, Slack)',
+    '多代理路由',
+    '媒體支援 (圖片、音訊、文件)',
+    'Web 控制介面',
+    '外掛系統',
+    '行動節點 (iOS/Android)',
+  ],
+  softwareRequirements: 'Node.js >= 22',
+  inLanguage: 'zh-TW',
+};
 ---
 
 <PageLayout title="首頁">
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <Hero />
   <About />
   <Features />

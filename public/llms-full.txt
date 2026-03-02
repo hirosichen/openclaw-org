@@ -1,0 +1,217 @@
+# OpenClaw 台灣社群 — 完整文件參考
+
+> OpenClaw 是一個開源的自架式 AI 代理閘道器，將多種聊天 App 連接到 AI 代理。本文件為繁體中文社群翻譯版本。
+
+網站: https://www.openclaw.org.tw
+官方 GitHub: https://github.com/openclaw/openclaw
+授權: MIT
+
+---
+
+## 什麼是 OpenClaw
+
+OpenClaw 是一個自架的閘道器（Gateway），可將 WhatsApp、Telegram、Discord、iMessage 等聊天 App 連接到 AI 程式碼代理。它在你的機器上運行單一 Gateway 程序，支援多頻道路由、代理會話、工具使用和記憶功能。需要 Node.js 22+，5 分鐘即可完成設定。
+
+### 核心功能
+
+- 多頻道閘道器：單一 Gateway 同時連接 WhatsApp、Telegram、Discord、iMessage 等 20+ 聊天平台
+- 多代理路由：每個代理擁有獨立的工作區和會話歷史
+- 媒體支援：傳送和接收圖片、音訊和文件
+- Web 控制介面：瀏覽器儀表板管理聊天和設定
+- 外掛系統：擴展頻道和功能支援
+- 行動節點：iOS 和 Android 裝置配對
+- MIT 開源授權，社群驅動
+
+---
+
+## 快速入門
+
+URL: https://www.openclaw.org.tw/docs/start/getting-started
+
+安裝方式：
+1. 安裝腳本（推薦）：自動處理 Node.js 偵測
+2. npm/pnpm 全域安裝
+3. 從原始碼建置（git clone）
+
+環境變數：
+- OPENCLAW_HOME: 主目錄
+- OPENCLAW_STATE_DIR: 狀態目錄
+- OPENCLAW_CONFIG_PATH: 設定檔路徑
+
+啟動流程：安裝 → 執行引導精靈 → 驗證 Gateway → 開啟 Control UI
+
+---
+
+## 系統架構
+
+URL: https://www.openclaw.org.tw/docs/concepts/architecture
+
+Gateway 是一個長駐守護程序，管理所有訊息介面，並提供 typed WebSocket API（JSON 文字框架）。客戶端（macOS app、CLI、Web UI）和節點（iOS/Android/headless）透過 WebSocket 連接，使用裝置配對和挑戰簽名機制。支援透過 Tailscale/VPN 或 SSH tunnel 進行遠端存取。
+
+### Agent 執行環境
+
+URL: https://www.openclaw.org.tw/docs/concepts/agent
+
+Agent 執行環境建立在 pi-mono 之上，需要工作區目錄。首次會話時注入六個使用者可編輯的引導檔案（AGENTS.md、SOUL.md、TOOLS.md、BOOTSTRAP.md、IDENTITY.md、USER.md）。會話存儲為 JSONL 檔案。
+
+### Agent 迴圈
+
+URL: https://www.openclaw.org.tw/docs/concepts/agent-loop
+
+執行路徑：驗證 → 會話解析 → 上下文組裝 → 模型推理 → 工具執行 → 串流回覆 → 狀態持久化。支援生命週期、助理和工具事件串流，可透過 Gateway hooks 和 plugin hooks 擴展。
+
+---
+
+## 支援的聊天頻道
+
+URL: https://www.openclaw.org.tw/docs/channels/channels
+
+支援 20+ 聊天頻道：
+- 核心頻道：WhatsApp、Telegram、Discord、Slack、Signal、Matrix、iMessage、IRC、Nostr、Twitch、Zalo、BlueBubbles、Google Chat
+- 外掛頻道：飛書（Feishu）、Mattermost、Microsoft Teams、LINE
+
+Telegram 設定最快（只需 Bot Token），WhatsApp 需要 QR 配對。多頻道可同時運行，自動訊息路由。
+
+---
+
+## 安裝方式
+
+URL: https://www.openclaw.org.tw/docs/install/install
+
+### 系統需求
+- Node.js >= 22
+- 可在 Raspberry Pi 上運行（最低 512MB-1GB RAM）
+- 支援 macOS、Linux、Windows (WSL2)
+
+### 安裝方法
+- 安裝腳本（推薦）
+- npm/pnpm 全域安裝
+- Docker / Docker Compose
+- Podman
+- Nix
+- Ansible
+- Bun（實驗性）
+- 從原始碼建置
+
+### 部署平台
+- Fly.io
+- Hetzner
+- GCP
+- Railway
+- Render
+- Northflank
+- exe.dev
+- macOS 虛擬機
+
+---
+
+## 工具
+
+URL: https://www.openclaw.org.tw/docs/tools/tools
+
+第一方代理工具：
+- exec：Shell 命令執行
+- process：背景程序管理
+- browser：Playwright 自動化（瀏覽器操作、截圖、UI 互動）
+- canvas：Canvas 渲染和 A2UI
+- nodes：裝置探索、相機、螢幕錄製、定位
+- image：視覺分析
+- message：跨平台訊息操作
+- cron：排程任務
+- gateway：重啟/設定/更新
+- session：會話管理
+
+支援工具配置檔（minimal/coding/messaging/full）、每個提供者的工具政策、群組快捷方式和外掛擴展工具。
+
+---
+
+## 模型提供者
+
+URL: https://www.openclaw.org.tw/docs/providers/providers
+
+支援 20+ LLM 提供者：
+- Anthropic (Claude)
+- OpenAI (GPT-4, etc.)
+- OpenRouter
+- LiteLLM
+- Together AI
+- Cloudflare AI Gateway
+- Moonshot
+- Mistral
+- Amazon Bedrock
+- Venice AI（隱私導向推薦）
+- Hugging Face
+- Ollama（本地模型）
+- vLLM
+- MiniMax
+- GLM
+- 千帆
+- ZAI
+- Vercel AI Gateway
+- Deepgram（音訊轉錄）
+
+模型設定格式：`provider/model`（例如 `anthropic/claude-opus-4-6`）
+
+---
+
+## 平台支援
+
+URL: https://www.openclaw.org.tw/docs/platforms/platforms
+
+- macOS：選單列 App
+- iOS：行動節點
+- Android：行動節點
+- Windows：建議使用 WSL2
+- Linux：原生支援
+
+Gateway 服務安裝：macOS 使用 launchd，Linux/WSL2 使用 systemd。
+
+---
+
+## Gateway 操作
+
+URL: https://www.openclaw.org.tw/docs/gateway/gateway
+
+- 預設連接埠：18789
+- 啟動：`openclaw gateway --port 18789`
+- 健康檢查端點
+- 熱重載模式：off/hot/restart/hybrid
+- 遠端存取：Tailscale 或 SSH tunnel
+- 服務管理：macOS (launchd) / Linux (systemd)
+- 支援單主機多 Gateway 實例
+
+---
+
+## 常見問題
+
+URL: https://www.openclaw.org.tw/docs/help/faq
+
+Q: OpenClaw 的系統需求是什麼？
+A: Node.js >= 22，可在 Raspberry Pi 上運行（最低 512MB-1GB RAM）。
+
+Q: 支援哪些認證方式？
+A: Claude setup-token、OpenAI Codex OAuth、本機模型。
+
+Q: 資料存儲在哪裡？
+A: 狀態存放在 ~/.openclaw（設定、憑證、工作階段），記憶持久化在 markdown 檔案中。
+
+Q: Gateway 預設設定是什麼？
+A: 預設連接埠 18789，預設啟用 token 驗證。
+
+Q: 支援多 Agent 嗎？
+A: 是，單一 Gateway 可託管多個 agent，每個 agent 維護獨立的工作空間和會話歷史。
+
+Q: 會話多久過期？
+A: 可設定的閒置時間後過期（預設 60 分鐘），使用 /new 指令開始全新對話。
+
+Q: 最佳部署方式是什麼？
+A: 筆電/桌機適合主動使用，VPS 適合全天候可靠性，Mac mini 作為常駐主機。
+
+---
+
+## 免責聲明
+
+本網站 (www.openclaw.org.tw) 為獨立社群專案，與 OpenClaw 官方團隊無任何關聯、從屬或背書關係。內容為社群志願者翻譯和編寫，可能包含錯誤或過時資訊。使用者應以 OpenClaw 官方文件為準。
+
+官方文件: https://docs.openclaw.ai
+GitHub: https://github.com/openclaw/openclaw
