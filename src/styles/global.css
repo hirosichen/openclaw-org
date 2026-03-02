@@ -5,7 +5,6 @@
 @import '@fontsource/noto-sans-tc/500.css';
 @import '@fontsource/noto-sans-tc/700.css';
 @import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
 
 /* ── Catppuccin Mocha inspired dark palette + OpenClaw lobster red ── */
 @theme {
@@ -54,6 +53,11 @@ html {
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* Use optimizeLegibility only for headings where it matters */
+h1, h2, h3 {
   text-rendering: optimizeLegibility;
 }
 
@@ -255,4 +259,44 @@ html.light .dot-grid {
 .toc-link.active {
   color: var(--color-accent) !important;
   border-left-color: var(--color-accent);
+}
+
+/* ── Performance: layout containment for doc sidebar ── */
+#doc-sidebar {
+  will-change: transform;
+  contain: layout style;
+}
+
+/* ── Performance: content-visibility for below-fold sections ── */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* ── Performance: reduce motion for users who prefer it ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll {
+    opacity: 1;
+    transform: none;
+  }
+  .animate-on-scroll.is-visible {
+    animation: none;
+  }
+  .stagger-children.is-visible > * {
+    animation: none;
+    opacity: 1;
+  }
+  #scroll-top {
+    transition: none;
+  }
+  a {
+    transition: none;
+  }
+}
+
+/* ── Performance: reduce backdrop-filter on low-end devices ── */
+@media (prefers-reduced-motion: reduce) {
+  .glass {
+    backdrop-filter: none;
+  }
 }
