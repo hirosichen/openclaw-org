@@ -920,6 +920,19 @@ html.light .prose img {
   .stagger-children.is-visible > *:nth-child(8) { animation-delay: 350ms; }
 }
 
+/* ── iOS: standalone PWA status bar padding ── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  header {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* ── iOS: prevent text size adjust on orientation change ── */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 /* ── Mobile: card shadow depth ── */
 @media (max-width: 640px) {
   .glass {

@@ -121,6 +121,13 @@ const navigationSchema = {
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- iOS PWA meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OpenClaw TW" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
     <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
@@ -247,6 +254,27 @@ const navigationSchema = {
           pre.style.position = 'relative';
           pre.appendChild(btn);
         });
+      });
+
+      // Prefetch visible links for faster navigation (deferred)
+      deferInit(() => {
+        if ('IntersectionObserver' in window) {
+          const prefetchObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const href = (entry.target as HTMLAnchorElement).href;
+                if (href && href.startsWith(window.location.origin) && !document.querySelector(`link[href="${href}"]`)) {
+                  const link = document.createElement('link');
+                  link.rel = 'prefetch';
+                  link.href = href;
+                  document.head.appendChild(link);
+                }
+                prefetchObserver.unobserve(entry.target);
+              }
+            });
+          }, { rootMargin: '0px 0px 200px 0px' });
+          document.querySelectorAll('a[href^="/docs/"]').forEach((a) => prefetchObserver.observe(a));
+        }
       });
 
       // TOC scroll spy (deferred)
