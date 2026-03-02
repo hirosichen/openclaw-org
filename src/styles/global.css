@@ -72,6 +72,14 @@ html.light {
   color: var(--color-light-text);
 }
 
+/* ── Theme transition (added via JS after page load to prevent FOUC) ── */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.3s ease, color 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
 /* ── Smooth scroll ── */
 html {
   scroll-behavior: smooth;
@@ -212,6 +220,16 @@ html.light :focus-visible {
   animation: float 3s ease-in-out infinite;
 }
 
+/* ── Hero gradient text sweep ── */
+@keyframes gradient-sweep {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-sweep {
+  animation: gradient-sweep 6s ease-in-out infinite;
+}
+
 /* ── Entrance animations ── */
 @keyframes fade-in-up {
   from {
@@ -263,16 +281,17 @@ html.light .dot-grid {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.7rem;
-  font-family: var(--font-sans);
+  padding: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-subtext-0);
   background: var(--color-surface-0);
   border: 1px solid var(--color-surface-1);
-  border-radius: 0.25rem;
+  border-radius: 0.375rem;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
+  transition: opacity 0.15s, background 0.15s, transform 0.15s;
 }
 .prose pre:hover .copy-btn,
 .copy-btn:focus-visible {
@@ -281,6 +300,10 @@ html.light .dot-grid {
 .copy-btn:hover {
   background: var(--color-surface-1);
   color: var(--color-text);
+  transform: scale(1.05);
+}
+.copy-btn:active {
+  transform: scale(0.95);
 }
 .copy-btn.copied {
   color: var(--color-green);
@@ -514,6 +537,9 @@ html.light .bg-crust {
 html.light .bg-base {
   background: var(--color-light-bg);
 }
+html.light .hero-fade {
+  background: linear-gradient(to top, var(--color-light-bg), transparent);
+}
 
 /* ── Light mode: code block text ── */
 html.light pre code.text-green {
@@ -565,6 +591,9 @@ html.light .border-accent\/30 { border-color: rgba(230, 69, 83, 0.25); }
     scroll-behavior: auto;
   }
   .animate-float {
+    animation: none;
+  }
+  .animate-gradient-sweep {
     animation: none;
   }
 }
