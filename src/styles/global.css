@@ -1247,6 +1247,53 @@ html.light header.glass {
   }
 }
 
+/* ── Mobile: reading progress bar shimmer ── */
+@keyframes progress-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@media (max-width: 640px) {
+  #reading-progress {
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-peach) 40%, var(--color-accent-light) 50%, var(--color-peach) 60%, var(--color-accent) 100%);
+    background-size: 200% 100%;
+    animation: progress-shimmer 3s ease-in-out infinite;
+  }
+}
+
+/* ── Mobile: disclaimer slide-in entrance ── */
+@keyframes slide-down-in {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+#disclaimer-banner {
+  animation: slide-down-in 0.4s ease-out;
+}
+
+/* ── Mobile: scroll-to-top spring appearance ── */
+@keyframes bounce-in {
+  0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+  60% { transform: translateY(-4px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+#scroll-top.visible {
+  animation: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Mobile: thin scrollbar on small screens ── */
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* ── Mobile: docs prose max-width clamp for ultra-wide phones ── */
+@media (min-width: 480px) and (max-width: 1023px) {
+  .prose {
+    max-width: clamp(20rem, 90vw, 48rem);
+  }
+}
+
 /* ── Performance: reduce motion for users who prefer it ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll {
