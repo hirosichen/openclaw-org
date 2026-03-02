@@ -1028,6 +1028,57 @@ html.light .glass {
   }
 }
 
+/* ── Mobile: table zebra striping for readability ── */
+@media (max-width: 640px) {
+  .prose tbody tr:nth-child(even) {
+    background: rgba(49, 50, 68, 0.3);
+  }
+}
+html.light .prose tbody tr:nth-child(even) {
+  background: rgba(220, 224, 232, 0.3);
+}
+
+/* ── Mobile: heading anchor flash on TOC navigation ── */
+@keyframes heading-flash {
+  0% { background-color: rgba(230, 69, 83, 0.15); }
+  100% { background-color: transparent; }
+}
+.prose h2[id]:target,
+.prose h3[id]:target,
+.prose h4[id]:target {
+  animation: heading-flash 1.5s ease-out;
+  border-radius: 0.25rem;
+}
+
+/* ── Mobile: docs bottom padding for floating toggle ── */
+@media (max-width: 1023px) {
+  body:has(#sidebar-toggle) main {
+    padding-bottom: 5rem;
+  }
+}
+
+/* ── Mobile: prose strong accent tint ── */
+@media (max-width: 640px) {
+  .prose strong {
+    color: var(--color-text);
+    text-shadow: 0 0 0.5px rgba(230, 69, 83, 0.15);
+  }
+}
+
+/* ── Mobile: prose link smooth underline ── */
+@media (max-width: 640px) {
+  .prose a:not([target="_blank"]) {
+    text-decoration: underline;
+    text-decoration-color: rgba(230, 69, 83, 0.3);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    transition: text-decoration-color 0.2s ease;
+  }
+  .prose a:not([target="_blank"]):active {
+    text-decoration-color: var(--color-accent);
+  }
+}
+
 /* ── Performance: reduce motion for users who prefer it ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-on-scroll {
