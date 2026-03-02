@@ -275,6 +275,29 @@ html.light .dot-grid {
 .prose blockquote {
   font-style: normal;
   quotes: none;
+  transition: border-color 0.2s ease;
+}
+.prose blockquote:hover {
+  border-color: var(--color-accent);
+}
+
+/* ── Prose table styling ── */
+.prose table {
+  border-collapse: collapse;
+}
+.prose thead {
+  background: var(--color-surface-0);
+}
+.prose th {
+  font-weight: 600;
+}
+html.light .prose thead {
+  background: var(--color-light-border);
+}
+
+/* ── Prose link transition ── */
+.prose a {
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 /* ── TOC scroll spy ── */

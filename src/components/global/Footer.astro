@@ -1,5 +1,7 @@
 ---
 const year = new Date().getFullYear();
+
+const linkClass = 'relative inline-block hover:text-accent transition-colors after:absolute after:left-0 after:bottom-0 after:h-px after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full';
 ---
 
 <footer class="border-t border-surface-0 bg-mantle/90 backdrop-blur-sm" role="contentinfo">
@@ -7,37 +9,37 @@ const year = new Date().getFullYear();
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- Community -->
       <div>
-        <h3 class="text-sm font-bold text-text mb-3">社群</h3>
-        <ul class="space-y-2 text-sm text-subtext-0">
-          <li><a href="https://github.com/openclaw/openclaw" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">GitHub</a></li>
-          <li><a href="https://docs.openclaw.ai" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">官方文件</a></li>
-          <li><a href="/docs/start/getting-started" class="hover:text-accent transition-colors">快速入門</a></li>
+        <h3 class="text-sm font-bold text-text mb-4 tracking-wide uppercase">社群</h3>
+        <ul class="space-y-2.5 text-sm text-subtext-0">
+          <li><a href="https://github.com/openclaw/openclaw" target="_blank" rel="noopener noreferrer" class={linkClass}>GitHub</a></li>
+          <li><a href="https://docs.openclaw.ai" target="_blank" rel="noopener noreferrer" class={linkClass}>官方文件</a></li>
+          <li><a href="/docs/start/getting-started" class={linkClass}>快速入門</a></li>
         </ul>
       </div>
       <!-- Resources -->
       <div>
-        <h3 class="text-sm font-bold text-text mb-3">資源</h3>
-        <ul class="space-y-2 text-sm text-subtext-0">
-          <li><a href="/docs/install/install" class="hover:text-accent transition-colors">安裝指南</a></li>
-          <li><a href="/docs/concepts/architecture" class="hover:text-accent transition-colors">架構概覽</a></li>
-          <li><a href="/docs/channels/channels" class="hover:text-accent transition-colors">頻道整合</a></li>
-          <li><a href="/docs/help/faq" class="hover:text-accent transition-colors">常見問題</a></li>
+        <h3 class="text-sm font-bold text-text mb-4 tracking-wide uppercase">資源</h3>
+        <ul class="space-y-2.5 text-sm text-subtext-0">
+          <li><a href="/docs/install/install" class={linkClass}>安裝指南</a></li>
+          <li><a href="/docs/concepts/architecture" class={linkClass}>架構概覽</a></li>
+          <li><a href="/docs/channels/channels" class={linkClass}>頻道整合</a></li>
+          <li><a href="/docs/help/faq" class={linkClass}>常見問題</a></li>
         </ul>
       </div>
       <!-- Legal -->
       <div>
-        <h3 class="text-sm font-bold text-text mb-3">法律聲明</h3>
-        <p class="text-sm text-subtext-0 leading-relaxed mb-2">
+        <h3 class="text-sm font-bold text-text mb-4 tracking-wide uppercase">法律聲明</h3>
+        <p class="text-sm text-subtext-0 leading-relaxed mb-3">
           本網站為獨立社群專案，與 OpenClaw 官方無任何關聯。所有商標均屬於其各自所有者。
         </p>
-        <a href="/about" class="text-sm text-accent hover:text-accent-hover transition-colors">
-          完整免責聲明 →
+        <a href="/about" class="text-sm text-accent hover:text-accent-hover transition-colors group">
+          完整免責聲明 <span class="inline-block transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
         </a>
       </div>
     </div>
 
-    <div class="mt-10 pt-6 border-t border-surface-0 text-center text-xs text-overlay-0">
-      <p>© {year} OpenClaw 台灣社群。本站內容以 CC BY-SA 4.0 授權。</p>
+    <div class="mt-10 pt-6 border-t border-surface-0/60 text-center text-xs text-overlay-0">
+      <p>&copy; {year} OpenClaw 台灣社群。本站內容以 CC BY-SA 4.0 授權。</p>
       <p class="mt-1">本網站與 OpenClaw 官方無關。</p>
     </div>
   </div>

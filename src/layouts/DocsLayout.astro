@@ -205,16 +205,24 @@ const howToSchema = isGettingStarted ? {
       )}
 
       <article class="prose prose-invert max-w-none
-        prose-headings:text-text prose-headings:font-bold
+        prose-headings:text-text prose-headings:font-bold prose-headings:tracking-tight
+        prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-surface-0/40
+        prose-h3:mt-8 prose-h3:mb-3
         prose-p:text-subtext-1 prose-p:leading-relaxed
-        prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-        prose-strong:text-text
-        prose-code:text-peach
-        prose-li:text-subtext-1
-        prose-blockquote:border-accent prose-blockquote:text-subtext-0
+        prose-a:text-accent prose-a:no-underline prose-a:underline-offset-4 hover:prose-a:underline prose-a:decoration-accent/50 hover:prose-a:decoration-accent
+        prose-strong:text-text prose-strong:font-semibold
+        prose-code:text-peach prose-code:font-normal
+        prose-li:text-subtext-1 prose-li:leading-relaxed
+        prose-blockquote:border-accent prose-blockquote:text-subtext-0 prose-blockquote:not-italic
+        prose-hr:border-surface-0/40 prose-hr:my-10
+        prose-table:text-sm
+        prose-thead:border-surface-0 prose-thead:text-text
+        prose-th:py-3 prose-th:px-4
+        prose-td:py-2.5 prose-td:px-4
+        prose-tr:border-surface-0/40
       ">
-        <h1 class="text-3xl mb-2">{title}</h1>
-        <p class="text-subtext-0 text-lg mt-0 mb-8">{description}</p>
+        <h1 class="text-3xl mb-2 tracking-tight">{title}</h1>
+        <p class="text-subtext-0 text-lg mt-0 mb-8 leading-relaxed">{description}</p>
         <slot />
       </article>
 

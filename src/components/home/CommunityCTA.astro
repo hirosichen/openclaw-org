@@ -2,15 +2,16 @@
 import Button from '../ui/Button.astro';
 ---
 
-<section class="py-16 px-4 cv-auto">
+<section class="py-20 px-4 cv-auto">
   <div class="max-w-3xl mx-auto text-center animate-on-scroll">
-    <div class="relative glass rounded-2xl p-10 md:p-14 overflow-hidden">
-      <!-- Decorative glow -->
-      <div class="absolute -top-20 -right-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-mauve/10 rounded-full blur-3xl"></div>
+    <div class="relative glass rounded-2xl p-10 md:p-14 overflow-hidden group hover:shadow-2xl hover:shadow-accent/10 transition-all duration-500">
+      <!-- Animated decorative glows -->
+      <div class="absolute -top-20 -right-20 w-48 h-48 bg-accent/10 rounded-full blur-3xl animate-pulse" style="animation-duration: 4s;"></div>
+      <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-mauve/10 rounded-full blur-3xl animate-pulse" style="animation-duration: 6s; animation-delay: 1s;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
       <div class="relative">
-        <h2 class="text-3xl font-bold text-text mb-4">加入台灣社群</h2>
+        <h2 class="text-3xl font-bold text-text mb-4 tracking-tight">加入台灣社群</h2>
         <p class="text-subtext-0 mb-8 max-w-lg mx-auto leading-relaxed">
           與其他台灣的 OpenClaw 使用者交流心得、分享設定、回報問題，一起打造更好的 AI 助理體驗。
         </p>
