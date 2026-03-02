@@ -134,12 +134,57 @@ const faqSchema = isFaqPage ? {
     },
   ],
 } : null;
+
+// JSON-LD: HowTo schema (only for getting-started page)
+const isGettingStarted = slug === 'start/getting-started';
+const howToSchema = isGettingStarted ? {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: '如何安裝並設定 OpenClaw',
+  description: '從零開始到首次對話的最簡設定指南，5 分鐘即可完成。',
+  totalTime: 'PT5M',
+  tool: [
+    { '@type': 'HowToTool', name: 'Node.js 22+' },
+    { '@type': 'HowToTool', name: '終端機 (Terminal)' },
+  ],
+  step: [
+    {
+      '@type': 'HowToStep',
+      position: 1,
+      name: '安裝 OpenClaw',
+      text: '在 macOS/Linux 上執行 curl -fsSL https://openclaw.ai/install.sh | bash，或在 Windows PowerShell 上執行 iwr -useb https://openclaw.ai/install.ps1 | iex。',
+      url: new URL('/docs/start/getting-started#步驟-1安裝-openclaw建議方式', Astro.site).toString(),
+    },
+    {
+      '@type': 'HowToStep',
+      position: 2,
+      name: '執行引導精靈',
+      text: '執行 openclaw onboard --install-daemon，精靈會設定認證、Gateway 設定以及選用的頻道。',
+      url: new URL('/docs/start/getting-started#步驟-2執行引導精靈', Astro.site).toString(),
+    },
+    {
+      '@type': 'HowToStep',
+      position: 3,
+      name: '檢查 Gateway',
+      text: '執行 openclaw gateway status 確認 Gateway 已在執行中。',
+      url: new URL('/docs/start/getting-started#步驟-3檢查-gateway', Astro.site).toString(),
+    },
+    {
+      '@type': 'HowToStep',
+      position: 4,
+      name: '開啟 Control UI',
+      text: '執行 openclaw dashboard 開啟瀏覽器控制介面，確認 Gateway 已準備就緒。',
+      url: new URL('/docs/start/getting-started#步驟-4開啟-control-ui', Astro.site).toString(),
+    },
+  ],
+} : null;
 ---
 
 <BaseLayout title={title} description={description} ogType="article">
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+  {howToSchema && <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />}
   <Disclaimer />
   <Header />
   <div class="flex-1 max-w-[90rem] mx-auto w-full flex">
