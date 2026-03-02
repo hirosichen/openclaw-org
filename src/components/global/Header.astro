@@ -103,17 +103,29 @@ const currentPath = Astro.url.pathname;
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
 
+  function closeMenu() {
+    menu?.classList.remove('max-h-96', 'opacity-100');
+    menu?.classList.add('max-h-0', 'opacity-0');
+    btn?.setAttribute('aria-expanded', 'false');
+  }
+
   btn?.addEventListener('click', () => {
     const isOpen = menu?.classList.contains('max-h-96');
 
     if (isOpen) {
-      menu?.classList.remove('max-h-96', 'opacity-100');
-      menu?.classList.add('max-h-0', 'opacity-0');
-      btn?.setAttribute('aria-expanded', 'false');
+      closeMenu();
     } else {
       menu?.classList.remove('max-h-0', 'opacity-0');
       menu?.classList.add('max-h-96', 'opacity-100');
       btn?.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Escape key to close mobile menu
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu?.classList.contains('max-h-96')) {
+      closeMenu();
+      btn?.focus();
     }
   });
 </script>

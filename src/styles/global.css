@@ -102,10 +102,35 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: #b8bdd0;
 }
 
+/* ── Skip to content link ── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+  outline: none;
+}
+
 /* ── Selection ── */
 ::selection {
   background-color: var(--color-accent);
   color: white;
+}
+html.light ::selection {
+  background-color: rgba(230, 69, 83, 0.25);
+  color: var(--color-light-text);
 }
 
 /* ── Glass card utility ── */
@@ -149,6 +174,9 @@ a {
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
+}
+html.light :focus-visible {
+  outline-color: var(--color-accent-hover);
 }
 
 /* ── Float animation (404 page) ── */
@@ -409,6 +437,35 @@ html.light #mobile-menu {
   background: rgba(255, 255, 255, 0.95);
   border-color: var(--color-light-border);
 }
+
+/* ── Light mode: homepage section backgrounds ── */
+html.light .bg-mantle\/50 {
+  background: rgba(255, 255, 255, 0.5);
+}
+html.light .bg-mantle\/90 {
+  background: rgba(255, 255, 255, 0.9);
+}
+html.light .bg-crust {
+  background: #e6e9ef;
+}
+html.light .bg-base {
+  background: var(--color-light-bg);
+}
+
+/* ── Light mode: code block text ── */
+html.light pre code.text-green {
+  color: #40a02b;
+}
+
+/* ── Light mode: callout component ── */
+html.light .bg-blue\/10 { background: rgba(30, 102, 245, 0.08); }
+html.light .border-blue\/30 { border-color: rgba(30, 102, 245, 0.25); }
+html.light .bg-green\/10 { background: rgba(64, 160, 43, 0.08); }
+html.light .border-green\/30 { border-color: rgba(64, 160, 43, 0.25); }
+html.light .bg-yellow\/10 { background: rgba(223, 142, 29, 0.08); }
+html.light .border-yellow\/30 { border-color: rgba(223, 142, 29, 0.25); }
+html.light .bg-accent\/10 { background: rgba(230, 69, 83, 0.08); }
+html.light .border-accent\/30 { border-color: rgba(230, 69, 83, 0.25); }
 
 /* ── Performance: layout containment for doc sidebar ── */
 #doc-sidebar {
