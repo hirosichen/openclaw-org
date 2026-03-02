@@ -80,6 +80,13 @@ const { currentSlug } = Astro.props;
     overlay?.classList.add('is-visible');
     document.body.style.overflow = 'hidden';
     closeBtn?.focus();
+    // Auto-scroll to current active link
+    requestAnimationFrame(() => {
+      const activeLink = sidebar?.querySelector('a.text-accent.font-medium');
+      if (activeLink) {
+        activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    });
   }
   function closeSidebar() {
     sidebar?.classList.add('-translate-x-full');
