@@ -294,9 +294,15 @@ html.light .dot-grid {
   }
 }
 
-/* ── Performance: reduce backdrop-filter on low-end devices ── */
+/* ── Performance: reduce backdrop-filter and animations on low-end devices ── */
 @media (prefers-reduced-motion: reduce) {
   .glass {
     backdrop-filter: none;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+  .will-change-transform {
+    will-change: auto;
   }
 }
