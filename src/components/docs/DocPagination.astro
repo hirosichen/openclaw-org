@@ -15,14 +15,14 @@ const prev = currentIndex > 0 ? allItems[currentIndex - 1] : null;
 const next = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
 ---
 
-<nav class="flex justify-between items-stretch gap-4 mt-12 pt-6 border-t border-surface-0">
+<nav class="flex justify-between items-stretch gap-4 mt-12 pt-6 border-t border-surface-0/40">
   {prev ? (
     <a
       href={`/docs/${prev.slug}`}
-      class="group glass rounded-lg p-4 flex-1 hover:border-accent/30 transition-all"
+      class="group glass rounded-lg p-4 flex-1 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-1 transition-all duration-300"
     >
-      <span class="text-xs text-overlay-0">← 上一篇</span>
-      <span class="block text-sm font-medium text-text group-hover:text-accent mt-1">{prev.label}</span>
+      <span class="text-xs text-overlay-0 inline-flex items-center gap-1 transition-transform duration-300 group-hover:-translate-x-1"><span>&larr;</span> 上一篇</span>
+      <span class="block text-sm font-medium text-text group-hover:text-accent transition-colors duration-300 mt-1">{prev.label}</span>
     </a>
   ) : (
     <div class="flex-1" />
@@ -30,10 +30,10 @@ const next = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : n
   {next ? (
     <a
       href={`/docs/${next.slug}`}
-      class="group glass rounded-lg p-4 flex-1 text-right hover:border-accent/30 transition-all"
+      class="group glass rounded-lg p-4 flex-1 text-right hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-1 transition-all duration-300"
     >
-      <span class="text-xs text-overlay-0">下一篇 →</span>
-      <span class="block text-sm font-medium text-text group-hover:text-accent mt-1">{next.label}</span>
+      <span class="text-xs text-overlay-0 inline-flex items-center gap-1 justify-end transition-transform duration-300 group-hover:translate-x-1">下一篇 <span>&rarr;</span></span>
+      <span class="block text-sm font-medium text-text group-hover:text-accent transition-colors duration-300 mt-1">{next.label}</span>
     </a>
   ) : (
     <div class="flex-1" />

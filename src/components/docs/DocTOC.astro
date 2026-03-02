@@ -17,14 +17,14 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
   <div class="hidden xl:block w-56 shrink-0">
     <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
       <h4 class="text-xs font-bold uppercase tracking-wider text-overlay-0 mb-3">目錄</h4>
-      <ul class="space-y-1.5 text-sm border-l border-surface-0">
+      <ul class="space-y-1 text-sm border-l border-surface-0">
         {filteredHeadings.map((h) => (
           <li>
             <a
               href={`#${h.slug}`}
               class:list={[
-                'toc-link block transition-colors hover:text-accent border-l-2 border-transparent -ml-[2px]',
-                h.depth === 2 ? 'pl-3 text-subtext-0' : 'pl-6 text-overlay-1',
+                'toc-link block transition-all duration-300 hover:text-accent hover:bg-surface-0/30 rounded-r-md border-l-2 border-transparent -ml-[2px] py-1',
+                h.depth === 2 ? 'pl-3 text-subtext-0' : 'pl-6 text-overlay-1 text-xs',
               ]}
             >
               {h.text}

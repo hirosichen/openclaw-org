@@ -304,6 +304,7 @@ html.light .prose thead {
 .toc-link.active {
   color: var(--color-accent) !important;
   border-left-color: var(--color-accent);
+  background: rgba(230, 69, 83, 0.08);
 }
 
 /* ── Performance: layout containment for doc sidebar ── */

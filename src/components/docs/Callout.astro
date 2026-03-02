@@ -40,10 +40,10 @@ const config = {
 const c = config[type];
 ---
 
-<div class:list={['rounded-lg border-l-4 p-4 my-6', c.bg, c.border]}>
+<div class:list={['group rounded-lg border-l-4 p-4 my-6 transition-all duration-300 hover:shadow-md', c.bg, c.border]}>
   {title && (
     <div class:list={['flex items-center gap-2 font-bold text-sm mb-2', c.titleColor]}>
-      <span class={c.iconColor} set:html={c.svg} />
+      <span class:list={[c.iconColor, 'transition-transform duration-300 group-hover:scale-125']} set:html={c.svg} />
       <span>{title}</span>
     </div>
   )}
