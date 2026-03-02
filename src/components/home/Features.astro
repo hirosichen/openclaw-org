@@ -25,8 +25,8 @@ const iconSvgs: Record<string, string> = {
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
       {features.map((feature, i) => (
-        <div class="group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-accent/30">
-          <div class:list={['mb-4 transition-transform duration-300 group-hover:scale-110', colors[i % colors.length]]} set:html={iconSvgs[feature.iconName]} />
+        <div class="group glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-1 hover:border-accent/30">
+          <div class:list={['mb-4 transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-lg', colors[i % colors.length]]} set:html={iconSvgs[feature.iconName]} />
           <h3 class:list={['text-lg font-bold mb-2', colors[i % colors.length]]}>{feature.title}</h3>
           <p class="text-sm text-subtext-0 leading-relaxed">{feature.description}</p>
         </div>

@@ -72,6 +72,11 @@ html.light {
   color: var(--color-light-text);
 }
 
+/* ── Smooth scroll ── */
+html {
+  scroll-behavior: smooth;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 8px;
@@ -83,6 +88,9 @@ html.light {
 ::-webkit-scrollbar-thumb {
   background: var(--color-surface-1);
   border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-2);
 }
 html.light ::-webkit-scrollbar-track {
   background: var(--color-light-bg);
@@ -136,7 +144,16 @@ a {
 /* ── Focus ring ── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+}
+
+/* ── Float animation (404 page) ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* ── Entrance animations ── */
@@ -243,6 +260,11 @@ html.light .dot-grid {
 }
 #scroll-top:hover {
   background: var(--color-accent-hover);
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(230, 69, 83, 0.4);
+}
+#scroll-top:active {
+  transform: scale(0.95);
 }
 
 /* ── Prose blockquote: remove auto-generated quotes ── */
@@ -291,6 +313,12 @@ html.light .dot-grid {
   }
   a {
     transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-float {
+    animation: none;
   }
 }
 

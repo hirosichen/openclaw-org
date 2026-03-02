@@ -31,14 +31,14 @@ const steps = [
 
     <div class="space-y-5 stagger-children">
       {steps.map((s) => (
-        <div class="glass rounded-xl p-6 transition-all duration-300 hover:border-accent/30">
+        <div class="glass rounded-xl p-6 transition-all duration-300 hover:border-accent/30 hover:shadow-lg hover:-translate-y-0.5">
           <div class="flex items-center gap-4 mb-3">
-            <span class="flex-shrink-0 w-9 h-9 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-accent/20">
+            <span class="flex-shrink-0 w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-accent/25 ring-4 ring-accent/15">
               {s.step}
             </span>
             <h3 class="text-lg font-bold text-text">{s.title}</h3>
           </div>
-          <pre class="bg-crust rounded-lg p-4 overflow-x-auto"><code class="text-sm font-mono text-green">{s.code}</code></pre>
+          <pre class="bg-crust rounded-lg p-4 overflow-x-auto border border-surface-0/60 border-l-4 border-l-accent/40"><code class="text-sm font-mono text-green leading-relaxed">{s.code}</code></pre>
         </div>
       ))}
     </div>
