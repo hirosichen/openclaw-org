@@ -235,6 +235,8 @@ const navigationSchema = {
           btn.addEventListener('click', async () => {
             const code = pre.querySelector('code')?.textContent || pre.textContent;
             await navigator.clipboard.writeText(code!.trim());
+            // Haptic feedback on supported devices
+            if ('vibrate' in navigator) navigator.vibrate(10);
             btn.innerHTML = checkSvg;
             btn.classList.add('copied');
             setTimeout(() => {

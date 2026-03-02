@@ -817,9 +817,14 @@ header {
   }
 }
 
-/* ── Mobile: sidebar momentum scroll ── */
+/* ── Mobile: sidebar momentum scroll & smooth open ── */
 #doc-sidebar {
   -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 1023px) {
+  #doc-sidebar {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 /* ── Mobile: landscape mode adjustments ── */
@@ -913,6 +918,16 @@ html.light .prose img {
   .stagger-children.is-visible > *:nth-child(6) { animation-delay: 250ms; }
   .stagger-children.is-visible > *:nth-child(7) { animation-delay: 300ms; }
   .stagger-children.is-visible > *:nth-child(8) { animation-delay: 350ms; }
+}
+
+/* ── Mobile: card shadow depth ── */
+@media (max-width: 640px) {
+  .glass {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+}
+html.light .glass {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* ── Mobile: focus ring enhanced visibility ── */
