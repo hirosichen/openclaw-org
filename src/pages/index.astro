@@ -7,6 +7,46 @@ import Channels from '../components/home/Channels.astro';
 import QuickStart from '../components/home/QuickStart.astro';
 import CommunityCTA from '../components/home/CommunityCTA.astro';
 
+// FAQ schema for "openclaw 是什麼" and related queries
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 是什麼？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'OpenClaw 是一個開源的自架式 AI 代理閘道器（Gateway），可以將 WhatsApp、Telegram、Discord、iMessage、LINE、Signal、Slack 等多種聊天 App 連接到 AI 代理。你可以在自己的電腦或伺服器上運行，完全掌控你的資料和 AI 代理。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 支援哪些聊天平台？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'OpenClaw 支援 WhatsApp、Telegram、Discord、iMessage、LINE、Signal、Slack、Microsoft Teams、Facebook Messenger、Instagram、Twitter/X 等多種聊天平台，並持續新增更多頻道。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 如何安裝？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '最簡單的方式是使用 Docker 安裝。只需要 Node.js 22 以上版本和一組 API 金鑰，5 分鐘即可啟動。也支援 Podman、NixOS、以及直接在 macOS/Linux 上安裝。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'OpenClaw 是免費的嗎？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'OpenClaw 是完全免費的開源軟體，採用 MIT 授權。你只需要準備自己的 AI 模型 API 金鑰（如 OpenAI、Anthropic 等）即可使用。',
+      },
+    },
+  ],
+};
+
 const softwareSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -34,8 +74,9 @@ const softwareSchema = {
 };
 ---
 
-<PageLayout title="首頁">
+<PageLayout title="首頁" description="OpenClaw 是什麼？開源自架式 AI 代理閘道器，整合 WhatsApp、Telegram、Discord、LINE、iMessage 等聊天 App，讓你在本機部署個人 AI 助理。台灣社群提供中文文件與技術支援。">
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   <Hero />
   <div class="h-px bg-gradient-to-r from-transparent via-surface-0/60 to-transparent"></div>
   <About />

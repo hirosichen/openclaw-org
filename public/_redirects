@@ -1,0 +1,3 @@
+# URL canonicalization is handled by functions/_middleware.ts
+# This file is kept for documentation and as a fallback
+# Cloudflare Pages _redirects only handles path-level redirects
