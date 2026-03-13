@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../../layouts/PageLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+);
+---
+
+<PageLayout
+  title="部落格"
+  description="OpenClaw 台灣社群部落格 — AI Agent 教學、使用技巧、平台整合指南與最新消息。"
+>
+  <section class="max-w-3xl mx-auto px-4 py-12 sm:py-16">
+    <h1 class="text-3xl sm:text-4xl font-bold text-text tracking-tight mb-2">部落格</h1>
+    <p class="text-subtext-0 text-lg mb-10">AI Agent 教學、使用技巧與最新消息</p>
+
+    <div class="space-y-8">
+      {posts.map((post) => {
+        const formattedDate = post.data.publishDate.toLocaleDateString('zh-TW', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+        return (
+          <article class="group">
+            <a href={`/blog/${post.id}`} class="block p-5 -mx-5 rounded-xl hover:bg-surface-0/40 transition-colors">
+              <div class="flex flex-wrap items-center gap-2 text-sm text-subtext-0 mb-2">
+                <time datetime={post.data.publishDate.toISOString()}>{formattedDate}</time>
+                {post.data.tags && post.data.tags.length > 0 && (
+                  <>
+                    <span class="text-surface-1">·</span>
+                    {post.data.tags.map((tag: string) => (
+                      <span class="px-2 py-0.5 text-xs rounded-full bg-surface-0/60 text-subtext-1">{tag}</span>
+                    ))}
+                  </>
+                )}
+              </div>
+              <h2 class="text-xl font-semibold text-text group-hover:text-accent transition-colors mb-2">{post.data.title}</h2>
+              <p class="text-subtext-1 leading-relaxed line-clamp-2">{post.data.description}</p>
+            </a>
+          </article>
+        );
+      })}
+    </div>
+
+    {posts.length === 0 && (
+      <p class="text-subtext-0 text-center py-12">目前還沒有文章，敬請期待！</p>
+    )}
+  </section>
+</PageLayout>

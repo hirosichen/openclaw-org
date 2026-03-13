@@ -1,0 +1,132 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/global/Header.astro';
+import Footer from '../components/global/Footer.astro';
+import Disclaimer from '../components/global/Disclaimer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  publishDate: Date;
+  author: string;
+  tags?: string[];
+  image?: string;
+}
+
+const { title, description, publishDate, author, tags, image } = Astro.props;
+
+const formattedDate = publishDate.toLocaleDateString('zh-TW', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// JSON-LD: Article schema
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  datePublished: publishDate.toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: author,
+    url: Astro.site?.toString(),
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'OpenClaw 台灣社群',
+    url: Astro.site?.toString(),
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/favicon.svg', Astro.site).toString(),
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': new URL(Astro.url.pathname, Astro.site).toString(),
+  },
+  inLanguage: 'zh-TW',
+  ...(image ? { image: new URL(image, Astro.site).toString() } : {}),
+};
+
+// Breadcrumb schema
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: '首頁', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: '部落格', item: new URL('/blog', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: title },
+  ],
+};
+---
+
+<BaseLayout title={title} description={description} ogType="article">
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <Disclaimer />
+  <Header />
+  <main id="main-content" class="flex-1">
+    <article class="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+      <!-- Breadcrumb -->
+      <nav class="text-sm text-subtext-0 mb-6" aria-label="麵包屑">
+        <a href="/" class="hover:text-accent transition-colors">首頁</a>
+        <span class="mx-1.5">/</span>
+        <a href="/blog" class="hover:text-accent transition-colors">部落格</a>
+        <span class="mx-1.5">/</span>
+        <span class="text-subtext-1">{title}</span>
+      </nav>
+
+      <!-- Article header -->
+      <header class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-text tracking-tight leading-tight mb-4">{title}</h1>
+        <p class="text-lg text-subtext-0 leading-relaxed mb-4">{description}</p>
+        <div class="flex flex-wrap items-center gap-3 text-sm text-subtext-0">
+          <time datetime={publishDate.toISOString()}>{formattedDate}</time>
+          <span class="text-surface-1">·</span>
+          <span>{author}</span>
+          {tags && tags.length > 0 && (
+            <>
+              <span class="text-surface-1">·</span>
+              <div class="flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <span class="px-2 py-0.5 text-xs rounded-full bg-surface-0/60 text-subtext-1">{tag}</span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </header>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-surface-0/60 to-transparent mb-8"></div>
+
+      <!-- Article content -->
+      <div class="prose prose-invert max-w-none
+        prose-headings:text-text prose-headings:font-bold prose-headings:tracking-tight
+        prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-surface-0/40
+        prose-h3:mt-8 prose-h3:mb-3
+        prose-p:text-subtext-1 prose-p:leading-relaxed
+        prose-a:text-accent prose-a:no-underline prose-a:underline-offset-4 hover:prose-a:underline prose-a:decoration-accent/50 hover:prose-a:decoration-accent
+        prose-strong:text-text prose-strong:font-semibold
+        prose-code:text-peach prose-code:font-normal
+        prose-li:text-subtext-1 prose-li:leading-relaxed
+        prose-blockquote:border-accent prose-blockquote:text-subtext-0 prose-blockquote:not-italic
+        prose-hr:border-surface-0/40 prose-hr:my-10
+        prose-table:text-sm
+        prose-thead:border-surface-0 prose-thead:text-text
+        prose-th:py-3 prose-th:px-4
+        prose-td:py-2.5 prose-td:px-4
+        prose-tr:border-surface-0/40
+      ">
+        <slot />
+      </div>
+
+      <!-- Back to blog -->
+      <div class="mt-12 pt-8 border-t border-surface-0/40">
+        <a href="/blog" class="text-accent hover:underline text-sm">← 回到部落格</a>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

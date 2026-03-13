@@ -1,0 +1,139 @@
+---
+title: "OpenClaw 是什麼？2026 最完整的開源 AI Agent 閘道器介紹"
+description: "OpenClaw 是一個開源、自架式的 AI 代理閘道器，可以將 LINE、Discord、Telegram 等聊天 App 連接到 AI。本文完整介紹 OpenClaw 的功能、架構與安裝方式。"
+publishDate: 2026-03-14
+author: "OpenClaw 台灣社群"
+tags: ["入門", "AI Agent", "開源"]
+image: "/og-default.png"
+---
+
+如果你曾經想過「能不能讓 AI 直接在我的 LINE、Discord 或 Telegram 上回覆訊息？」，那 OpenClaw 就是為你打造的工具。
+
+## OpenClaw 是什麼？
+
+**OpenClaw** 是一個開源的自架式 AI 代理閘道器（AI Agent Gateway）。簡單來說，它是一個中介層，把你常用的聊天 App（LINE、Discord、Telegram、WhatsApp、Slack、iMessage 等 20+ 平台）連接到 AI 模型（如 OpenAI GPT、Anthropic Claude、Mistral 等）。
+
+你可以把它想像成：
+
+> **聊天 App ←→ OpenClaw Gateway ←→ AI 模型**
+
+所有的對話、記憶、工具呼叫都由 OpenClaw 管理，而你完全掌控自己的資料——因為一切都跑在你自己的電腦或伺服器上。
+
+## 為什麼需要 OpenClaw？
+
+### 1. 自架式，資料完全在你手上
+
+與 ChatGPT 或 Claude 的官方 App 不同，OpenClaw 讓你在自己的環境中運行 AI 代理。對話資料不會被第三方平台儲存，適合：
+- 企業內部使用
+- 處理敏感資訊
+- 需要合規的場景
+
+### 2. 一個 AI，多個平台
+
+不需要為每個聊天平台各做一個 bot。OpenClaw 統一管理所有頻道，你只需要設定一次 AI 代理，就能在 LINE、Discord、Telegram 等平台同時使用。
+
+### 3. 支援多種 AI 模型
+
+OpenClaw 不綁定特定 AI 供應商，支援：
+- **OpenAI**（GPT-4o、GPT-4.1 等）
+- **Anthropic**（Claude Opus、Sonnet）
+- **Mistral**
+- **OpenRouter**（一個 API 存取數十種模型）
+- **AWS Bedrock**
+- 以及更多 LLM 供應商
+
+### 4. 真正的 AI 代理，不只是聊天
+
+OpenClaw 的 AI 不只會聊天，還能：
+- **瀏覽網頁**：查詢即時資訊
+- **執行程式碼**：在沙箱環境中安全執行
+- **使用工具**：串接外部 API 和服務
+- **記憶管理**：跨對話記住重要資訊
+- **多代理協作**：不同專長的 AI 代理協同工作
+
+## OpenClaw 的架構
+
+OpenClaw 採用 Gateway 架構：
+
+```
+┌─────────────┐     ┌─────────────────┐     ┌──────────────┐
+│  LINE Bot   │────▶│                 │────▶│   OpenAI     │
+│  Discord    │────▶│    OpenClaw     │────▶│   Claude     │
+│  Telegram   │────▶│    Gateway      │────▶│   Mistral    │
+│  WhatsApp   │────▶│                 │────▶│   ...        │
+│  Slack      │────▶│  (你的伺服器)    │     │              │
+└─────────────┘     └─────────────────┘     └──────────────┘
+```
+
+Gateway 負責：
+- **頻道管理**：統一處理不同聊天平台的 API
+- **工作階段管理**：追蹤每個使用者的對話脈絡
+- **工具調度**：讓 AI 使用瀏覽器、程式碼執行等工具
+- **安全控管**：沙箱隔離、權限管理
+
+## 支援的聊天平台
+
+| 平台 | 支援狀態 |
+|------|---------|
+| LINE | ✅ 完整支援 |
+| Discord | ✅ 完整支援 |
+| Telegram | ✅ 完整支援 |
+| WhatsApp | ✅ 完整支援 |
+| Slack | ✅ 完整支援 |
+| iMessage | ✅ 完整支援 |
+| Signal | ✅ 完整支援 |
+| Microsoft Teams | ✅ 完整支援 |
+| Matrix | ✅ 完整支援 |
+| Google Chat | ✅ 完整支援 |
+| 飛書 (Feishu) | ✅ 完整支援 |
+| IRC | ✅ 完整支援 |
+| Twitch | ✅ 完整支援 |
+
+## 5 分鐘快速安裝
+
+### 系統需求
+
+- Node.js 22 或以上
+- 一組 AI 模型的 API 金鑰（如 OpenAI API Key）
+
+### 安裝步驟
+
+**macOS / Linux：**
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+**Windows（PowerShell）：**
+
+```powershell
+iwr -useb https://openclaw.ai/install.ps1 | iex
+```
+
+安裝完成後，執行引導精靈：
+
+```bash
+openclaw onboard --install-daemon
+```
+
+精靈會幫你設定 AI 供應商的 API 金鑰、選擇要連接的聊天頻道，5 分鐘內即可開始使用。
+
+👉 完整安裝教學請參考：[快速入門指南](/docs/start/getting-started)
+
+## 適合哪些人使用？
+
+- **開發者**：想要自架 AI 助手，串接到現有的聊天平台
+- **企業團隊**：需要內部 AI 助手，但資料不能外洩
+- **AI 愛好者**：想要自己掌控 AI 代理的行為和工具
+- **社群管理者**：想在 Discord/Telegram 群組中加入 AI 助手
+
+## 開始使用
+
+準備好了嗎？從這裡開始：
+
+1. 📖 [快速入門指南](/docs/start/getting-started) — 5 分鐘完成安裝
+2. 🐳 [Docker 安裝](/docs/install/docker) — 用 Docker 部署
+3. 💬 [頻道設定](/docs/channels/channels) — 連接你的聊天 App
+4. 🧠 [核心概念](/docs/concepts/architecture) — 了解 OpenClaw 的架構
+
+有問題嗎？歡迎到 [GitHub](https://github.com/openclaw/openclaw) 提出 issue 或加入社群討論！
